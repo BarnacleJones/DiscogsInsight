@@ -7,7 +7,7 @@
 @inject CollectionService CollectionService
 @inject NavigationManager _navigationManager
 
-@if (_collectionResponse == null)
+@if (_collectionSize == 0)
 {
     <p><em>Loading...</em></p>
 }
@@ -36,30 +36,29 @@ else
 
 @code
 {
-    private DiscogsCollection _collectionResponse;
+    private int _collectionSize;
     private ReleaseViewModel _release;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _collectionResponse = await CollectionService.GetCollection();
-            var releases = _collectionResponse.Releases.ToList();
+            _collectionSize = await CollectionService.GetCollectionSize();
             Random random = new Random();
-            var randomNumber = random.Next(1, releases.Count());
-            _release = _collectionResponse.Releases.ElementAt(randomNumber);
+            var randomNumber = random.Next(1, _collectionSize);
+            _release = await CollectionService.GetReleaseViewModel(randomNumber);
 
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
-
         }
     }
 
-    public void RefreshPage()
+    public async Task RefreshPage()
     {
-        OnInitializedAsync();
+        await OnInitializedAsync();
+        StateHasChanged();
     }
 
 }

@@ -6,7 +6,7 @@ namespace DiscogsInsight.Models
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
-        public int DiscogsArtistId { get; set; }
+        public int DiscogsArtistId { get; set; }//Foreign key
         public string Name { get; set; }
         public string ResourceUrl { get; set; }
     }
