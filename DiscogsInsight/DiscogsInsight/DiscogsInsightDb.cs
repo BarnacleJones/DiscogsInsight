@@ -1,4 +1,6 @@
-﻿using DiscogsInsight.Models;
+﻿using DiscogsInsight.DataModels;
+using DiscogsInsight.Models;
+using DiscogsInsight.ResponseModels;
 using SQLite;
 
 namespace DiscogsInsight
@@ -20,29 +22,22 @@ namespace DiscogsInsight
 
             Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
             var result = await Database.CreateTableAsync<Artist>();
+            var result2 = await Database.CreateTableAsync<Release>();
         }
 
-        public async Task<List<Artist>> GetArtistsAsync()
+        public async Task<List<T>> GetAllEntitiesAsync<T>() where T : IDatabaseEntity, new()
         {
             await Init();
-            return await Database.Table<Artist>().ToListAsync();
+            return await Database.Table<T>().ToListAsync();
         }
 
-        //public async Task<List<TodoItem>> GetItemsNotDoneAsync()
-        //{
-        //    await Init();
-        //    return await Database.Table<TodoItem>().Where(t => t.Done).ToListAsync();
-
-        //    // SQL queries are also possible
-        //    //return await Database.QueryAsync<TodoItem>("SELECT * FROM [TodoItem] WHERE [Done] = 0");
-        //}
-
-        //public async Task<T> GetEntityAsync<T>(T item) where T : IDatabaseEntity
-        //{
-        //    await Init();
-        //    return await Database.GetTableInfoAsync<T>();
-        //}
-
+        public async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
+        {
+            await SaveArtistsFromCollectionResponse(collectionResponse);
+            await SaveReleasesWithArtistIds(collectionResponse);
+            return true;
+        }
+        
         public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
         {
             try
@@ -60,20 +55,52 @@ namespace DiscogsInsight
             }
         }
 
-        public async Task<int> SaveArtistsAsync(Artist item)
+        #region Private Methods
+        private async Task SaveReleasesWithArtistIds(DiscogsCollectionResponse collectionResponse)
         {
-            await Init();
-            if (item.Id != 0)
-                return await Database.UpdateAsync(item);
+            var artistsFromDb = await Database.Table<Artist>().ToListAsync();
+            foreach (var release in collectionResponse.releases)
+            {
+                var artistIdForThisRelease = release.basic_information.artists.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
+                var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
 
-            return await Database.InsertAsync(item);
+                await Database.InsertAsync(new Release
+                {
+                    ArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
+                    DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                    DiscogsMasterId = release.basic_information.master_id,
+                    Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
+                    MasterUrl = release.basic_information.master_url,
+                    ResourceUrl = release.basic_information.resource_url,
+                    Title = release.basic_information.title,
+                    Year = release.basic_information.year,
+                    DateAdded = release.date_added
+                });
+
+            }
         }
 
-        //public async Task<int> DeleteItemAsync(TodoItem item)
-        //{
-        //    await Init();
-        //    return await Database.DeleteAsync(item);
-        //}
+        private async Task SaveArtistsFromCollectionResponse(DiscogsCollectionResponse collectionResponse)
+        {
+            foreach (var release in collectionResponse.releases)
+            {
+                var artistsToSave = release.basic_information.artists.ToList();
+                foreach (var artist in artistsToSave)
+                {
+                    var existingArtist = await Database.Table<Artist>().Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
+                    if (existingArtist == null)
+                    {
+                        await Database.InsertAsync(new Artist
+                        {
+                            DiscogsArtistId = artist.id,
+                            Name = artist.name,
+                            ResourceUrl = artist.resource_url
+                        });
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }
 

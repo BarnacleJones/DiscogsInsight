@@ -23,6 +23,7 @@ namespace DiscogsInsight
 #endif
             builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddSingleton<DiscogsApiService>();
+            builder.Services.AddSingleton<CollectionService>();
             builder.Services.AddSingleton<DiscogsInsightDb>();
 
             return builder.Build();

@@ -3,7 +3,8 @@
 @using DiscogsInsight.Services
 @using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
-@inject DiscogsApiService DiscogsApiService
+@using DiscogsInsight.ViewModels
+@inject CollectionService CollectionService
 
 
 @if (_collectionResponse == null)
@@ -18,19 +19,19 @@ else
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
-            @foreach (var release in _collectionResponse.releases.OrderBy(r => r.basic_information.artists.FirstOrDefault()?.name))
+            @foreach (var release in _collectionResponse.Releases.OrderBy(r => r.Artist))
             {
-                if (release.basic_information is null)
+                if (release is null)
                     continue;
 
                 <div class="col">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">@string.Join(", ", release.basic_information.artists.Select(x => x.name))</h5>
-                            <p class="card-text"><strong>Title:</strong> @release.basic_information.title</p>
-                            <p class="card-text"><strong>Year:</strong> @release.basic_information.year</p>
-                            <p class="card-text"><strong>Resource URL:</strong> <a href="@release.basic_information.resource_url" target="_blank">@release.basic_information.resource_url</a></p>
-                            <p class="card-text"><strong>Date Added:</strong> @release.date_added.ToString("yyyy-MM-dd")</p>
+                            <h5 class="card-title">@release.Artist</h5>
+                            <p class="card-text"><strong>Title:</strong> @release.Title</p>
+                            <p class="card-text"><strong>Year:</strong> @release.Year</p>
+                            <p class="card-text"><strong>Resource URL:</strong> <a href="@release.ResourceUrl" target="_blank">@release.ResourceUrl</a></p>
+                            <p class="card-text"><strong>Date Added:</strong> @release.DateAdded.ToString("yyyy-MM-dd")</p>
                         </div>
                     </div>
                 </div>
@@ -41,11 +42,20 @@ else
 
 @code
 {
-    private DiscogsCollectionResponse _collectionResponse;
+    private DiscogsCollection _collectionResponse;
 
     protected override async Task OnInitializedAsync()
     {
-        _collectionResponse = await DiscogsApiService.GetCollection();
+        try
+        {
+            _collectionResponse = await CollectionService.GetCollection();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+
+        }
     }
 
 }

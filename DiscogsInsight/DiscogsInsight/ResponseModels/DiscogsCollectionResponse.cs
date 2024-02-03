@@ -59,7 +59,7 @@
         public Urls urls { get; set; }
     }
 
-    public class Release
+    public class ResponseRelease
     {
         public BasicInformation basic_information { get; set; }
         public DateTime date_added { get; set; }
@@ -68,10 +68,10 @@
         public int rating { get; set; }
     }
 
-    public class DiscogsCollectionResponse
+    public class DiscogsCollectionResponse  
     {
         public Pagination pagination { get; set; }
-        public List<Release> releases { get; set; }
+        public List<ResponseRelease> releases { get; set; }
     }
 
     public class Urls

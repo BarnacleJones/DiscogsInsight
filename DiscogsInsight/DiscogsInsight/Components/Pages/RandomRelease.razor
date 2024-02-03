@@ -1,0 +1,65 @@
+﻿@page "/randomRelease"
+
+@using DiscogsInsight.Services
+@using DiscogsInsight.ResponseModels
+@using System.Collections.ObjectModel
+@using DiscogsInsight.ViewModels
+@inject CollectionService CollectionService
+@inject NavigationManager _navigationManager
+
+@if (_collectionResponse == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <div class="container mt-4">
+        <h1>Discogs Collection</h1>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">            
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@_release.Artist</h5>
+                        <p class="card-text"><strong>Title:</strong> @_release.Title</p>
+                        <p class="card-text"><strong>Year:</strong> @_release.Year</p>
+                        <p class="card-text"><strong>Resource URL:</strong> <a href="@_release.ResourceUrl" target="_blank">@_release.ResourceUrl</a></p>
+                        <p class="card-text"><strong>Date Added:</strong> @_release.DateAdded.ToString("yyyy-MM-dd")</p>
+                        </div>
+                    </div>
+                </div>            
+        </div>
+        <button class="btn btn-primary" @onclick="RefreshPage">Refresh Page</button>
+    </div>
+}
+
+@code
+{
+    private DiscogsCollection _collectionResponse;
+    private ReleaseViewModel _release;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _collectionResponse = await CollectionService.GetCollection();
+            var releases = _collectionResponse.Releases.ToList();
+            Random random = new Random();
+            var randomNumber = random.Next(1, releases.Count());
+            _release = _collectionResponse.Releases.ElementAt(randomNumber);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+
+        }
+    }
+
+    public void RefreshPage()
+    {
+        OnInitializedAsync();
+    }
+
+}
