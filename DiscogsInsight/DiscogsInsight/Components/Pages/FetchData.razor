@@ -1,0 +1,51 @@
+﻿@page "/fetchdata"
+
+@using DiscogsInsight.Services
+@using DiscogsInsight.ResponseModels
+@using System.Collections.ObjectModel
+@inject DiscogsApiService DiscogsApiService
+
+
+@if (_collectionResponse == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <div class="container mt-4">
+        <h1>Discogs Collection</h1>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+            @foreach (var release in _collectionResponse.releases.OrderBy(r => r.basic_information.artists.FirstOrDefault()?.name))
+            {
+                if (release.basic_information is null)
+                    continue;
+
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@string.Join(", ", release.basic_information.artists.Select(x => x.name))</h5>
+                            <p class="card-text"><strong>Title:</strong> @release.basic_information.title</p>
+                            <p class="card-text"><strong>Year:</strong> @release.basic_information.year</p>
+                            <p class="card-text"><strong>Resource URL:</strong> <a href="@release.basic_information.resource_url" target="_blank">@release.basic_information.resource_url</a></p>
+                            <p class="card-text"><strong>Date Added:</strong> @release.date_added.ToString("yyyy-MM-dd")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code
+{
+    private DiscogsCollectionResponse _collectionResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _collectionResponse = await DiscogsApiService.GetCollection();
+    }
+
+}

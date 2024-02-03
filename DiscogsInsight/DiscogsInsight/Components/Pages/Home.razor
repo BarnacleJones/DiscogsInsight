@@ -1,0 +1,37 @@
+﻿@page "/"
+
+@inject NavigationManager NavigationManager
+
+<div class="welcome-container">
+    <h1>Welcome to DiscogsInsight</h1>
+    <p class="lead">Explore your music collection on Discogs.</p>
+    @if (_hasKey)
+    {
+        <a class="btn btn-primary" href="@NavigationManager.ToAbsoluteUri("/fetchdata")">Explore Collection</a>        
+    }
+    else
+    {
+        <label for="userNameInput">Enter Discogs Username:</label>
+        <input type="text" @bind="discogsUsername">
+
+        <button @onclick="handleButtonClick">Store Username</button>
+    }
+</div>
+
+
+
+@code{
+    private static bool _hasKey { get; set; }
+    private string discogsUsername = string.Empty;
+
+    public void handleButtonClick()
+    {
+        Preferences.Default.Set("discogsUsername", discogsUsername);
+        _hasKey = true;
+    }
+
+    protected override void OnInitialized()
+    {
+        _hasKey = Preferences.Default.ContainsKey("discogsUsername");
+    }
+}
