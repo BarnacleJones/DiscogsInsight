@@ -31,6 +31,23 @@ namespace DiscogsInsight
             return await Database.Table<T>().ToListAsync();
         }
 
+        public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
+        {
+            try
+            {
+                await Init();
+                if (item.Id != 0)
+                    return await Database.UpdateAsync(item);
+
+                return await Database.InsertAsync(item);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {
             await SaveArtistsFromCollectionResponse(collectionResponse);
@@ -39,6 +56,8 @@ namespace DiscogsInsight
             await RemoveArtistsNoLongerInCollection(collectionResponse);
             return true;
         }
+
+        #region Private Methods
 
         private async Task RemoveReleasesNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
         {
@@ -75,25 +94,6 @@ namespace DiscogsInsight
                 await Database.DeleteAsync(artistToRemove);
             }
         }
-
-        public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
-        {
-            try
-            {
-                await Init();
-                if (item.Id != 0)
-                    return await Database.UpdateAsync(item);
-
-                return await Database.InsertAsync(item);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        #region Private Methods
         private async Task SaveReleasesWithArtistIds(DiscogsCollectionResponse collectionResponse)
         {
             var artistsFromDb = await Database.Table<Artist>().ToListAsync();
