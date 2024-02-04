@@ -25,6 +25,7 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<DiscogsApiService>();
             builder.Services.AddSingleton<CollectionService>();
             builder.Services.AddSingleton<DiscogsInsightDb>();
+            builder.Services.AddSingleton<SettingsService>();
 
             return builder.Build();
         }

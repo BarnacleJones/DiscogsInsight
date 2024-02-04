@@ -1,0 +1,109 @@
+@page "/settings"
+
+@using DiscogsInsight.Services
+@inject NavigationManager NavigationManager
+@inject SettingsService SettingsService
+
+<div class="container mt-5">
+    <div class="row mb-3">
+        <h1 class="col-12">Settings</h1>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6 mb-3">
+            <label for="userNameInput">Discogs Username:</label>
+            <input type="text" class="form-control" @bind="discogsUsername">
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+            <button class="btn btn-primary" @onclick="SaveUsername">Save</button>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <p>Fetch your collection data to update.</p>
+            <button class="btn btn-primary" @onclick="UpdateApiData">Refresh Collection Data</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            @if (showSuccessBanner)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong> @successMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" @onclick="CloseSuccessBanner"></button>
+                </div>
+            }
+            @if (showErrorBanner)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong> @errorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" @onclick="CloseErrorBanner"></button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private string discogsUsername = string.Empty;
+    private bool showSuccessBanner = false;
+    private string successMessage = "";
+    private bool showErrorBanner = false;
+    private string errorMessage = "";
+
+    public void SaveUsername()
+    {
+        HandleSuccess(SettingsService.UpdateDiscogsUsername(discogsUsername), successMessage: "Updated Discogs Username", errorMessage: "Error Updating Discogs Username");
+
+        StateHasChanged();
+    }
+
+    public async Task UpdateApiData()
+    {
+        HandleSuccess(await SettingsService.UpdateCollection(), successMessage: "Updated Collection Data", errorMessage: "Error Updating Collection Data");
+    }
+
+    protected override void OnInitialized()
+    {
+        discogsUsername = SettingsService.GetDiscogsUsername();
+    }
+
+    private void HandleSuccess(bool success, string? successMessage = null, string? errorMessage = null)
+    {
+        showSuccessBanner = false;
+        showErrorBanner = false;
+        if (success)
+        {
+            ToggleSuccessBanner(successMessage ?? "Success");
+        }
+        else
+        {
+            ToggleErrorBanner(errorMessage ?? "Error");
+        }
+    }
+
+    private void ToggleSuccessBanner(string message)
+    {
+        showSuccessBanner = !showSuccessBanner;
+        successMessage = message;
+    }
+
+    private void CloseSuccessBanner()
+    {
+        showSuccessBanner = false;
+    }
+
+    private void ToggleErrorBanner(string message)
+    {
+        showErrorBanner = !showErrorBanner;
+        errorMessage = message;
+    }
+
+    private void CloseErrorBanner()
+    {
+        showErrorBanner = false;
+    }
+}
