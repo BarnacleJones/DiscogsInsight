@@ -35,9 +35,47 @@ namespace DiscogsInsight
         {
             await SaveArtistsFromCollectionResponse(collectionResponse);
             await SaveReleasesWithArtistIds(collectionResponse);
+            await RemoveReleasesNoLongerInCollection(collectionResponse);
+            await RemoveArtistsNoLongerInCollection(collectionResponse);
             return true;
         }
-        
+
+        private async Task RemoveReleasesNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
+        {
+            var existingReleases = await Database.Table<Release>().ToListAsync();
+
+            // Get the DiscogsReleaseId values from the response
+            var releasesInResponse = collectionResponse.releases.Select(r => r.id).ToList();
+
+            // Identify releases in the database that are not in the response
+            var releasesToRemove = existingReleases.Where(r => !releasesInResponse.Contains(r.DiscogsReleaseId)).ToList();
+
+            // Remove the identified releases from the database
+            foreach (var releaseToRemove in releasesToRemove)
+            {
+                await Database.DeleteAsync(releaseToRemove);
+            }
+        }
+
+        private async Task RemoveArtistsNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
+        {
+            var existingArtists = await Database.Table<Artist>().ToListAsync();
+
+            // Get the DiscogsArtistId values from the response
+            var artistsInResponse = collectionResponse.releases
+                .SelectMany(r => r.basic_information.artists.Select(a => a.id))
+                .ToList();
+
+            // Identify artists in the database that are not in the response
+            var artistsToRemove = existingArtists.Where(a => !artistsInResponse.Contains(a.DiscogsArtistId)).ToList();
+
+            // Remove the identified artists from the database
+            foreach (var artistToRemove in artistsToRemove)
+            {
+                await Database.DeleteAsync(artistToRemove);
+            }
+        }
+
         public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
         {
             try
