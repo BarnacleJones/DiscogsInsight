@@ -22,6 +22,11 @@
 
         public bool UpdateDiscogsUsername(string userName)
         {
+            if (userName == string.Empty)
+            {
+                Preferences.Default.Remove("discogsUsername");
+                return true;
+            }
             Preferences.Default.Set("discogsUsername", userName);
             return true;
         }

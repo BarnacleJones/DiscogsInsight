@@ -11,10 +11,13 @@
     }
     else
     {
-        <label for="userNameInput">Enter Discogs Username:</label>
+        <label for="userNameInput">Enter Discogs Username: </label>
         <input type="text" @bind="discogsUsername">
-
-        <button @onclick="handleButtonClick">Store Username</button>
+        <br />
+        <button class="btn btn-primary"   @onclick="handleButtonClick">Store Username</button>
+        <hr />
+        <p>This app will fetch your Discogs collection (currently up to 1000 items) using your username</p>
+        <p>The data will be stored locally and used for gaining statistical insights into your collection.</p>
     }
 </div>
 
