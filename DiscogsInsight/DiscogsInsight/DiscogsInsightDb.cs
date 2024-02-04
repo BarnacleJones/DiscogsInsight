@@ -100,6 +100,85 @@ namespace DiscogsInsight
                 }
             }
         }
+       
+        //THese will check if the response item exists, and if not updates the entity with the response.
+        //keeping as they might come in handy one day for when collection items get updated on discogs
+        private async Task SaveOrUpdateReleasesWithArtistIds(DiscogsCollectionResponse collectionResponse)
+        {
+            var artistsFromDb = await Database.Table<Artist>().ToListAsync();
+            foreach (var release in collectionResponse.releases)
+            {
+                //For fetching foreign key
+                var artistIdForThisRelease = release.basic_information.artists.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
+                var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
+
+                var existingRelease = await Database.Table<Release>().Where(x => x.DiscogsReleaseId == release.id).FirstOrDefaultAsync();
+                if (existingRelease == null)
+                {
+
+                    await Database.InsertAsync(new Release
+                    {
+                        ArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
+                        DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                        DiscogsMasterId = release.basic_information.master_id,
+                        Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
+                        MasterUrl = release.basic_information.master_url,
+                        ResourceUrl = release.basic_information.resource_url,
+                        Title = release.basic_information.title,
+                        Year = release.basic_information.year,
+                        DateAdded = release.date_added
+                    });
+
+                }
+                else
+                {
+                    await Database.UpdateAsync(new Release
+                    {
+                        Id = existingRelease.Id,
+                        ArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
+                        DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                        DiscogsMasterId = release.basic_information.master_id,
+                        Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
+                        MasterUrl = release.basic_information.master_url,
+                        ResourceUrl = release.basic_information.resource_url,
+                        Title = release.basic_information.title,
+                        Year = release.basic_information.year,
+                        DateAdded = release.date_added
+                    });
+                }
+            }
+        }
+
+        private async Task SaveOrUpdateArtistsFromCollectionResponse(DiscogsCollectionResponse collectionResponse)
+        {
+            foreach (var release in collectionResponse.releases)
+            {
+                var artistsToSave = release.basic_information.artists.ToList();
+                foreach (var artist in artistsToSave)
+                {
+                    var existingArtist = await Database.Table<Artist>().Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
+                    if (existingArtist == null)
+                    {
+                        await Database.InsertAsync(new Artist
+                        {
+                            DiscogsArtistId = artist.id,
+                            Name = artist.name,
+                            ResourceUrl = artist.resource_url
+                        });
+                    }
+                    else
+                    {
+                        await Database.UpdateAsync(new Artist
+                        {
+                            Id = existingArtist.Id,
+                            DiscogsArtistId = artist.id,
+                            Name = artist.name,
+                            ResourceUrl = artist.resource_url
+                        });
+                    }
+                }
+            }
+        }
         #endregion
     }
 }

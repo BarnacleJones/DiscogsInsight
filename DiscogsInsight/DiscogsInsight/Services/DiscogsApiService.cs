@@ -40,6 +40,31 @@ namespace DiscogsInsight.Services
 
             throw new Exception("Failed to get data from API: " + response.ReasonPhrase);
         }
+
+        public async Task<bool> UpdateCollection()
+        {
+            //https://json2csharp.com/ - put in the json response, generates lots of classes, split them up
+
+            var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page=1&per_page=1000";
+
+            var response = await _httpClient.GetAsync(collectionUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var responseData = JsonConvert.DeserializeObject<DiscogsCollectionResponse>(json);
+                if (responseData is null)
+                    throw new Exception("Error getting data");
+                var success = await _db.SaveDiscogsCollectionResponse(responseData);
+                if (success)
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            throw new Exception("Failed to get data from API: " + response.ReasonPhrase);
+        }
       
     }
 }
