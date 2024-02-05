@@ -13,7 +13,8 @@
 
         public async Task<bool> UpdateCollection()
         {
-            return await _discogsApiService.UpdateCollection();
+            var result =  await _discogsApiService.GetCollectionFromDiscogsAndSaveAndReturn();
+            return result.Count > 0;
         }
 
         public string GetDiscogsUsername()

@@ -19,53 +19,53 @@ namespace DiscogsInsight.Services
 
         public async Task<List<Release>> GetCollectionFromDiscogsAndSaveAndReturn()
         {
-            //https://json2csharp.com/ - put in the json response, generates lots of classes, split them up
-
-            var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page=1&per_page=1000";
-
-            var response = await _httpClient.GetAsync(collectionUrl);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseData = JsonConvert.DeserializeObject<DiscogsCollectionResponse>(json);
-                if (responseData is null)
-                    throw new Exception("Error getting data");
-                var success = await _db.SaveDiscogsCollectionResponse(responseData);
-                if (success)
+                //API can handle 25 requests per minute - if pages are over that it will most likely not work
+
+                var releases = new List<ResponseRelease>();
+                var currentPage = 1;
+                var totalPages = 1;
+                var responseData = new DiscogsCollectionResponse();
+                _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
+                var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
+                
+                do
                 {
-                    return await _db.GetAllEntitiesAsync<Release>();
-                }
-            }
+                    var response = await _httpClient.GetAsync(collectionUrl);
+                    response.EnsureSuccessStatusCode();
 
-            throw new Exception("Failed to get data from API: " + response.ReasonPhrase);
-        }
+                    var json = await response.Content.ReadAsStringAsync();
+                    responseData = JsonConvert.DeserializeObject<DiscogsCollectionResponse>(json);
 
-        public async Task<bool> UpdateCollection()
-        {
-            //refresh the username
-            _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
+                    if (responseData == null)
+                    {
+                        throw new Exception("Error getting data");
+                    }
 
-            var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page=1&per_page=1000";
+                    releases.AddRange(responseData.releases);
 
-            var response = await _httpClient.GetAsync(collectionUrl);
+                    totalPages = responseData.pagination.pages;
+                    currentPage++;
 
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                var responseData = JsonConvert.DeserializeObject<DiscogsCollectionResponse>(json);
-                if (responseData is null)
+                } while (currentPage <= totalPages);
+               
+                if (releases is null)
                     throw new Exception("Error getting data");
-                var success = await _db.SaveDiscogsCollectionResponse(responseData);
-                if (success)
-                {
-                    return true;
-                }
-                return false;
-            }
 
-            throw new Exception("Failed to get data from API: " + response.ReasonPhrase);
+                var data = new DiscogsCollectionResponse { releases = releases};
+
+                var success = await _db.SaveDiscogsCollectionResponse(data);
+                if (!success)
+                {
+                    throw new Exception("Error saving collection data.");
+                }
+                return await _db.GetAllEntitiesAsync<Release>();
+            }
+            catch(Exception ex) { 
+            
+                throw new Exception($"Failed to get data from API: {ex.Message}");
+            }
         }
-      
     }
 }
