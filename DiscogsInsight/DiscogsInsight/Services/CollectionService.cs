@@ -1,5 +1,4 @@
 ﻿using DiscogsInsight.DataModels;
-using DiscogsInsight.Models;
 using DiscogsInsight.ViewModels;
 
 namespace DiscogsInsight.Services

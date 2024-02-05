@@ -10,7 +10,7 @@
     </div>
     <div class="row mb-3">
         <div class="col-md-12">
-            <p>Change your Discogs username. <strong><br />Warning: </strong>Deletes the local db and reseeds with your collection.</p>
+            <p>Change your Discogs username. <strong><br />Warning: </strong>You need to refresh your data for changes to appear.</p>
         </div>
         <div class="col-12 col-md-6 mb-3">
             <label for="userNameInput">Discogs Username:</label>
@@ -61,9 +61,9 @@
     public void SaveUsername()
     {
         var result = SettingsService.UpdateDiscogsUsername(discogsUsername);
-        HandleSuccess(result.Result, successMessage: "Updated Discogs Username", errorMessage: "Error Updating Discogs Username");
-
         StateHasChanged();
+        HandleSuccess(result, successMessage: "Updated Discogs Username - refresh your data now", errorMessage: "Error Updating Discogs Username");
+
     }
 
     public async Task UpdateApiData()

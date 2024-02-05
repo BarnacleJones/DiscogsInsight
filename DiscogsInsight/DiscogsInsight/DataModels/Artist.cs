@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace DiscogsInsight.Models
+namespace DiscogsInsight.DataModels
 {
     public class Artist : IDatabaseEntity
     {

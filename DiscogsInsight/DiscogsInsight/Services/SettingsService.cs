@@ -22,7 +22,7 @@
             return username;
         }
 
-        public async Task<bool> UpdateDiscogsUsername(string userName)
+        public bool UpdateDiscogsUsername(string userName)
         {
             if (userName == string.Empty)
             {
@@ -32,7 +32,7 @@
             {
                 Preferences.Default.Set("discogsUsername", userName);
             }
-            await _db.Purge();
+            //await _db.Purge();
             return true;
         }
 

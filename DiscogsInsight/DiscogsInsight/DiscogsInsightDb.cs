@@ -1,5 +1,4 @@
-﻿using DiscogsInsight.DataModels;
-using DiscogsInsight.Models;
+using DiscogsInsight.DataModels;
 using DiscogsInsight.ResponseModels;
 using SQLite;
 
@@ -31,19 +30,23 @@ namespace DiscogsInsight
             return await Database.Table<T>().ToListAsync();
         }
 
-        public async Task Purge()
-        {
-            try
-            {
-                await Init();
-                await Database.DeleteAllAsync<Artist>();
-                await Database.DeleteAllAsync<Release>();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
+        //public async Task Purge()
+        //{
+        //    try
+        //    {
+        //        await Init();
+
+        //        await Database.RunInTransactionAsync(async connection =>
+        //        {
+        //            connection.DeleteAll<Release>();
+        //            connection.DeleteAll<Artist>();
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
 
         public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
         {

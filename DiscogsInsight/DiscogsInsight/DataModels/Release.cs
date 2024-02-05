@@ -1,10 +1,4 @@
 ﻿using SQLite;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscogsInsight.DataModels
 {
@@ -19,8 +13,7 @@ namespace DiscogsInsight.DataModels
         public DateTime DateAdded { get; set; }
         public string ResourceUrl { get; set; }
         public string MasterUrl { get; set; }
-        public string Genres {get;set;}
-      
+        public string Genres {get;set;}      
         public int Year { get; set; }
     }
 }

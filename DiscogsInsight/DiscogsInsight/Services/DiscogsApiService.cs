@@ -43,7 +43,8 @@ namespace DiscogsInsight.Services
 
         public async Task<bool> UpdateCollection()
         {
-            //https://json2csharp.com/ - put in the json response, generates lots of classes, split them up
+            //refresh the username
+            _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
 
             var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page=1&per_page=1000";
 
