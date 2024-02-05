@@ -9,6 +9,9 @@
         <h1 class="col-12">Settings</h1>
     </div>
     <div class="row mb-3">
+        <div class="col-md-12">
+            <p>Change your Discogs username. <strong><br />Warning: </strong>Deletes the local db and reseeds with your collection.</p>
+        </div>
         <div class="col-12 col-md-6 mb-3">
             <label for="userNameInput">Discogs Username:</label>
             <input type="text" class="form-control" @bind="discogsUsername">
@@ -57,7 +60,8 @@
 
     public void SaveUsername()
     {
-        HandleSuccess(SettingsService.UpdateDiscogsUsername(discogsUsername), successMessage: "Updated Discogs Username", errorMessage: "Error Updating Discogs Username");
+        var result = SettingsService.UpdateDiscogsUsername(discogsUsername);
+        HandleSuccess(result.Result, successMessage: "Updated Discogs Username", errorMessage: "Error Updating Discogs Username");
 
         StateHasChanged();
     }

@@ -43,30 +43,30 @@ namespace DiscogsInsight.Services
             return new DiscogsCollection { Releases = viewModel };
         }
 
-        public async Task<ReleaseViewModel> GetReleaseViewModel(int releaseId)
+        public async Task<ReleaseViewModel> GetReleaseViewModel()
         {
             
             var releases = await _db.GetAllEntitiesAsync<Release>();
-            var release = releases.Where(x => x.Id == releaseId).FirstOrDefault();
+            var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
 
-            if (release is null)
+            if (randomRelease is null)
             {
-                throw new Exception($"Release {releaseId} was unable to be found.");
+                throw new Exception($"Error getting random release.");
             }
            
             var artists = await _db.GetAllEntitiesAsync<Artist>();
-            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == release.ArtistId).Select(x => x.Name).FirstOrDefault();
+            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.ArtistId).Select(x => x.Name).FirstOrDefault();
 
 
             var viewModel = new ReleaseViewModel
             {
                 Artist = releaseArtistName ?? "Missing Artist",
-                Year = release.Year,
-                Title = release.Title,
-                ResourceUrl = release.ResourceUrl,
-                MasterUrl = release.MasterUrl,
-                Genres = release.Genres,
-                DateAdded = release.DateAdded
+                Year = randomRelease.Year,
+                Title = randomRelease.Title,
+                ResourceUrl = randomRelease.ResourceUrl,
+                MasterUrl = randomRelease.MasterUrl,
+                Genres = randomRelease.Genres,
+                DateAdded = randomRelease.DateAdded
             };
 
             return viewModel;
