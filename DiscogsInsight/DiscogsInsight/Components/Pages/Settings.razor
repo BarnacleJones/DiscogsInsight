@@ -10,7 +10,7 @@
     </div>
     <div class="row mb-3">
         <div class="col-md-12">
-            <p>Change your Discogs username. <strong><br />Warning: </strong>You need to refresh your data for changes to appear.</p>
+            <p>Change your Discogs username. <strong><br />Warning: </strong>This will DELETE all of your saved collection data. The task will take a while to complete for larger collections.</p>
         </div>
         <div class="col-12 col-md-6 mb-3">
             <label for="userNameInput">Discogs Username:</label>
@@ -58,11 +58,11 @@
     private bool showErrorBanner = false;
     private string errorMessage = "";
 
-    public void SaveUsername()
+    public async void SaveUsername()
     {
-        var result = SettingsService.UpdateDiscogsUsername(discogsUsername);
+        var result = await SettingsService.UpdateDiscogsUsername(discogsUsername);
+        HandleSuccess(result, successMessage: "Updated Discogs Username - data has been purged", errorMessage: "Error Updating Discogs Username");
         StateHasChanged();
-        HandleSuccess(result, successMessage: "Updated Discogs Username - refresh your data now", errorMessage: "Error Updating Discogs Username");
 
     }
 

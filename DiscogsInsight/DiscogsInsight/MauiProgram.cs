@@ -18,11 +18,11 @@ namespace DiscogsInsight
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
             builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddSingleton<DiscogsInsightDb>();
+            builder.Services.AddSingleton <CollectionDataService>();
             builder.Services.AddSingleton<DiscogsApiService>();
             builder.Services.AddSingleton<CollectionService>();
             builder.Services.AddSingleton<SettingsService>();

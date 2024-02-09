@@ -46,6 +46,13 @@ namespace DiscogsInsight.Services
         {
             
             var releases = await _db.GetAllEntitiesAsync<Release>();
+            if (releases.Count < 1)
+            {
+                return new ReleaseViewModel
+                {
+                    Artist = "Nothing In collection"
+                };
+            }
             var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
 
             if (randomRelease is null)
