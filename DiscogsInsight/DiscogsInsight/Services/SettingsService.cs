@@ -1,14 +1,16 @@
-﻿namespace DiscogsInsight.Services
+﻿using SQLitePCL;
+
+namespace DiscogsInsight.Services
 {
     public class SettingsService
     {
-        private readonly DiscogsInsightDb _db;
         private readonly DiscogsApiService _discogsApiService;
+        private readonly CollectionDataService _collectionDataService;
 
-        public SettingsService(DiscogsInsightDb db, DiscogsApiService discogsApiService)
+        public SettingsService(DiscogsApiService discogsApiService, CollectionDataService collectionDataService)
         { 
-            _db = db;
             _discogsApiService = discogsApiService;
+            _collectionDataService = collectionDataService;
         }
 
         public async Task<bool> UpdateCollection()
@@ -23,7 +25,7 @@
             return username;
         }
 
-        public bool UpdateDiscogsUsername(string userName)
+        public async Task<bool> UpdateDiscogsUsername(string userName)
         {
             if (userName == string.Empty)
             {
@@ -33,7 +35,7 @@
             {
                 Preferences.Default.Set("discogsUsername", userName);
             }
-            //await _db.Purge();
+            await _collectionDataService.PurgeEntireDb();
             return true;
         }
 

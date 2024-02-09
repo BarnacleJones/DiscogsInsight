@@ -7,9 +7,9 @@ namespace DiscogsInsight.Services
     public class DiscogsApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly DiscogsInsightDb _db;
+        private readonly CollectionDataService _db;
         private string _discogsUserName;
-        public DiscogsApiService(HttpClient httpClient, DiscogsInsightDb db)
+        public DiscogsApiService(HttpClient httpClient, CollectionDataService db)
         {
             _httpClient = httpClient;
             _db = db;
