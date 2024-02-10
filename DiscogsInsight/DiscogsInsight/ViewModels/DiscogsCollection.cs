@@ -4,5 +4,7 @@
 
     {
         public List<ReleaseViewModel> Releases { get; set; }
+
+        public IEnumerable<string> ArtistList { get; set; }
     }
 }

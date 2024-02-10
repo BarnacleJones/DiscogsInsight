@@ -1,5 +1,6 @@
 ﻿using DiscogsInsight.DataModels;
 using DiscogsInsight.ResponseModels;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace DiscogsInsight.Services
@@ -7,12 +8,14 @@ namespace DiscogsInsight.Services
     public class DiscogsApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly CollectionDataService _db;
+        private readonly CollectionDataService _db; 
+        private readonly ILogger<DiscogsApiService> _logger;
         private string _discogsUserName;
-        public DiscogsApiService(HttpClient httpClient, CollectionDataService db)
+        public DiscogsApiService(HttpClient httpClient, CollectionDataService db, ILogger<DiscogsApiService> logger)
         {
             _httpClient = httpClient;
             _db = db;
+            _logger = logger;
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
             _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
         }
@@ -28,6 +31,11 @@ namespace DiscogsInsight.Services
                 var totalPages = 1;
                 var responseData = new DiscogsCollectionResponse();
                 _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
+                if (string.IsNullOrEmpty(_discogsUserName))
+                {
+                    _logger.LogError("Empty username");
+                    return new List<Release>();
+                }
                 var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
                 
                 do
