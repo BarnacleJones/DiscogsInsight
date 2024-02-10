@@ -1,0 +1,81 @@
+@page "/collectionGrid"
+
+@using DiscogsInsight.Services
+@using DiscogsInsight.ResponseModels
+@using System.Collections.ObjectModel
+@using DiscogsInsight.ViewModels
+@inject CollectionService CollectionService
+
+@if (_collectionResponse == null)
+{
+    <p><em>Loading your entire collection from Discogs and putting it in the database...</em></p>
+    <p><em>This could take some time.</em></p>
+}
+else{
+    <RadzenDataGrid 
+        AllowFiltering="true" AllowColumnResize="true" 
+        AllowAlternatingRows="false" 
+        FilterMode="FilterMode.Advanced" 
+        AllowSorting="true" 
+        PageSize="20" 
+        AllowPaging="true" 
+        PagerHorizontalAlign="HorizontalAlign.Left" 
+        ShowPagingSummary="true"
+        Data="@_collectionResponse.Releases" 
+        TItem="ReleaseViewModel" 
+        ColumnWidth="300px" 
+        LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn 
+                TItem="ReleaseViewModel" Property="Artist" 
+                Title="Artist" 
+                Width="15%"             
+                TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn 
+                TItem="ReleaseViewModel" Property="Title" 
+                Title="Album" 
+                Width="25%" 
+                TextAlign="TextAlign.Left" />
+            <RadzenDataGridColumn 
+                TItem="ReleaseViewModel" Property="Year" 
+                Title="Year" 
+                Width="10%" />
+            <RadzenDataGridColumn 
+                TItem="ReleaseViewModel" Property="Genres" 
+                Title="Genres" 
+                Width="25%" />
+            <RadzenDataGridColumn 
+                TItem="ReleaseViewModel" Property="DateAdded" 
+                Title="Date Added" 
+                FormatString="{0:d}" 
+                Width="25%" />
+        </Columns>
+    </RadzenDataGrid>
+}
+@code {
+    private DiscogsCollection? _collectionResponse;
+    private IEnumerable<string> _artistLists;
+
+    void OnSelectedArtistsChange(object value)
+    {
+        if (_artistLists != null && !_artistLists.Any())
+        {
+            _artistLists = null;  
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _collectionResponse = await CollectionService.GetCollection();
+            // _artistList = _collectionResponse.ArtistList
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+
+        }
+    }
+}
