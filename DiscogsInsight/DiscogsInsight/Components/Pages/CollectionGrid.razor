@@ -8,10 +8,12 @@
 
 @if (_collectionResponse == null)
 {
-    <p><em>Loading your entire collection from Discogs and putting it in the database...</em></p>
-    <p><em>This could take some time.</em></p>
+
+    <p><em>Loading your entire collection...</em></p>
+    <p><em>This could take some time, especially if its your first time.</em></p>
 }
 else{
+    <RadzenText TextStyle="TextStyle.H2">Collection</RadzenText>
     <RadzenDataGrid 
         AllowFiltering="true" AllowColumnResize="true" 
         AllowAlternatingRows="false" 
