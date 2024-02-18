@@ -24,8 +24,10 @@ namespace DiscogsInsight
                     return;
 
                 Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
+                //todo: result needed still?
                 var result = await Database.CreateTableAsync<Artist>();
                 var result2 = await Database.CreateTableAsync<Release>();
+                var result3 = await Database.CreateTableAsync<Track>();
             }
             catch (Exception ex)
             {
@@ -74,6 +76,7 @@ namespace DiscogsInsight
                 await Init();
                 await Database.DeleteAllAsync<Artist>();
                 await Database.DeleteAllAsync<Release>();
+                await Database.DeleteAllAsync<Track>();
             }
             catch (Exception ex)
             {

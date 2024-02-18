@@ -11,6 +11,19 @@ namespace DiscogsInsight.Services
         private readonly CollectionDataService _db; 
         private readonly ILogger<DiscogsApiService> _logger;
         private string _discogsUserName;
+
+        //-----------------------------------------------------------------------------
+        //Hard coded Disgogs API Endpoints. If they ever change this should be the only place they are referenced!
+
+        //If they take a parameter (Eg ArtistId, use value from entity prefixed with Discogs eg. DiscogsArtistId
+
+        private const string ReleaseUrl = "https://api.discogs.com/releases/";
+        private const string MasterReleaseUrl = "https://api.discogs.com/masters/";
+        private const string ArtistUrl = "https://api.discogs.com/artists/";
+
+        //-----------------------------------------------------------------------------
+
+
         public DiscogsApiService(HttpClient httpClient, CollectionDataService db, ILogger<DiscogsApiService> logger)
         {
             _httpClient = httpClient;
@@ -72,6 +85,66 @@ namespace DiscogsInsight.Services
             }
             catch(Exception ex) { 
             
+                throw new Exception($"Failed to get data from API: {ex.Message}");
+            }
+        }
+        public async Task<bool> GetReleaseFromDiscogsAndSave(int discogsReleaseId)
+        {
+            try
+            {
+                var thisReleaseUrl = ReleaseUrl + discogsReleaseId;
+                var response = await _httpClient.GetAsync(thisReleaseUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var responseData = JsonConvert.DeserializeObject <DiscogsReleaseResponse>(json);
+
+                if (responseData == null)
+                {
+                    throw new Exception("Error getting data");
+                }
+
+                var success = await _db.SaveDiscogsReleaseResponse(responseData);
+
+                if (!success)
+                {
+                    throw new Exception("Error saving release data.");
+                }
+                return true;
+            }
+            catch(Exception ex) { 
+            
+                throw new Exception($"Failed to get data from API: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> GetArtistFromDiscogsAndSave(int discogsArtistId)
+        {
+            try
+            {
+                var thisArtistUrl = ArtistUrl + discogsArtistId;
+                var response = await _httpClient.GetAsync(thisArtistUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var responseData = JsonConvert.DeserializeObject<DiscogsArtistResponse>(json);
+
+                if (responseData == null)
+                {
+                    throw new Exception("Error getting data");
+                }
+
+                var success = await _db.SaveDiscogsArtistResponse(responseData);
+
+                if (!success)
+                {
+                    throw new Exception("Error saving Artist data.");
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+
                 throw new Exception($"Failed to get data from API: {ex.Message}");
             }
         }
