@@ -25,6 +25,78 @@ namespace DiscogsInsight.Services
             await _db.Purge();
         }
 
+        #region Artist Response Methods
+        public async Task<bool> SaveDiscogsArtistResponse(DiscogsArtistResponse releaseResponse)
+        {
+            try
+            {
+                var artistsTable = await _db.GetTable<Artist>();
+                var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == releaseResponse.id).FirstOrDefaultAsync().Result;
+                if (existingArtist == null)
+                {
+                    //dont want to store the artist if not in db already
+                    throw new Exception($"Unhandled exception: Artist {releaseResponse.id} not in database not able to store info.");
+                }
+                else
+                {
+                    existingArtist.Profile = releaseResponse.profile;
+                    await _db.UpdateAsync(existingArtist);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+            }
+            return true;
+        }
+
+        #endregion 
+
+        #region Release Response Methods
+        public async Task<bool> SaveDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
+        {
+            //save tracklists, make tracklist entity
+            try
+            {
+                var releaseTable = await _db.GetTable<Release>();
+                var existingRelease = releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync().Result;
+                var tracksTable = await _db.GetTable<Track>();
+                var existingTracks = tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync().Result;
+                if (existingRelease == null)
+                    //at this stage, dont want to store the release info if not in db already
+                    throw new Exception($"Unhandled exception: Release {releaseResponse.id} not in database not able to store info.");
+
+                existingRelease.ReleaseCountry = releaseResponse.country;
+                await _db.UpdateAsync(existingRelease);
+
+                if (!existingTracks.Any())
+                {
+                    foreach (var track in releaseResponse.tracklist)
+                    {
+                        await _db.SaveItemAsync<Track>(new Track
+                        {
+                            DiscogsArtistId = existingRelease.DiscogsArtistId,
+                            DiscogsMasterId = existingRelease.DiscogsMasterId,
+                            DiscogsReleaseId = releaseResponse.id,
+                            Duration = track.duration,
+                            Title = track.title,
+                            Position = track.position
+                        });
+                    }
+                }     
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+            }
+            return true;
+        }
+
+        #endregion
+
+        #region Collection Response Methods
         public async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {            
             await SaveArtistsFromCollectionResponse(collectionResponse);
@@ -33,8 +105,6 @@ namespace DiscogsInsight.Services
             await RemoveArtistsNoLongerInCollection(collectionResponse);
             return true;
         }
-
-        #region Private Methods
         private async Task RemoveReleasesNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
         {
             try
@@ -108,12 +178,10 @@ namespace DiscogsInsight.Services
 
                         await _db.InsertAsync(new Release
                         {
-                            ArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
+                            DiscogsArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
                             DiscogsMasterId = release.basic_information.master_id,
                             Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
-                            MasterUrl = release.basic_information.master_url,
-                            ResourceUrl = release.basic_information.resource_url,
                             Title = release.basic_information.title,
                             Year = release.basic_information.year,
                             DateAdded = release.date_added
@@ -125,12 +193,10 @@ namespace DiscogsInsight.Services
                         await _db.UpdateAsync(new Release
                         {
                             Id = existingRelease.Id,
-                            ArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
+                            DiscogsArtistId = (artistIdForThisRelease == artistIdFromDb) ? artistIdForThisRelease : null,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
                             DiscogsMasterId = release.basic_information.master_id,
                             Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
-                            MasterUrl = release.basic_information.master_url,
-                            ResourceUrl = release.basic_information.resource_url,
                             Title = release.basic_information.title,
                             Year = release.basic_information.year,
                             DateAdded = release.date_added
@@ -164,7 +230,6 @@ namespace DiscogsInsight.Services
                             {
                                 DiscogsArtistId = artist.id,
                                 Name = artist.name,
-                                ResourceUrl = artist.resource_url
                             });
                         }
                         else
@@ -173,8 +238,7 @@ namespace DiscogsInsight.Services
                             {
                                 Id = existingArtist.Id,
                                 DiscogsArtistId = artist.id,
-                                Name = artist.name,
-                                ResourceUrl = artist.resource_url
+                                Name = artist.name
                             });
                         }
                     }
@@ -187,6 +251,8 @@ namespace DiscogsInsight.Services
                 throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
             }
         }
+
+
         #endregion
     }
 }
