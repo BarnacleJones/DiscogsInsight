@@ -5,10 +5,10 @@ namespace DiscogsInsight.Services
 {
     public class CollectionService
     {
-        private readonly DiscogsInsightDb _db;
+        private readonly CollectionDataService _db;
         private readonly DiscogsApiService _discogsApiService;
 
-        public CollectionService(DiscogsInsightDb db, DiscogsApiService discogsApiService)
+        public CollectionService(CollectionDataService db, DiscogsApiService discogsApiService)
         { 
             _db = db;
             _discogsApiService = discogsApiService;
@@ -30,11 +30,11 @@ namespace DiscogsInsight.Services
 
             var viewModel = releaseList.Select(x => new ReleaseViewModel
             {
-                Artist = artistIdsList.Where(y => y.DiscogsArtistId == x.ArtistId).Select(x => x.Name).FirstOrDefault() ?? "ERROR",//Todo: make this better
+                Artist = artistIdsList.Where(y => y.DiscogsArtistId == x.DiscogsArtistId).Select(x => x.Name).FirstOrDefault() ?? "ERROR",//Todo: make this better
+                DiscogsArtistId = x.DiscogsArtistId,
+                DiscogsReleaseId = x.DiscogsReleaseId,
                 Year = x.Year,
                 Title = x.Title,
-                ResourceUrl = x.ResourceUrl,
-                MasterUrl = x.MasterUrl,
                 Genres = x.Genres,
                 DateAdded = x.DateAdded
             }).ToList();
@@ -61,7 +61,7 @@ namespace DiscogsInsight.Services
             }
            
             var artists = await _db.GetAllEntitiesAsync<Artist>();
-            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.ArtistId).Select(x => x.Name).FirstOrDefault();
+            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
 
 
             var viewModel = new ReleaseViewModel
@@ -69,8 +69,6 @@ namespace DiscogsInsight.Services
                 Artist = releaseArtistName ?? "Missing Artist",
                 Year = randomRelease.Year,
                 Title = randomRelease.Title,
-                ResourceUrl = randomRelease.ResourceUrl,
-                MasterUrl = randomRelease.MasterUrl,
                 Genres = randomRelease.Genres,
                 DateAdded = randomRelease.DateAdded
             };

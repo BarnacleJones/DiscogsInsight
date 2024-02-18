@@ -9,28 +9,26 @@
     </RadzenHeader>
     <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
         <RadzenPanelMenu>
-            <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
-            <RadzenPanelMenuItem Text="Collection" Icon="explore" Path="CollectionGrid" />
-            <RadzenPanelMenuItem Text="Random" Icon="autorenew" Path="RandomRelease"/>
-            <RadzenPanelMenuItem Text="Settings" Icon="build" Path="Settings"/>
-            <RadzenPanelMenuItem Text="Github" Icon="code" Path="https://github.com/BarnacleJones/DiscogsInsight" />
+            <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Home" Icon="home" Path="/" />
+            <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Collection" Icon="explore" Path="CollectionGrid" />
+            <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Random" Icon="autorenew" Path="RandomRelease"/>
+            <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Settings" Icon="build" Path="Settings"/>
+            <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Github" Icon="code" Path="https://github.com/BarnacleJones/DiscogsInsight" />
         </RadzenPanelMenu>
         <div class="rz-p-4">
             @* Sidebar additional content *@
         </div>
     </RadzenSidebar>
     <RadzenBody>
-        <div class="rz-p-4">
+        <div class="rz-p-1">
             @Body
         </div>
     </RadzenBody>
     <RadzenFooter>
-       @*  <div class="rz-text-align-left">
-            <RadzenLink Icon="code" Path="https://github.com/BarnacleJones/DiscogsInsight" Text="View Code" />
-        </div> *@
+        @* Anything? *@
     </RadzenFooter>
 </RadzenLayout>
 
 @code {
-    bool sidebar1Expanded = true;
+    public static bool sidebar1Expanded = false;
 }
