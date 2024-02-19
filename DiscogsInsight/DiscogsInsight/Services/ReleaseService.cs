@@ -60,5 +60,62 @@ namespace DiscogsInsight.Services
             };           
             
         }
+
+        public async Task<ReleaseViewModel> GetRandomRelease()
+        {
+
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            if (releases.Count < 1)
+            {
+                return new ReleaseViewModel
+                {
+                    Artist = "Nothing In collection"
+                };
+            }
+
+            var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+
+            if (randomRelease is null)
+            {
+                throw new Exception($"Error getting random release.");
+            }
+
+            var tracks = await _db.GetAllEntitiesAsync<Track>();
+            var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId);
+
+            if (!releaseTracks.Any())
+            {
+                var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(randomRelease.DiscogsReleaseId);
+
+                var newRelease = await _db.GetAllEntitiesAsync<Release>();
+                randomRelease = newRelease.FirstOrDefault(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId);
+
+                tracks = await _db.GetAllEntitiesAsync<Track>();
+            }
+
+
+            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
+
+            var releaseTrackList = tracks.Where(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId).Select(x => new TrackViewModel
+            {
+                Title = x.Title,
+                Duration = x.Duration,
+                Position = x.Position
+            })
+            .ToList();
+
+            var viewModel = new ReleaseViewModel
+            {
+                Artist = releaseArtistName ?? "Missing Artist",
+                Year = randomRelease.Year,
+                Title = randomRelease.Title,
+                Genres = randomRelease.Genres,
+                Tracks = releaseTrackList,
+                DateAdded = randomRelease.DateAdded
+            };
+
+            return viewModel;
+        }
     }
 }

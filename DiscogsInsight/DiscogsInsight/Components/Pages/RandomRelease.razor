@@ -4,7 +4,8 @@
 @using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
 @using DiscogsInsight.ViewModels
-@inject CollectionService CollectionService
+@using DiscogsInsight.Components.Pages
+@inject ReleaseService ReleaseService
 @inject NavigationManager _navigationManager
 
 @if (_release is null)
@@ -13,49 +14,22 @@
 }
 else
 {
-<RadzenText TextStyle="TextStyle.H2">Random Release</RadzenText>
-<RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 420px">
-    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
-        @* <RadzenImage Path="@order?.Employee?.Photo" Style="width: 100px; height: 100px; border-radius: 50%;" /> *@
-        <RadzenStack Gap="0">
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(_release.Artist)</b></RadzenText>
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Album</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@_release.Title</b></RadzenText>
-        </RadzenStack>
-    </RadzenStack>
-    <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
-        <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Other Information</strong></RadzenText>
-        <RadzenRow RowGap="0">
-            <RadzenColumn SizeSM="4">
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Year</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(_release.Year)</b></RadzenText>
-            </RadzenColumn>
-            <RadzenColumn SizeSM="8">
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Date Added</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(_release.DateAdded)</b></RadzenText>
-              </RadzenColumn>
-        </RadzenRow>
-    </RadzenCard>
-    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
-        <RadzenButton Click=@(args => RefreshPage()) Icon="refresh" ButtonStyle="ButtonStyle.Light" />
-    </RadzenStack>
-</RadzenCard>
+    <ReleaseComponent Release="@_release" />
+    <RadzenButton Click=@(args => RefreshPage()) Icon="refresh" ButtonStyle="ButtonStyle.Light" />    
 }
 
 @code
 {
-    private ReleaseViewModel _release;
+    private ReleaseViewModel? _release;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {            
-            _release = await CollectionService.GetReleaseViewModel();
+            _release = await ReleaseService.GetRandomRelease();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
         }
     }
 

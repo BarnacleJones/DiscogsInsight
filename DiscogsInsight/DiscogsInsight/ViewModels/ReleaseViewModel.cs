@@ -11,6 +11,6 @@ namespace DiscogsInsight.ViewModels
         public string? Genres { get; set; }
         public DateTime? DateAdded { get; set; }
 
-        public List<TrackViewModel> Tracks { get; set; }
+        public List<TrackViewModel>? Tracks { get; set; }
     }
 }
