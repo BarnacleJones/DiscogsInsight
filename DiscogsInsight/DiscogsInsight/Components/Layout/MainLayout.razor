@@ -4,7 +4,7 @@
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
             <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-            <RadzenLabel Text="Discogs Insight" />
+            <RadzenLabel Text="" />
         </RadzenStack>
     </RadzenHeader>
     <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
@@ -20,9 +20,7 @@
         </div>
     </RadzenSidebar>
     <RadzenBody>
-        <div class="rz-p-1">
-            @Body
-        </div>
+        @Body
     </RadzenBody>
     <RadzenFooter>
         @* Anything? *@

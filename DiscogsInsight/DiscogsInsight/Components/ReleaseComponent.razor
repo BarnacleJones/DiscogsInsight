@@ -1,6 +1,6 @@
 ﻿@using DiscogsInsight.ViewModels
 
-<RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 100%">
+<RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
         @* <RadzenImage Path="@order?.Employee?.Photo" Style="width: 100px; height: 100px; border-radius: 50%;" /> *@
         <RadzenStack Gap="0">
@@ -14,7 +14,7 @@
             <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.ReleaseCountry)</b></RadzenText>
         </RadzenStack>
     </RadzenStack>
-    <RadzenAccordion class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-3">
+    <RadzenAccordion class="">
         <Items>
             <RadzenAccordionItem Text="Tracklist" Icon="list" CollapseTitle="Collapse Tracklist."
              ExpandTitle="Expand Tracklist." CollapseAriaLabel="Collapse the Tracklist."
