@@ -42,39 +42,7 @@ namespace DiscogsInsight.Services
             return new DiscogsCollection { Releases = viewModel };
         }
 
-        public async Task<ReleaseViewModel> GetReleaseViewModel()
-        {
-            
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-            if (releases.Count < 1)
-            {
-                return new ReleaseViewModel
-                {
-                    Artist = "Nothing In collection"
-                };
-            }
-            var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
-
-            if (randomRelease is null)
-            {
-                throw new Exception($"Error getting random release.");
-            }
-           
-            var artists = await _db.GetAllEntitiesAsync<Artist>();
-            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
-
-
-            var viewModel = new ReleaseViewModel
-            {
-                Artist = releaseArtistName ?? "Missing Artist",
-                Year = randomRelease.Year,
-                Title = randomRelease.Title,
-                Genres = randomRelease.Genres,
-                DateAdded = randomRelease.DateAdded
-            };
-
-            return viewModel;
-        }
+        
 
         public async Task<int> GetCollectionSize()
         {

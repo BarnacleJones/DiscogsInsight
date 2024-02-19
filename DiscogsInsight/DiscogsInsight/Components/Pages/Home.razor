@@ -1,13 +1,42 @@
 ﻿@page "/"
 
+@using DiscogsInsight.ViewModels
+@using DiscogsInsight.Services
+@inject ReleaseService ReleaseService
 @inject NavigationManager NavigationManager
-
 <div class="welcome-container">
-    <RadzenText TextStyle="TextStyle.H2">Discogs Insight</RadzenText>
-    <p class="lead">Explore your music collection on Discogs.</p>
+        
     @if (_hasKey)
     {
-        <a class="btn btn-primary" href="@NavigationManager.ToAbsoluteUri("/collectionGrid")">Explore Collection</a>        
+        @* <a class="btn btn-primary" href="@NavigationManager.ToAbsoluteUri("/collectionGrid")">Explore Collection</a> *@
+        <RadzenText Text="Discogs Insight" TextStyle="TextStyle.DisplayH4" />
+        <br />           
+
+        <div class="rz-p-sm-12">
+            <RadzenAccordion>
+                <Items>
+                    <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
+                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
+                                         ExpandAriaLabel="Expand the random panel.">
+                        @if (_randomRelease != null)
+                        {
+                            <ReleaseComponent Release="@_randomRelease" />
+                        }
+                    </RadzenAccordionItem>
+                    <RadzenAccordionItem Text="Latest 5 Releases" Icon="pageview" CollapseTitle="Collapse Latest 5 Releases."
+                                         ExpandTitle="Expand Latest 5 Releases." CollapseAriaLabel="Collapse the Latest 5 Releases details."
+                                         ExpandAriaLabel="Expand the Latest 5 Releases details.">
+                        @if (_latestReleases != null)
+                        {
+                            foreach (var item in _latestReleases)
+                            {
+                                <ReleaseComponent Release="@item" />
+                            }
+                        }
+                    </RadzenAccordionItem>
+                </Items>
+            </RadzenAccordion>
+        </div>
     }
     else
     {
@@ -26,6 +55,8 @@
 @code{
     private static bool _hasKey { get; set; }
     private string discogsUsername = string.Empty;
+    private ReleaseViewModel? _randomRelease;
+    private List<ReleaseViewModel>? _latestReleases;
 
     public void handleButtonClick()
     {
@@ -33,8 +64,13 @@
         _hasKey = true;
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _hasKey = Preferences.Default.ContainsKey("discogsUsername");
+        if (_hasKey)
+        {
+            _randomRelease = await ReleaseService.GetRandomRelease();
+            _latestReleases = await ReleaseService.GetNewestFiveReleases();
+        }
     }
 }
