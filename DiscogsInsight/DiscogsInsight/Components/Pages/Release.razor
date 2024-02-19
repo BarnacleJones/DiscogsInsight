@@ -4,11 +4,23 @@
 @using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
 @using DiscogsInsight.ViewModels
+@using DiscogsInsight.Components
 @inject ReleaseService ReleaseService
 
 @if (_release is null)
 {
-    <p>Loading...</p>
+    <div class="d-flex justify-content-center">
+        <div class="row">
+            <div class="col-12">
+                <img src="/images/loading.svg" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p><em>Loading...</em></p>
+            </div>
+        </div>
+    </div>
 }
 else
 {
