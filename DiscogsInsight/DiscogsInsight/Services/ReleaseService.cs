@@ -85,7 +85,7 @@ namespace DiscogsInsight.Services
 
             if (!releaseTracks.Any())
             {
-                var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(randomRelease.DiscogsReleaseId);
+                var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(randomRelease.DiscogsReleaseId.Value);
 
                 var newRelease = await _db.GetAllEntitiesAsync<Release>();
                 randomRelease = newRelease.FirstOrDefault(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId);
@@ -141,7 +141,7 @@ namespace DiscogsInsight.Services
 
                 if (!releaseTracks.Any())
                 {
-                    var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(thisItem.DiscogsReleaseId);
+                    var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(thisItem.DiscogsReleaseId.Value) ;
 
                     var newRelease = await _db.GetAllEntitiesAsync<Release>();
                     thisItem = newRelease.FirstOrDefault(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId);
