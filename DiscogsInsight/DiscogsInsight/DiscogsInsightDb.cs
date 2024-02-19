@@ -9,7 +9,7 @@ namespace DiscogsInsight
     {
 
         private readonly ILogger<DiscogsInsightDb> _logger;
-        SQLiteAsyncConnection Database;
+        SQLiteAsyncConnection? Database;
 
         public DiscogsInsightDb(ILogger<DiscogsInsightDb> logger)
         {
