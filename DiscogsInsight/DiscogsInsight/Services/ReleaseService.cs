@@ -48,16 +48,7 @@ namespace DiscogsInsight.Services
                 Position = x.Position
             })
             .ToList();
-            return new ReleaseViewModel
-            {
-                Artist = artist.Name,
-                Title = release.Title,
-                DateAdded = release.DateAdded,
-                Genres = release.Genres,
-                Year = release.Year,
-                Tracks = releaseTrackList,
-                ReleaseCountry = release.ReleaseCountry
-            };           
+            return GetReleaseViewModel(release, releaseTrackList, artist.Name);
             
         }
 
@@ -105,17 +96,7 @@ namespace DiscogsInsight.Services
             })
             .ToList();
 
-            var viewModel = new ReleaseViewModel
-            {
-                Artist = releaseArtistName ?? "Missing Artist",
-                Year = randomRelease.Year,
-                Title = randomRelease.Title,
-                Genres = randomRelease.Genres,
-                Tracks = releaseTrackList,
-                DateAdded = randomRelease.DateAdded
-            };
-
-            return viewModel;
+            return GetReleaseViewModel(randomRelease, releaseTrackList, releaseArtistName);
         }
 
         public async Task<List<ReleaseViewModel>> GetNewestFiveReleases()
@@ -160,19 +141,26 @@ namespace DiscogsInsight.Services
                 })
                 .ToList();
 
-                returnedReleases.Add(new ReleaseViewModel
-                {
-                    Artist = releaseArtistName ?? "Missing Artist",
-                    Year = item.Year,
-                    Title = item.Title,
-                    Genres = item.Genres,
-                    Tracks = releaseTrackList,
-                    DateAdded = item.DateAdded
-                });
+                returnedReleases.Add(GetReleaseViewModel(item, releaseTrackList, releaseArtistName));
 
             }
 
             return returnedReleases;
+        }
+
+        private ReleaseViewModel GetReleaseViewModel(Release release, List<TrackViewModel> trackList, string? releaseArtistName)
+        {
+            return new ReleaseViewModel
+            {
+                Artist = releaseArtistName ?? "Missing Artist",
+                Year = release.Year,
+                Title = release.Title ?? "Missing Title",
+                Genres = release.Genres ?? "",
+                Tracks = trackList,
+                DateAdded = release.DateAdded,
+                DiscogsArtistId = release.DiscogsArtistId,
+                DiscogsReleaseId = release.DiscogsReleaseId
+            };
         }
     }
 }
