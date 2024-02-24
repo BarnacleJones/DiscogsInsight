@@ -39,11 +39,12 @@ namespace DiscogsInsight.Services
         {
             if (discogsArtistId == null)
                 throw new Exception($"Missing artist info");
+                
 
             var artists = await _db.GetAllEntitiesAsync<Artist>();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
 
-            if (artist == null || artist?.Profile == null)
+            if (artist == null || artist?.Profile == null)//artist.Profile is retrieved on a different API call which is only called in this scenario
             {
                 var result = await _discogsApiService.GetArtistFromDiscogsAndSave(discogsArtistId.Value);
 

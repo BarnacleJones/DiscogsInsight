@@ -48,17 +48,119 @@ namespace DiscogsInsight.Services
                 Position = x.Position
             })
             .ToList();
+            return GetReleaseViewModel(release, releaseTrackList, artist.Name);
+            
+        }
+
+        public async Task<ReleaseViewModel> GetRandomRelease()
+        {
+
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            if (releases.Count < 1)
+            {
+                return new ReleaseViewModel
+                {
+                    Artist = "Nothing In collection"
+                };
+            }
+
+            var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+
+            if (randomRelease is null)
+            {
+                throw new Exception($"Error getting random release.");
+            }
+
+            var tracks = await _db.GetAllEntitiesAsync<Track>();
+            var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId);
+
+            if (!releaseTracks.Any())
+            {
+                var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(randomRelease.DiscogsReleaseId.Value);
+
+                var newRelease = await _db.GetAllEntitiesAsync<Release>();
+                randomRelease = newRelease.FirstOrDefault(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId);
+
+                tracks = await _db.GetAllEntitiesAsync<Track>();
+            }
+
+
+            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            var releaseArtistName = artists.Where(x => x.DiscogsArtistId == randomRelease.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
+
+            var releaseTrackList = tracks.Where(x => x.DiscogsReleaseId == randomRelease.DiscogsReleaseId).Select(x => new TrackViewModel
+            {
+                Title = x.Title,
+                Duration = x.Duration,
+                Position = x.Position
+            })
+            .ToList();
+
+            return GetReleaseViewModel(randomRelease, releaseTrackList, releaseArtistName);
+        }
+
+        public async Task<List<ReleaseViewModel>> GetNewestFiveReleases()
+        {
+            var returnedReleases = new List<ReleaseViewModel>();
+
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            if (releases.Count < 1)
+            {
+                return
+                [
+                    new ReleaseViewModel {Artist = "Nothing In collection" }
+                ];
+            }
+            var releaseIsFiveOrMore = releases.Count() >= 5;
+            var lastFiveReleases = releases.OrderByDescending(r => r.DateAdded).Take(releaseIsFiveOrMore ? 5 : 1);
+
+            foreach (var item in lastFiveReleases)
+            {
+                var thisItem = item;
+                var tracks = await _db.GetAllEntitiesAsync<Track>();
+                var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId);
+
+                if (!releaseTracks.Any())
+                {
+                    var result = await _discogsApiService.GetReleaseFromDiscogsAndSave(thisItem.DiscogsReleaseId.Value) ;
+
+                    var newRelease = await _db.GetAllEntitiesAsync<Release>();
+                    thisItem = newRelease.FirstOrDefault(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId);
+
+                    tracks = await _db.GetAllEntitiesAsync<Track>();
+                }
+
+                var artists = await _db.GetAllEntitiesAsync<Artist>();
+                var releaseArtistName = artists.Where(x => x.DiscogsArtistId == thisItem.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
+
+                var releaseTrackList = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).Select(x => new TrackViewModel
+                {
+                    Title = x.Title,
+                    Duration = x.Duration,
+                    Position = x.Position
+                })
+                .ToList();
+
+                returnedReleases.Add(GetReleaseViewModel(item, releaseTrackList, releaseArtistName));
+
+            }
+
+            return returnedReleases;
+        }
+
+        private ReleaseViewModel GetReleaseViewModel(Release release, List<TrackViewModel> trackList, string? releaseArtistName)
+        {
             return new ReleaseViewModel
             {
-                Artist = artist.Name,
-                Title = release.Title,
-                DateAdded = release.DateAdded,
-                Genres = release.Genres,
+                Artist = releaseArtistName ?? "Missing Artist",
                 Year = release.Year,
-                Tracks = releaseTrackList,
-                ReleaseCountry = release.ReleaseCountry
-            };           
-            
+                Title = release.Title ?? "Missing Title",
+                Genres = release.Genres ?? "",
+                Tracks = trackList,
+                DateAdded = release.DateAdded,
+                DiscogsArtistId = release.DiscogsArtistId,
+                DiscogsReleaseId = release.DiscogsReleaseId
+            };
         }
     }
 }

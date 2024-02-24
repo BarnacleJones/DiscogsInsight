@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
@@ -61,6 +61,17 @@
 	</ItemGroup>
 
     <ItemGroup>
+      <None Remove="Platforms\Android\Resources\drawable\loading.svg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Platforms\Android\Resources\drawable\loading.svg">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
@@ -72,7 +83,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\Images\" />
+      <Folder Include="wwwroot\images\" />
     </ItemGroup>
 
 </Project>

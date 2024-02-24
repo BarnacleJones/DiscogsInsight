@@ -66,7 +66,7 @@ namespace DiscogsInsight.Services
 
                     releases.AddRange(responseData.releases);
 
-                    totalPages = responseData.pagination.pages;
+                    totalPages = responseData?.pagination?.pages ?? 1;
                     currentPage++;
 
                 } while (currentPage <= totalPages);
