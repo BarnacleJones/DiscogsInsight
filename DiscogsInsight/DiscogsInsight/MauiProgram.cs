@@ -7,6 +7,7 @@ using DiscogsInsight.View.Services.Collection;
 using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
+using DiscogsInsight.View.Services.Notifications;
 
 
 namespace DiscogsInsight
@@ -42,6 +43,7 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<ReleaseDataService>();
 
             //view layer
+            builder.Services.AddSingleton<UserNotificationService>();
             builder.Services.AddSingleton<CollectionViewService>();
             builder.Services.AddSingleton<SettingsViewService>();
             builder.Services.AddSingleton<ArtistViewService>();

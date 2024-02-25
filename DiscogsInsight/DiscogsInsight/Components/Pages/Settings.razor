@@ -1,8 +1,11 @@
 @page "/settings"
+@using DiscogsInsight.View.Services.Notifications
 @using DiscogsInsight.View.Services.Settings
-@using DiscogsInsight.Components
+@using DiscogsInsight.ViewModels.Results
+@using Microsoft.Maui.Controls
 @inject NavigationManager NavigationManager
 @inject SettingsViewService SettingsViewService
+@inject UserNotificationService UserNotificationService
 
 <div class="container mt-5">
     <div class="row mb-3">
@@ -27,54 +30,35 @@
             <button class="btn btn-primary" @onclick="UpdateApiData">Refresh Collection Data</button>
         </div>
     </div>
-   <ErrorComponent SuccessMessage="@SuccessMessage" ErrorMessage="@ErrorMessage" ShowErrorBanner="@ShowErrorBanner" ShowSuccessBanner="@ShowSuccessBanner" />
 </div>
 
 @code {
     private string discogsUsername = string.Empty;
 
-
-    private string ErrorMessage { get; set; }
-    private string SuccessMessage { get; set; }
-    private bool ShowErrorBanner { get; set; }
-    private bool ShowSuccessBanner { get; set; }
-
-
     public async void SaveUsername()
     {
-        var result = await SettingsViewService.UpdateDiscogsUsername(discogsUsername);
-        if (result.Success)
-        {
-            ShowSuccessBanner = true;
-            SuccessMessage = "Success: Saved Username";
-        }
-        else
-        {
-            ShowErrorBanner = true;
-            ErrorMessage = result.ErrorMessage;
-        }
-        StateHasChanged();
-
+        HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername));
     }
 
     public async Task UpdateApiData()
     {
-        var result = await SettingsViewService.UpdateCollection();
-        if (result.Success)
-        {
-            ShowSuccessBanner = true;
-            SuccessMessage = "Success: Updated Collection";
-        }
-        else
-        {
-            ShowErrorBanner = true;
-            ErrorMessage = result.ErrorMessage;
-        }
-        StateHasChanged();
+        HandleResult(await SettingsViewService.UpdateCollection());
     }
 
     protected override void OnInitialized()
     {
         discogsUsername = SettingsViewService.GetDiscogsUsername();
-    }        
+    }
+
+    private async void HandleResult(ViewResult<bool> result)
+    {
+        if (result.Success)
+        {
+            await UserNotificationService.DisplayNotification("Success", $"Saved Username", "OK", "Cancel");
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
 }
