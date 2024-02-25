@@ -1,10 +1,10 @@
 ﻿@page "/artist/{artistId:int?}"
 
-@using DiscogsInsight.Services
-@using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
+@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.View.Services.Artist
 @using DiscogsInsight.ViewModels
-@inject ArtistService ArtistService
+@inject ArtistViewService ArtistViewService
 @inject NavigationManager _navigationManager
 
 @if (_artist is null)
@@ -54,7 +54,7 @@ else
     {
         try
         {            
-            _artist = await ArtistService.GetArtist(artistId);
+            _artist = await ArtistViewService.GetArtist(artistId);
         }
         catch (Exception ex)
         {

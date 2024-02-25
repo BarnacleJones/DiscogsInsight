@@ -1,11 +1,11 @@
 ﻿@page "/randomRelease"
 
-@using DiscogsInsight.Services
-@using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
+@using DiscogsInsight.View.Services.Releases
 @using DiscogsInsight.ViewModels
 @using DiscogsInsight.Components
-@inject ReleaseService ReleaseService
+@using DiscogsInsight.ViewModels.EntityViewModels
+@inject ReleaseViewService ReleaseViewService
 @inject NavigationManager _navigationManager
 
 @if (_release is null)
@@ -49,10 +49,11 @@ else
     {
         try
         {            
-            _release = await ReleaseService.GetRandomRelease();
+            _release = await ReleaseViewService.GetRandomRelease();
         }
         catch (Exception ex)
         {
+            //todo
         }
     }
 

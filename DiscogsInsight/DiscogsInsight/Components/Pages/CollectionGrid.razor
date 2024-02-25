@@ -1,14 +1,11 @@
 @page "/collectionGrid"
-
-@using DiscogsInsight.Services
-@using DiscogsInsight.ResponseModels
-@using System.Collections.ObjectModel
-@using DiscogsInsight.ViewModels
-@using DiscogsInsight.Components.Layout
-@inject CollectionService CollectionService
+@using DiscogsInsight.ViewModels.Collection
+@using DiscogsInsight.View.Services.Collection
+@using DiscogsInsight.ViewModels.EntityViewModels
 @inject NavigationManager NavigationManager
+@inject CollectionViewService CollectionViewService
 
-@if (_collectionResponse == null)
+@if (_collectionViewModel == null)
 {
     <div class="d-flex justify-content-center">
         <div class="row">
@@ -35,7 +32,7 @@ else{
         Style="width: 100%"
         PagerHorizontalAlign="HorizontalAlign.Left" 
         ShowPagingSummary="true"
-        Data="@_collectionResponse.Releases.OrderBy(x => x.Artist)" 
+        Data="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" 
         TItem="ReleaseViewModel"
         LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
@@ -57,32 +54,17 @@ else{
                     <RadzenLink class="m-1" onclick=@(() => GoToRelease(data.DiscogsReleaseId)) Text="@data.Title"></RadzenLink>
                 </Template>
             </RadzenDataGridColumn>
-            @* <RadzenDataGridColumn 
-                TItem="ReleaseViewModel" Property="Year" 
-                Title="Year" 
-                Width="10%" /> *@
         </Columns>
     </RadzenDataGrid>
 }
 @code {
-    private DiscogsCollection? _collectionResponse;
-    private IEnumerable<string>? _artistLists;
-
-    void OnSelectedArtistsChange(object value)
-    {
-        if (_artistLists != null && !_artistLists.Any())
-        {
-            _artistLists = null;  
-        }
-    }
-
+    private DiscogsCollectionViewModel? _collectionViewModel;
+   
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _collectionResponse = await CollectionService.GetCollection();
-            // _artistList = _collectionResponse.ArtistList
-
+            _collectionViewModel = await CollectionViewService.GetCollection();
         }
         catch (Exception ex)
         {
