@@ -1,4 +1,5 @@
 ﻿using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.ViewModels.Results;
 
 namespace DiscogsInsight.View.Services.Settings
 {
@@ -11,9 +12,24 @@ namespace DiscogsInsight.View.Services.Settings
             _settingsDataService = settingsDataService;
         }
 
-        public async Task<bool> UpdateCollection()
+        public async Task<ViewResult<bool>> UpdateCollection()
         {
-            return await _settingsDataService.UpdateCollection();
+            try
+            {
+             var success = await _settingsDataService.UpdateCollection();
+
+                if (success)
+                {
+                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                }
+
+                return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Collection. " };
+
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
+            }
         }
 
         public string GetDiscogsUsername()
@@ -21,9 +37,23 @@ namespace DiscogsInsight.View.Services.Settings
             return _settingsDataService.GetDiscogsUsername();
         }
 
-        public async Task<bool> UpdateDiscogsUsername(string userName)
+        public async Task<ViewResult<bool>> UpdateDiscogsUsername(string userName)
         {
-            return await _settingsDataService.UpdateDiscogsUsername(userName);
+            try
+            {
+                var success = await _settingsDataService.UpdateDiscogsUsername(userName);
+
+                if (success)
+                {
+                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                }
+
+                return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Discogs Username. " };
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
+            }
         }
 
     }

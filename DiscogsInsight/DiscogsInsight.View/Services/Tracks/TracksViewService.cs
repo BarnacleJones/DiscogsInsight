@@ -2,6 +2,7 @@
 using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.DataAccess;
 using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.ViewModels.Results;
 using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.View.Services.Tracks
@@ -18,34 +19,51 @@ namespace DiscogsInsight.View.Services.Tracks
             _db = db;
         }
 
-        public async Task<List<Track>> GetTracksForRelease(int? discogsReleaseId)
+        public async Task<ViewResult<List<Track>>> GetTracksForRelease(int? discogsReleaseId)
         {
-            if (discogsReleaseId == null) throw new Exception("No release id provided for getting tracklist");
-
-            var tracks = await _db.GetAllEntitiesAsync<Track>();
-
-            var trackList = tracks.ToList();
-
-            var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId);
-
-            if (!tracksForListRelease.Any())
+            try
             {
-                var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
-                var success = await SaveTracksFromDiscogsReleaseResponse(discogsReleaseResponse);
-                if (!success)
-                {
-                    throw new Exception("Error saving tracklist to database");
-                }
-                tracks = await _db.GetAllEntitiesAsync<Track>();
-                trackList = tracks.ToList();
-            }
+                if (discogsReleaseId == null) throw new Exception("No release id provided for getting tracklist");
 
-            return trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
+                var tracks = await _db.GetAllEntitiesAsync<Track>();
+
+                var trackList = tracks.ToList();
+
+                var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId);
+
+                if (!tracksForListRelease.Any())
+                {
+                    var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
+                    var success = await SaveTracksFromDiscogsReleaseResponse(discogsReleaseResponse);
+                    if (!success.Success)
+                    {
+                        throw new Exception("Error saving tracklist to database");
+                    }
+                    tracks = await _db.GetAllEntitiesAsync<Track>();
+                    trackList = tracks.ToList();
+                }
+
+                return new ViewResult<List<Track>>
+                {
+                    Data = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList(),
+                    ErrorMessage = "",
+                    Success = true
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<List<Track>>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
         }
 
-        public async Task<bool> SaveTracksFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
+        public async Task<ViewResult<bool>> SaveTracksFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
         {           
-            //save tracklists, make tracklist entity
             try
             {
                 var releaseTable = await _db.GetTable<Release>();
@@ -61,7 +79,7 @@ namespace DiscogsInsight.View.Services.Tracks
                 existingRelease.ReleaseCountry = releaseResponse.country;
                 await _db.UpdateAsync(existingRelease);
 
-
+                //save the tracks
                 if (!existingTracks.Any() && releaseResponse.tracklist != null)
                 {
                     foreach (var track in releaseResponse.tracklist)
@@ -77,13 +95,18 @@ namespace DiscogsInsight.View.Services.Tracks
                         });
                     }
                 }
+
+                return new ViewResult<bool> { Success = true, ErrorMessage = "" };
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-                throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-            }
-            return true;            
+                return new ViewResult<bool>
+                {
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }           
         }              
     }    
 }
