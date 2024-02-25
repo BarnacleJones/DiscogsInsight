@@ -1,11 +1,11 @@
 ﻿@page "/release/{releaseId:int?}"
 
-@using DiscogsInsight.Services
-@using DiscogsInsight.ResponseModels
 @using System.Collections.ObjectModel
+@using DiscogsInsight.View.Services.Releases
 @using DiscogsInsight.ViewModels
 @using DiscogsInsight.Components
-@inject ReleaseService ReleaseService
+@using DiscogsInsight.ViewModels.EntityViewModels
+@inject ReleaseViewService ReleaseViewService
 
 @if (_release is null)
 {
@@ -38,7 +38,7 @@ else
     {
         try
         {            
-            _release = await ReleaseService.GetRelease(releaseId);
+            _release = await ReleaseViewService.GetRelease(releaseId);
         }
         catch (Exception ex)
         {

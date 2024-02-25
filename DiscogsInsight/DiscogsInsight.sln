@@ -4,6 +4,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight", "DiscogsInsight\DiscogsInsight.csproj", "{DED0A50D-9CDE-41F8-96F9-892DD5AC1FFD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4B608677-1EA3-485A-84D6-BC1036C6C214} = {4B608677-1EA3-485A-84D6-BC1036C6C214}
+		{A7A82C9C-A178-4DC1-9AF8-084091A3EA08} = {A7A82C9C-A178-4DC1-9AF8-084091A3EA08}
+		{C8623DE4-E12E-4FD3-A848-F86024A18649} = {C8623DE4-E12E-4FD3-A848-F86024A18649}
+		{CA8857FD-A095-41E8-8B8B-3718070D69FA} = {CA8857FD-A095-41E8-8B8B-3718070D69FA}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.DataAccess", "DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj", "{4B608677-1EA3-485A-84D6-BC1036C6C214}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.ApiIntegration", "DiscogsInsight.ApiIntegration\DiscogsInsight.ApiIntegration.csproj", "{A7A82C9C-A178-4DC1-9AF8-084091A3EA08}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.ViewModels", "DiscogsInsight.ViewModels\DiscogsInsight.ViewModels.csproj", "{CA8857FD-A095-41E8-8B8B-3718070D69FA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.View", "DiscogsInsight.View\DiscogsInsight.View.csproj", "{C8623DE4-E12E-4FD3-A848-F86024A18649}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +31,22 @@ Global
 		{DED0A50D-9CDE-41F8-96F9-892DD5AC1FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DED0A50D-9CDE-41F8-96F9-892DD5AC1FFD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DED0A50D-9CDE-41F8-96F9-892DD5AC1FFD}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4B608677-1EA3-485A-84D6-BC1036C6C214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B608677-1EA3-485A-84D6-BC1036C6C214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B608677-1EA3-485A-84D6-BC1036C6C214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B608677-1EA3-485A-84D6-BC1036C6C214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7A82C9C-A178-4DC1-9AF8-084091A3EA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7A82C9C-A178-4DC1-9AF8-084091A3EA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7A82C9C-A178-4DC1-9AF8-084091A3EA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7A82C9C-A178-4DC1-9AF8-084091A3EA08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA8857FD-A095-41E8-8B8B-3718070D69FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA8857FD-A095-41E8-8B8B-3718070D69FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA8857FD-A095-41E8-8B8B-3718070D69FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA8857FD-A095-41E8-8B8B-3718070D69FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8623DE4-E12E-4FD3-A848-F86024A18649}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8623DE4-E12E-4FD3-A848-F86024A18649}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8623DE4-E12E-4FD3-A848-F86024A18649}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8623DE4-E12E-4FD3-A848-F86024A18649}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

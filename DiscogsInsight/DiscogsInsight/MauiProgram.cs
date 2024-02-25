@@ -1,5 +1,13 @@
-﻿using DiscogsInsight.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using DiscogsInsight.DataAccess;
+using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.View.Services.Tracks;
+using DiscogsInsight.View.Services.Collection;
+using DiscogsInsight.View.Services.Settings;
+using DiscogsInsight.View.Services.Artist;
+using DiscogsInsight.View.Services.Releases;
+
 
 namespace DiscogsInsight
 {
@@ -21,13 +29,25 @@ namespace DiscogsInsight
             builder.Logging.AddDebug();
 #endif
             builder.Services.AddSingleton<HttpClient>();
+            //Data layer
             builder.Services.AddSingleton<DiscogsInsightDb>();
-            builder.Services.AddSingleton<CollectionDataService>();
+            //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
-            builder.Services.AddSingleton<CollectionService>();
-            builder.Services.AddSingleton<SettingsService>();
-            builder.Services.AddSingleton<ArtistService>();
-            builder.Services.AddSingleton<ReleaseService>();
+
+            //rest of data layer - does the order matter?
+            builder.Services.AddSingleton<CollectionDataService>();
+            builder.Services.AddSingleton<SettingsDataService>();
+            builder.Services.AddSingleton<ArtistDataService>();
+            builder.Services.AddSingleton<TracksViewService>();
+            builder.Services.AddSingleton<ReleaseDataService>();
+
+            //view layer
+            builder.Services.AddSingleton<CollectionViewService>();
+            builder.Services.AddSingleton<SettingsViewService>();
+            builder.Services.AddSingleton<ArtistViewService>();
+            builder.Services.AddSingleton<TracksViewService>();
+            builder.Services.AddSingleton<ReleaseViewService>();
+
 
             return builder.Build();
         }

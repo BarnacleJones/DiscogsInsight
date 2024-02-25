@@ -1,8 +1,10 @@
 ﻿@page "/"
-
-@using DiscogsInsight.ViewModels
-@using DiscogsInsight.Services
-@inject ReleaseService ReleaseService
+@using DiscogsInsight.View.Services.Collection
+@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.DataAccess.Services;
+@inject ReleaseViewService ReleaseViewService
+@inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
 <div class="welcome-container">
         
@@ -50,8 +52,6 @@
     }
 </div>
 
-
-
 @code{
     private static bool _hasKey { get; set; }
     private string discogsUsername = string.Empty;
@@ -69,8 +69,9 @@
         _hasKey = Preferences.Default.ContainsKey("discogsUsername");
         if (_hasKey)
         {
-            _randomRelease = await ReleaseService.GetRandomRelease();
-            _latestReleases = await ReleaseService.GetNewestFiveReleases();
+            var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
+            _randomRelease = await ReleaseViewService.GetRandomRelease();
+            _latestReleases = await ReleaseViewService.GetNewestReleases();
         }
     }
 }
