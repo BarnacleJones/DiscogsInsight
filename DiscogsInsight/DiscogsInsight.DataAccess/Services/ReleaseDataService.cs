@@ -26,6 +26,12 @@ namespace DiscogsInsight.DataAccess.Services
             var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
 
             //if release is null save it and the tracks here
+            if (release == null)
+            {
+                releases = await _collectionDataService.GetReleases();
+                release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+
+            }
             return release;
         }
 
