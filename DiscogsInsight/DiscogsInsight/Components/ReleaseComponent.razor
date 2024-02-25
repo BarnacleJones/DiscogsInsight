@@ -1,17 +1,22 @@
-﻿@using DiscogsInsight.ViewModels
+﻿@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@inject NavigationManager NavigationManager
 
 <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
         @* <RadzenImage Path="@order?.Employee?.Photo" Style="width: 100px; height: 100px; border-radius: 50%;" /> *@
         <RadzenStack Gap="0">
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.Artist)</b></RadzenText>
+            <RadzenLink TextStyle="TextStyle.Body1" onclick=@(() => @GoToArtist(Release.DiscogsArtistId))><b>@(Release.Artist)</b></RadzenLink>
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Album</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1"><b>@Release.Title</b></RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1" onclick=@(() => @GoToRelease(Release.DiscogsReleaseId))><b>@Release.Title</b></RadzenText>
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Date Added</RadzenText>
             <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.DateAdded)</b></RadzenText>
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Release Country</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.ReleaseCountry)</b></RadzenText>
+            @if (Release.ReleaseCountry != null)
+            {
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Release Country</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.ReleaseCountry)</b></RadzenText>                
+            }
         </RadzenStack>
     </RadzenStack>
     <RadzenAccordion class="">
@@ -24,7 +29,7 @@
                 {
                     if (track is not null)
                     {
-                        <li>@track.Position - @track.Title - @track.Duration</li>
+                            <li style="list-style:none">@GetTrackString(@track)</li>
                     }
                 }
                 </ul>
@@ -40,5 +45,20 @@
 {
     [Parameter]
     public ReleaseViewModel Release { get; set; }
+
+    void GoToArtist(int? discogsArtistId)
+    {
+        NavigationManager.NavigateTo("/artist/" + discogsArtistId);
+    }
+
+    void GoToRelease(int? releaseId)
+    {
+        NavigationManager.NavigateTo($"/release/{releaseId}");
+    }
+
+    string GetTrackString(TrackViewModel track)
+    {
+        return $"{(track.Position == null ? "" : track.Position + " - ")}{(track.Title == null ? "" : track.Title)}{(track.Duration == null ? "" : " - " + track.Duration)}";
+    }
 
 }
