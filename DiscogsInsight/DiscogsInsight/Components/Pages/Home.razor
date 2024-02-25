@@ -2,7 +2,10 @@
 @using DiscogsInsight.View.Services.Collection
 @using DiscogsInsight.View.Services.Releases
 @using DiscogsInsight.ViewModels.EntityViewModels
-@using DiscogsInsight.DataAccess.Services;
+@using DiscogsInsight.DataAccess.Services
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
@@ -70,8 +73,32 @@
         if (_hasKey)
         {
             var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
-            _randomRelease = await ReleaseViewService.GetRandomRelease();
-            _latestReleases = await ReleaseViewService.GetNewestReleases();
+            HandleRandomResult(await ReleaseViewService.GetRandomRelease());
+            HandleNewestReleaseResult(await ReleaseViewService.GetNewestReleases());
+        }
+    }
+
+    private async void HandleRandomResult(ViewResult<ReleaseViewModel> result)
+    {
+        if (result.Success)
+        {
+            _randomRelease = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
+
+    private async void HandleNewestReleaseResult(ViewResult<List<ReleaseViewModel>> result)
+    {
+        if (result.Success)
+        {
+            _latestReleases = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
         }
     }
 }

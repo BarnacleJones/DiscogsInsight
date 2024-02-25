@@ -5,6 +5,9 @@
 @using DiscogsInsight.ViewModels
 @using DiscogsInsight.Components
 @using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 
 @if (_release is null)
@@ -38,11 +41,23 @@ else
     {
         try
         {            
-            _release = await ReleaseViewService.GetRelease(releaseId);
+            HandleResult(await ReleaseViewService.GetRelease(releaseId));
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+        }
+    }
+
+    private async void HandleResult(ViewResult<ReleaseViewModel> result)
+    {
+        if (result.Success)
+        {
+            _release = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
         }
     }
 }

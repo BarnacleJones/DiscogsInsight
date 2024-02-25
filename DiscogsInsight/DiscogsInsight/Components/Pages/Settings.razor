@@ -37,12 +37,12 @@
 
     public async void SaveUsername()
     {
-        HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername));
+        HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername), "Saved Username");
     }
 
     public async Task UpdateApiData()
     {
-        HandleResult(await SettingsViewService.UpdateCollection());
+        HandleResult(await SettingsViewService.UpdateCollection(), "Updated Collection");
     }
 
     protected override void OnInitialized()
@@ -50,11 +50,11 @@
         discogsUsername = SettingsViewService.GetDiscogsUsername();
     }
 
-    private async void HandleResult(ViewResult<bool> result)
+    private async void HandleResult(ViewResult<bool> result, string successMessage)
     {
         if (result.Success)
         {
-            await UserNotificationService.DisplayNotification("Success", $"Saved Username", "OK", "Cancel");
+            await UserNotificationService.DisplayNotification("Success", successMessage, "OK", "Cancel");
         }
         else
         {

@@ -5,6 +5,9 @@
 @using DiscogsInsight.ViewModels
 @using DiscogsInsight.Components
 @using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 @inject NavigationManager _navigationManager
 
@@ -46,21 +49,26 @@ else
     private ReleaseViewModel? _release;
 
     protected override async Task OnInitializedAsync()
-    {
-        try
-        {            
-            _release = await ReleaseViewService.GetRandomRelease();
-        }
-        catch (Exception ex)
-        {
-            //todo
-        }
+    {          
+        HandleRandomResult(await ReleaseViewService.GetRandomRelease());        
     }
 
     public async Task RefreshPage()
     {
         await OnInitializedAsync();
         StateHasChanged();
+    }
+
+    private async void HandleRandomResult(ViewResult<ReleaseViewModel> result)
+    {
+        if (result.Success)
+        {
+            _release = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
     }
 
 }

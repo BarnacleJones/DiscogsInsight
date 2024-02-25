@@ -2,6 +2,9 @@
 @using DiscogsInsight.ViewModels.Collection
 @using DiscogsInsight.View.Services.Collection
 @using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
 @inject NavigationManager NavigationManager
 @inject CollectionViewService CollectionViewService
 
@@ -64,7 +67,7 @@ else{
     {
         try
         {
-            _collectionViewModel = await CollectionViewService.GetCollection();
+            HandleResult(await CollectionViewService.GetCollection());
         }
         catch (Exception ex)
         {
@@ -81,5 +84,17 @@ else{
     void GoToRelease(int? releaseId)
     {
         NavigationManager.NavigateTo($"/release/{releaseId}");
+    }
+    
+    private async void HandleResult(ViewResult<DiscogsCollectionViewModel> result)
+    {
+        if (result.Success)
+        {
+            _collectionViewModel = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
     }
 }

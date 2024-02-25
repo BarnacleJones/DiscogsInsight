@@ -4,6 +4,9 @@
 @using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.View.Services.Artist
 @using DiscogsInsight.ViewModels
+@using DiscogsInsight.ViewModels.Results
+@using DiscogsInsight.View.Services.Notifications
+@inject UserNotificationService UserNotificationService
 @inject ArtistViewService ArtistViewService
 @inject NavigationManager _navigationManager
 
@@ -54,11 +57,23 @@ else
     {
         try
         {            
-            _artist = await ArtistViewService.GetArtist(artistId);
+            HandleResult(await ArtistViewService.GetArtist(artistId));
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+        }
+    }
+
+    private async void HandleResult(ViewResult<ArtistViewModel> result)
+    {
+        if (result.Success)
+        {
+            _artist = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
         }
     }
 }
