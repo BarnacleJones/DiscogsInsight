@@ -26,9 +26,6 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<Artist> GetArtist(int? discogsArtistId)
         {
-            if (discogsArtistId == null)
-                throw new Exception($"Missing artist info");
-
             var artists = await _db.GetAllEntitiesAsync<Artist>();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
 
