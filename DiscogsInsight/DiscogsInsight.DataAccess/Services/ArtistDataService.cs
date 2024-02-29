@@ -9,12 +9,14 @@ namespace DiscogsInsight.DataAccess.Services
     {
         private readonly DiscogsInsightDb _db;
         private readonly DiscogsApiService _discogsApiService;
+        private readonly MusicBrainzApiService _musicBrainzApiService;
         private readonly ILogger<ArtistDataService> _logger;
 
-        public ArtistDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<ArtistDataService> logger)
+        public ArtistDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<ArtistDataService> logger, MusicBrainzApiService musicBrainzApiService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
+            _musicBrainzApiService = musicBrainzApiService;
             _logger = logger;
         }
 
@@ -22,6 +24,12 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<Artist>> GetArtists()
         {
             return await _db.GetAllEntitiesAsync<Artist>();
+        }
+
+        public async Task<bool> GetInitialArtistInfo()
+        {
+            var additionalArtistInfo = _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi("The Moody Blues").Result;
+            return true;
         }
 
         public async Task<Artist> GetArtist(int? discogsArtistId)
@@ -42,6 +50,7 @@ namespace DiscogsInsight.DataAccess.Services
                 var newArtists = await _db.GetAllEntitiesAsync<Artist>();
                 artist = newArtists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
             }
+            
             return artist ?? new Artist();
 
         }

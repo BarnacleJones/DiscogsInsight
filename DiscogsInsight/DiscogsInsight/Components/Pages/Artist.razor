@@ -58,6 +58,7 @@ else
         try
         {            
             HandleResult(await ArtistViewService.GetArtist(artistId));
+            HandleResult(await ArtistViewService.GetInitialArtist());
         }
         catch (Exception ex)
         {
@@ -74,6 +75,18 @@ else
         else
         {
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
+
+    private async void HandleResult(bool result)
+    {
+        if (result)
+        {
+            
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result}", "OK", "Cancel");
         }
     }
 }

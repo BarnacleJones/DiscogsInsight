@@ -34,6 +34,7 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<DiscogsInsightDb>();
             //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
+            builder.Services.AddSingleton<MusicBrainzApiService>();
 
             //rest of data layer - does the order matter?
             builder.Services.AddSingleton<CollectionDataService>();

@@ -76,5 +76,11 @@ namespace DiscogsInsight.View.Services.Artist
             }
 
         }
+
+        public async Task<bool> GetInitialArtist()
+        {
+           var a = _artistDataService.GetInitialArtistInfo();
+            return true;
+        }
     }
 }
