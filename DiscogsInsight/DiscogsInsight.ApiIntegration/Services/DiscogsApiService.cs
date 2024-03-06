@@ -1,6 +1,7 @@
 ﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -15,18 +16,17 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //If they take a parameter (Eg ArtistId, use value from entity prefixed with Discogs eg. DiscogsArtistId
 
-        private const string ReleaseUrl = "https://api.discogs.com/releases/";
-        private const string MasterReleaseUrl = "https://api.discogs.com/masters/";
-        private const string ArtistUrl = "https://api.discogs.com/artists/";
+        private const string ReleaseUrl = "/releases/";
+        private const string MasterReleaseUrl = "/masters/";
+        private const string ArtistUrl = "/artists/";
 
         //-----------------------------------------------------------------------------
 
 
-        public DiscogsApiService(HttpClient httpClient, ILogger<DiscogsApiService> logger)
+        public DiscogsApiService(IHttpClientFactory httpClientFactory, ILogger<DiscogsApiService> logger)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("DiscogsApiClient");
             _logger = logger;
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
             _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
         }
 

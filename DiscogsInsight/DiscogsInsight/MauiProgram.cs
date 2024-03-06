@@ -8,6 +8,7 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
+using System.Net.Http;
 
 
 namespace DiscogsInsight
@@ -29,7 +30,23 @@ namespace DiscogsInsight
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-            builder.Services.AddSingleton<HttpClient>();
+            //Http client factory
+            //https://stackoverflow.com/questions/72288451/how-do-i-properly-use-di-with-ihttpclientfactory-in-net-maui
+
+            builder.Services.AddHttpClient("DiscogsApiClient", hc => 
+            {
+                hc.BaseAddress = new Uri("https://api.discogs.com");
+                hc.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
+            });
+
+            builder.Services.AddHttpClient("MusicBrainzApiClient", hc => 
+            {
+                hc.BaseAddress = new Uri("http://musicbrainz.org");
+                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
+
             //Data layer
             builder.Services.AddSingleton<DiscogsInsightDb>();
             //Api layer
