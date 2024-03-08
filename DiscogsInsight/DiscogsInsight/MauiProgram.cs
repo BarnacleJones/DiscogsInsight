@@ -28,6 +28,7 @@ namespace DiscogsInsight
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
+            builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
 #endif
             //Http client factory

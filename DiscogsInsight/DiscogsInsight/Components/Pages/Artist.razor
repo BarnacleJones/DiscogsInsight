@@ -44,6 +44,7 @@ else
         </RadzenRow>
     </RadzenCard>
 </RadzenCard>
+
 }
 
 @code
@@ -59,6 +60,7 @@ else
         {            
             HandleResult(await ArtistViewService.GetArtist(artistId));
             HandleResult(await ArtistViewService.GetInitialArtist());
+
         }
         catch (Exception ex)
         {
@@ -82,7 +84,7 @@ else
     {
         if (result)
         {
-            
+
         }
         else
         {

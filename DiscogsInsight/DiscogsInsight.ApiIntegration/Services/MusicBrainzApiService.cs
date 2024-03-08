@@ -1,7 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -42,15 +41,8 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         public MusicBrainzApiService(IHttpClientFactory httpClientFactory, ILogger<MusicBrainzApiService> logger)
         {
-            _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
-            if (string.IsNullOrEmpty(_discogsUserName))
-            {
-                _logger.LogError("Empty username");
-            }
-
             _httpClient = httpClientFactory.CreateClient("MusicBrainzApiClient");
-            _logger = logger;
-            
+            _logger = logger;            
         }
 
         public async Task<MusicBrainzInitialArtist> GetInitialArtistFromMusicBrainzApi(string artistName)
@@ -60,10 +52,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var responseData = new MusicBrainzInitialArtist();
 
                 var fullArtistRequestUrl = InitialArtistRequest + $"'{artistName}'" + InitialArtistIncludeUrl;
-                //_httpClient.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight_{_discogsUserName}");
-                //_httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-                //_httpClient.BaseAddress = new Uri(fullArtistRequestUrl);
-
+                
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
 
@@ -80,53 +69,6 @@ namespace DiscogsInsight.ApiIntegration.Services
                 _logger.LogError(ex, "Failed to get data from API");
                 throw;
             }
-        }
-        //public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
-        //{
-        //    try
-        //    {
-        //        var thisReleaseUrl = ReleaseUrl + discogsReleaseId;
-        //        var response = await _httpClient.GetAsync(thisReleaseUrl);
-        //        response.EnsureSuccessStatusCode();
-
-        //        var json = await response.Content.ReadAsStringAsync();
-        //        var responseData = JsonConvert.DeserializeObject<DiscogsReleaseResponse>(json);
-
-        //        if (responseData == null)
-        //        {
-        //            throw new Exception("Error getting data");
-        //        }
-
-        //        return responseData;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Failed to get data from API: {ex.Message}");
-        //    }
-        //}
-        //public async Task<DiscogsArtistResponse> GetArtistFromDiscogs(int discogsArtistId)
-        //{
-        //    try
-        //    {
-        //        var thisArtistUrl = ArtistUrl + discogsArtistId;
-        //        var response = await _httpClient.GetAsync(thisArtistUrl);
-        //        response.EnsureSuccessStatusCode();
-
-        //        var json = await response.Content.ReadAsStringAsync();
-        //        var responseData = JsonConvert.DeserializeObject<DiscogsArtistResponse>(json);
-
-        //        if (responseData == null)
-        //        {
-        //            throw new Exception("Error getting data");
-        //        }
-
-        //        return responseData;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Failed to get data from API: {ex.Message}");
-        //    }
-        //}
+        }        
     }
 }

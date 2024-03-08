@@ -28,7 +28,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<bool> GetInitialArtistInfo()
         {
-            var additionalArtistInfo = _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi("The Moody Blues").Result;
+            var additionalArtistInfo = _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi("The Moody Blues");
             return true;
         }
 
