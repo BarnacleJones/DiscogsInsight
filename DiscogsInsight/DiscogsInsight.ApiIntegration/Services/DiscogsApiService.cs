@@ -1,7 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Net.Http;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -47,7 +46,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                     _logger.LogError("Empty username");
                     return new DiscogsCollectionResponse();
                 }
-                var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
+                var collectionUrl = $"/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
 
                 do
                 {
@@ -76,7 +75,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
         public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
@@ -100,7 +99,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
         public async Task<DiscogsArtistResponse> GetArtistFromDiscogs(int discogsArtistId)
@@ -123,7 +122,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
     }

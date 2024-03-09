@@ -29,6 +29,8 @@ namespace DiscogsInsight.DataAccess
                 var result = await Database.CreateTableAsync<Artist>();
                 var result2 = await Database.CreateTableAsync<Release>();
                 var result3 = await Database.CreateTableAsync<Track>();
+                var result4 = await Database.CreateTableAsync<MusicBrainzTags>();
+                var result5 = await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzTags>();
             }
             catch (Exception ex)
             {

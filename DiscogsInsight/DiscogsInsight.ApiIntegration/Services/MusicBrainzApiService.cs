@@ -8,7 +8,6 @@ namespace DiscogsInsight.ApiIntegration.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<MusicBrainzApiService> _logger;
-        private string _discogsUserName;
 
         //-----------------------------------------------------------------------------
         //Hard coded MusicBrainz API Endpoints. If they ever change this should be the only place they are referenced!
@@ -28,7 +27,7 @@ namespace DiscogsInsight.ApiIntegration.Services
         private const string ReleaseUrl = "/ws/2/release/59211ea4-ffd2-4ad9-9a4e-941d3148024a";
         private const string ReleaseIncludeUrl = "?inc=artist-credits+labels+discids+recordings+tags";
 
-        private const string ArtistUrl = "/ws/2/artist/b574bfea-2359-4e9d-93f6-71c3c9a2a4f0";
+        private const string ArtistUrl = "/ws/2/artist/";
         private const string ArtistIncludeUrl = "?inc=aliases+releases";
 
 
@@ -51,13 +50,40 @@ namespace DiscogsInsight.ApiIntegration.Services
             {
                 var responseData = new MusicBrainzInitialArtist();
 
-                var fullArtistRequestUrl = InitialArtistRequest + $"'{artistName}'" + InitialArtistIncludeUrl;
+                var fullArtistRequestUrl = InitialArtistRequest + $"'{artistName}'";
                 
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
                 responseData = JsonConvert.DeserializeObject<MusicBrainzInitialArtist>(json);
+
+                if (responseData == null)
+                        throw new Exception("Error getting musicbrainz artist data");
+
+                return responseData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get data from API");
+                throw;
+            }
+        }        
+        public async Task<MusicBrainzArtist> GetArtistFromMusicBrainzApiUsingArtistId(string musicBrainzArtistId)
+        {
+            //not using at this stage - really only has additional release data (from the query string) but not displaying all releases by artist at this point
+            //todo: maybe a button on the artist page to view all releases by artist, dont even save them? just bring a list to the view
+            try
+            {
+                var responseData = new MusicBrainzArtist();
+
+                var fullArtistRequestUrl = ArtistUrl + $"{musicBrainzArtistId}" + ArtistIncludeUrl;
+                
+                var response = await _httpClient.GetAsync(fullArtistRequestUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                responseData = JsonConvert.DeserializeObject<MusicBrainzArtist>(json);
 
                 if (responseData == null)
                         throw new Exception("Error getting musicbrainz artist data");

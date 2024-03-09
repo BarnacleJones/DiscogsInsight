@@ -67,9 +67,9 @@ namespace DiscogsInsight.View.Services.Tracks
             try
             {
                 var releaseTable = await _db.GetTable<Release>();
-                var existingRelease = releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync().Result;
+                var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync();
                 var tracksTable = await _db.GetTable<Track>();
-                var existingTracks = tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync().Result;
+                var existingTracks = await tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync();
                 if (existingRelease == null)
                     //at this stage, dont want to store the release info if not in db already
                     throw new Exception($"Unhandled exception: Release {releaseResponse.id} not in database not able to store info.");

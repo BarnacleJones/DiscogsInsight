@@ -64,8 +64,14 @@ namespace DiscogsInsight.ApiIntegration.MusicBrainzResponseModels
         
     public class BeginArea
     {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
         [JsonPropertyName("type-id")]
-        public object TypeId { get; set; }
+        public string TypeId { get; set; }
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
@@ -73,14 +79,8 @@ namespace DiscogsInsight.ApiIntegration.MusicBrainzResponseModels
         [JsonPropertyName("sort-name")]
         public string SortName { get; set; }
 
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("disambiguation")]
-        public string Disambiguation { get; set; }
-
-        [JsonPropertyName("type")]
-        public object Type { get; set; }
+        [JsonPropertyName("life-span")]
+        public LifeSpan LifeSpan { get; set; }
     }
 
     public class BeginArea2
@@ -104,16 +104,5 @@ namespace DiscogsInsight.ApiIntegration.MusicBrainzResponseModels
         public object Type { get; set; }
     }
 
-    public class LifeSpan
-    {
-        [JsonPropertyName("ended")]
-        public bool? Ended { get; set; }
-
-        [JsonPropertyName("end")]
-        public object End { get; set; }
-
-        [JsonPropertyName("begin")]
-        public string Begin { get; set; }
-    }
-
+   
 }

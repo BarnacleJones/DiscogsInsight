@@ -8,7 +8,6 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
-using System.Net.Http;
 
 
 namespace DiscogsInsight
@@ -57,6 +56,7 @@ namespace DiscogsInsight
             //rest of data layer - does the order matter?
             builder.Services.AddSingleton<CollectionDataService>();
             builder.Services.AddSingleton<SettingsDataService>();
+            builder.Services.AddSingleton<TagsDataService>();
             builder.Services.AddSingleton<ArtistDataService>();
             builder.Services.AddSingleton<TracksViewService>();
             builder.Services.AddSingleton<ReleaseDataService>();

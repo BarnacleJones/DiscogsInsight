@@ -54,7 +54,12 @@ namespace DiscogsInsight.View.Services.Artist
                 {
                     Artist = artist.Name,
                     ArtistDescription = artist.Profile,
-                    DiscogsArtistId = artist.DiscogsArtistId
+                    DiscogsArtistId = artist.DiscogsArtistId,
+                    City = artist.City,
+                    Country = artist.Country,  
+                    StartYear = artist.StartYear,
+                    EndYear = artist.EndYear,
+                    MusicBrainzArtistId = artist.MusicBrainzArtistId
                 };
 
                 return new ViewResult<ArtistViewModel>
@@ -75,12 +80,6 @@ namespace DiscogsInsight.View.Services.Artist
                 };
             }
 
-        }
-
-        public async Task<bool> GetInitialArtist()
-        {
-           var a = _artistDataService.GetInitialArtistInfo();
-            return true;
         }
     }
 }
