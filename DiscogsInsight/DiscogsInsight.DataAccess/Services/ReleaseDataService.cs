@@ -1,5 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+﻿using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.DataAccess.Entities;
 
 namespace DiscogsInsight.DataAccess.Services
@@ -7,14 +6,21 @@ namespace DiscogsInsight.DataAccess.Services
     public class ReleaseDataService
     {
         private readonly DiscogsInsightDb _db;
-        private readonly DiscogsApiService _discogsApiService;
+        private readonly MusicBrainzApiService _musicBrainzApiService;
         private readonly CollectionDataService _collectionDataService;
 
-        public ReleaseDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, CollectionDataService collectionDataService)
+        public ReleaseDataService(DiscogsInsightDb db, MusicBrainzApiService musicBrainzApiService, CollectionDataService collectionDataService)
         {
             _db = db;
-            _discogsApiService = discogsApiService;
+            _musicBrainzApiService = musicBrainzApiService;
             _collectionDataService = collectionDataService;
+        }
+
+        public async Task<Release?> GetReleaseFromDbByDiscogsReleaseId(int discogsReleaseId)
+        {
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+            return release;
         }
 
         public async Task<Release?> GetRelease(int? discogsReleaseId)
@@ -22,15 +28,25 @@ namespace DiscogsInsight.DataAccess.Services
             if (discogsReleaseId == null)
                 throw new Exception($"Missing discogs release id");
 
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-            var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+            var release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
 
             //if release is null save it and the tracks here
             if (release == null)
             {
-                releases = await _collectionDataService.GetReleases();
+                var releases = await _collectionDataService.GetReleases();
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+            }
+            if (release.MusicBrainzReleaseId == null)
+            {
+                var artists = await _db.GetAllEntitiesAsync<Artist>();
+                var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
+                var apiReleaseModel = await _musicBrainzApiService.GetReleaseIdAndCoverArtUrlFromMusicBrainzApiByReleaseTitle(release.Title, release.DiscogsArtistId.Value, artist.MusicBrainzArtistId);
 
+                release.MusicBrainzReleaseId = apiReleaseModel.ReleaseId;
+                release.MusicBrainzCoverUrl = apiReleaseModel.CoverArtUrl;
+                await _db.UpdateAsync(release);
+
+                release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
             }
             return release;
         }
@@ -58,14 +74,15 @@ namespace DiscogsInsight.DataAccess.Services
             var returnedReleases = new List<Release>();
 
             var releases = await _db.GetAllEntitiesAsync<Release>();
-            if (releases.Count < 1)
+
+            if (releases.Count < 1)//seed the collection if no releases
             {
                 releases = await _collectionDataService.GetReleases();
             }
-            var releaseIsLargerThanParameter = releases.Count() >= howManyToReturn;
+            var moreReleasesThanHowManyToReturn = releases.Count() >= howManyToReturn;
 
             return releases.OrderByDescending(r => r.DateAdded)
-                           .Take(releaseIsLargerThanParameter ? howManyToReturn : 1)
+                           .Take(moreReleasesThanHowManyToReturn ? howManyToReturn : 1)
                            .ToList();
         }
 
