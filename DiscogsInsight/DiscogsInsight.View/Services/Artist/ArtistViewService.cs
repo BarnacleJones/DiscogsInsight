@@ -7,9 +7,11 @@ namespace DiscogsInsight.View.Services.Artist
     public class ArtistViewService
     {
         private readonly ArtistDataService _artistDataService;
-        public ArtistViewService(ArtistDataService artistDataService)
+        private readonly TagsDataService _tagsDataService;
+        public ArtistViewService(ArtistDataService artistDataService, TagsDataService tagsDataService)
         {
             _artistDataService = artistDataService;
+            _tagsDataService = tagsDataService; 
         }
 
         public async Task<ViewResult<List<ArtistViewModel>>> GetArtists()
@@ -49,7 +51,8 @@ namespace DiscogsInsight.View.Services.Artist
             try
             {
                 var artist = await _artistDataService.GetArtist(discogsArtistId);
-
+                var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+                var tagsList = tags.Select(x => x.Tag).ToList();
                 var data = new ArtistViewModel
                 {
                     Artist = artist.Name,
@@ -59,7 +62,8 @@ namespace DiscogsInsight.View.Services.Artist
                     Country = artist.Country,  
                     StartYear = artist.StartYear,
                     EndYear = artist.EndYear,
-                    MusicBrainzArtistId = artist.MusicBrainzArtistId
+                    MusicBrainzArtistId = artist.MusicBrainzArtistId,
+                    Tags = tagsList
                 };
 
                 return new ViewResult<ArtistViewModel>

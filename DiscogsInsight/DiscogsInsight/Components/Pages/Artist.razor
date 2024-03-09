@@ -60,6 +60,17 @@ else
             </RadzenColumn>
         </RadzenRow>
     </RadzenCard>
+        <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
+            <RadzenText TextStyle="TextStyle.H6"><strong>Artist Tags</strong></RadzenText>
+            <RadzenRow RowGap="0">
+                <RadzenColumn SizeSM="12">
+                    @foreach (var tag in _artist.Tags)
+                    {
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(tag)</b></RadzenText>
+                    }
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenCard>
 </RadzenCard>
 
 }

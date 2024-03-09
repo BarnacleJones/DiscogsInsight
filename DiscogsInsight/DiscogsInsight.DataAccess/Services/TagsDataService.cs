@@ -11,10 +11,7 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly DiscogsInsightDb _db;
         private readonly ILogger<TagsDataService> _logger;
 
-        public TagsDataService(DiscogsInsightDb db, 
-            DiscogsApiService discogsApiService, 
-            MusicBrainzApiService musicBrainzApiService,
-            ILogger<TagsDataService> logger)
+        public TagsDataService(DiscogsInsightDb db, ILogger<TagsDataService> logger)
         {
             _db = db;
             _logger = logger;

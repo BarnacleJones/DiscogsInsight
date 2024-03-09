@@ -13,5 +13,7 @@
         public string? City { get; set; }
         public string? StartYear { get; set; }
         public string? EndYear { get; set; }
+
+        public List<string> Tags { get; set; }
     }
 }
