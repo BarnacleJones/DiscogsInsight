@@ -17,5 +17,6 @@ namespace DiscogsInsight.DataAccess.Entities
         public string? ReleaseCountry { get; set; }
         public string? MusicBrainzReleaseId { get; set; }
         public string? MusicBrainzCoverUrl { get; set; }
+        public byte[]? MusicBrainzCoverImage { get; set; }
     }
 }

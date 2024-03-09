@@ -8,6 +8,7 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
+using System.Net.Http;
 
 
 namespace DiscogsInsight
@@ -39,6 +40,12 @@ namespace DiscogsInsight
                 hc.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
             });
 
+            builder.Services.AddHttpClient("CoverArtApiClient", hc => 
+            {
+                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
             builder.Services.AddHttpClient("MusicBrainzApiClient", hc => 
             {
                 hc.BaseAddress = new Uri("http://musicbrainz.org");
@@ -52,6 +59,7 @@ namespace DiscogsInsight
             //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
             builder.Services.AddSingleton<MusicBrainzApiService>();
+            builder.Services.AddSingleton<CoverArtArchiveApiService>();
 
             //rest of data layer - does the order matter?
             builder.Services.AddSingleton<CollectionDataService>();

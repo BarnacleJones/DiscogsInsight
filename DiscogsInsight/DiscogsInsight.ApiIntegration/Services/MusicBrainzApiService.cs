@@ -30,11 +30,6 @@ namespace DiscogsInsight.ApiIntegration.Services
         private const string ArtistUrl = "/ws/2/artist/";
         private const string ArtistIncludeUrl = "?inc=aliases+releases";
 
-
-        //Cover images, just add the release id - note NOT the release-group id
-
-        private const string ImageUrl = "coverartarchive.org/release/";
-
         //-----------------------------------------------------------------------------
 
 
@@ -71,8 +66,6 @@ namespace DiscogsInsight.ApiIntegration.Services
         }        
         public async Task<MusicBrainzArtist> GetArtistFromMusicBrainzApiUsingArtistId(string musicBrainzArtistId)
         {
-            //not using at this stage - really only has additional release data (from the query string) but not displaying all releases by artist at this point
-            //todo: maybe a button on the artist page to view all releases by artist, dont even save them? just bring a list to the view
             try
             {
                 var responseData = new MusicBrainzArtist();
@@ -95,33 +88,6 @@ namespace DiscogsInsight.ApiIntegration.Services
                 _logger.LogError(ex, "Failed to get data from API");
                 throw;
             }
-        }
-
-        public async Task<(string ReleaseId, string CoverArtUrl)> GetReleaseIdAndCoverArtUrlFromMusicBrainzApiByReleaseTitle(string title, int discogsArtistId, string musicBrainzArtistId)
-        {
-            try
-            {
-                //get artist releases by getting the artists name or musicbrainzid
-                var artist = await GetArtistFromMusicBrainzApiUsingArtistId(musicBrainzArtistId);
-                //save those releases in new table musicbrainzartisttomusicbrainzreleases
-                //save the release name and the release id, for showing releases on artists page and getting release cover art by id
-
-                //then go through the artists releases and look for the title that matches variable title
-                var releaseIdForThisRelease = artist.Releases.Where(x => x.Title == title).FirstOrDefault();//will need regex
-                //use that release id to get cover art url - deserialise to MusicBrainzCover
-                var coverUrl = GetCoverArtUrlFromMusicBrainzApiByMusicBrainzReleaseId(releaseIdForThisRelease.Id);
-                //just return the two values and it is saved in the data service for release
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get data from API");
-                throw;
-            }
-        }
-        private async Task<string> GetCoverArtUrlFromMusicBrainzApiByMusicBrainzReleaseId(string musicBrainzReleaseId)
-        {
-            return "";
         }
     }
 }

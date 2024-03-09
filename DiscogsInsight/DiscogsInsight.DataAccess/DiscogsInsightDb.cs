@@ -25,12 +25,13 @@ namespace DiscogsInsight.DataAccess
                     return;
 
                 Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
-                //todo: result needed still?
-                var result = await Database.CreateTableAsync<Artist>();
-                var result2 = await Database.CreateTableAsync<Release>();
-                var result3 = await Database.CreateTableAsync<Track>();
-                var result4 = await Database.CreateTableAsync<MusicBrainzTags>();
-                var result5 = await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzTags>();
+                
+                await Database.CreateTableAsync<Artist>();
+                await Database.CreateTableAsync<Release>();
+                await Database.CreateTableAsync<Track>();
+                await Database.CreateTableAsync<MusicBrainzTags>();
+                await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzTags>();
+                await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzRelease>();
             }
             catch (Exception ex)
             {
@@ -125,6 +126,7 @@ namespace DiscogsInsight.DataAccess
             {
                 await Init();
                 var a = await Database.InsertAsync(entity);
+                
                 return a;
             }
             catch (Exception ex)
