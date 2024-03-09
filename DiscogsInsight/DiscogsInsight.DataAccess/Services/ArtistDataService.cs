@@ -64,33 +64,31 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task<bool> GetAndSaveDiscogsArtistData(int discogsArtistId)
         {
-            var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
-
-            var saved = await SaveDiscogsArtistResponse(result);
-
-            return saved;
+            var artistsTable = await _db.GetTable<Artist>();
+            var existingArtist = await artistsTable.Where(x => x.DiscogsArtistId == discogsArtistId).FirstOrDefaultAsync();
+            if (existingArtist == null)
+            {
+                //dont want to store the artist if not in db already
+                //it hasnt been in the main discogs collection call
+                //i dont know how would one get here...
+                throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in database not able to store info.");
+            }
+            if (string.IsNullOrEmpty(existingArtist.Profile))
+            {
+                var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
+                var saved = await SaveDiscogsArtistResponse(existingArtist, result);
+                return saved;
+            }
+            return true;
         }
 
-        private async Task<bool> SaveDiscogsArtistResponse(DiscogsArtistResponse artistResponse)
+        private async Task<bool> SaveDiscogsArtistResponse(Artist existingArtist, DiscogsArtistResponse artistResponse)
         {
             try
-            {
-                var artistsTable = await _db.GetTable<Artist>();
-                var existingArtist = await artistsTable.Where(x => x.DiscogsArtistId == artistResponse.id).FirstOrDefaultAsync();
-
-                if (existingArtist == null)
-                {
-                    //dont want to store the artist if not in db already
-                    //it hasnt been in the main discogs collection call
-                    //i dont know how would one get here...
-                    throw new Exception($"Unhandled exception: Artist {artistResponse.id} not in database not able to store info.");
-                }
-                else
-                {
-                    //additional properties from discogs artist call that arent on the main collection call
-                    existingArtist.Profile = artistResponse.profile;
-                    await _db.UpdateAsync(existingArtist);
-                }
+            {               
+                //additional properties from discogs artist call that arent on the main collection call
+                existingArtist.Profile = artistResponse.profile;
+                await _db.UpdateAsync(existingArtist);                
                 return true;
             }
             catch (Exception ex)
@@ -106,9 +104,14 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<string> GetAndSaveInitialMusicBrainzArtistData(int discogsArtistId)
         {
             var artist = await GetArtistByDiscogsId(discogsArtistId);
-            var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(artist?.Name ?? "");
+            if (artist == null) { throw new Exception("Artist not found, error in GetAndSaveInitialMusicBrainzArtistData"); }
 
-            return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
+            if (artist.MusicBrainzArtistId == null)
+            {
+                var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(artist?.Name ?? "");
+                return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
+            }
+            return artist.MusicBrainzArtistId;
         }
 
         private async Task<string> SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(MusicBrainzInitialArtist artistResponse, int discogsArtistId)
