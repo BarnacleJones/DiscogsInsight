@@ -125,7 +125,7 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var artistsTable = await _db.GetTable<Artist>();
-                var artistsFromDb = artistsTable.ToListAsync().Result;
+                var artistsFromDb = await artistsTable.ToListAsync();
                 foreach (var release in collectionResponse.releases)
                 {
                     var artistIdForThisRelease = release.basic_information.artists.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
@@ -177,7 +177,7 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var releaseTable = await _db.GetTable<Release>();
-                var existingReleases = releaseTable.ToListAsync().Result;
+                var existingReleases = await releaseTable.ToListAsync();
 
                 // Get the DiscogsReleaseId values from the response
                 var releasesInResponse = collectionResponse.releases.Select(r => r.id).ToList();
@@ -203,7 +203,7 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var artistsTable = await _db.GetTable<Artist>();
-                var existingArtists = artistsTable.ToListAsync().Result;
+                var existingArtists = await artistsTable.ToListAsync();
 
                 // Get the DiscogsArtistId values from the response
                 var artistsInResponse = collectionResponse.releases

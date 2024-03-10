@@ -78,12 +78,12 @@ else{
 
     void GoToArtist(int? discogsArtistId)
     {
-        NavigationManager.NavigateTo("/artist/" + discogsArtistId);
+        NavigationManager.NavigateTo("artist/" + discogsArtistId);
     }
 
     void GoToRelease(int? releaseId)
     {
-        NavigationManager.NavigateTo($"/release/{releaseId}");
+        NavigationManager.NavigateTo($"release/{releaseId}");
     }
     
     private async void HandleResult(ViewResult<DiscogsCollectionViewModel> result)

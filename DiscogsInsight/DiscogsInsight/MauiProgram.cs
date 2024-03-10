@@ -8,6 +8,7 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
+using System.Net.Http;
 
 
 namespace DiscogsInsight
@@ -27,17 +28,43 @@ namespace DiscogsInsight
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
+            builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
 #endif
-            builder.Services.AddSingleton<HttpClient>();
+            //Http client factory
+            //https://stackoverflow.com/questions/72288451/how-do-i-properly-use-di-with-ihttpclientfactory-in-net-maui
+
+            builder.Services.AddHttpClient("DiscogsApiClient", hc => 
+            {
+                hc.BaseAddress = new Uri("https://api.discogs.com");
+                hc.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
+            });
+
+            builder.Services.AddHttpClient("CoverArtApiClient", hc => 
+            {
+                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
+            builder.Services.AddHttpClient("MusicBrainzApiClient", hc => 
+            {
+                hc.BaseAddress = new Uri("http://musicbrainz.org");
+                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
+
             //Data layer
             builder.Services.AddSingleton<DiscogsInsightDb>();
             //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
+            builder.Services.AddSingleton<MusicBrainzApiService>();
+            builder.Services.AddSingleton<CoverArtArchiveApiService>();
 
             //rest of data layer - does the order matter?
             builder.Services.AddSingleton<CollectionDataService>();
             builder.Services.AddSingleton<SettingsDataService>();
+            builder.Services.AddSingleton<TagsDataService>();
             builder.Services.AddSingleton<ArtistDataService>();
             builder.Services.AddSingleton<TracksViewService>();
             builder.Services.AddSingleton<ReleaseDataService>();
