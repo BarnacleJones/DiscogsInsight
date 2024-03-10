@@ -11,6 +11,7 @@ namespace DiscogsInsight.DataAccess.Entities
         //public int TagId {  get; set; }
         public string? MusicBrainzArtistId { get; set;}
         public string? MusicBrainzReleaseId { get; set;}
+        public bool IsAReleaseGroupGroupId { get; set;}
         public string? MusicBrainzReleaseName { get; set;}
         public string? ReleaseYear { get; set;}
         public int DiscogsArtistId { get; set;}

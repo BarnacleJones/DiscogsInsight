@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -28,7 +28,7 @@ namespace DiscogsInsight.ApiIntegration.Services
         private const string ReleaseIncludeUrl = "?inc=artist-credits+labels+discids+recordings+tags";
 
         private const string ArtistUrl = "/ws/2/artist/";
-        private const string ArtistIncludeUrl = "?inc=aliases+releases";
+        private const string ArtistIncludeUrl = "?inc=aliases+releases+release-groups";
 
         //-----------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                responseData = JsonConvert.DeserializeObject<MusicBrainzInitialArtist>(json);
+                responseData = JsonSerializer.Deserialize<MusicBrainzInitialArtist>(json);
 
                 if (responseData == null)
                         throw new Exception("Error getting musicbrainz artist data");
@@ -76,8 +76,8 @@ namespace DiscogsInsight.ApiIntegration.Services
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                responseData = JsonConvert.DeserializeObject<MusicBrainzArtist>(json);
-
+                responseData = JsonSerializer.Deserialize<MusicBrainzArtist>(json);
+                
                 if (responseData == null)
                         throw new Exception("Error getting musicbrainz artist data");
 

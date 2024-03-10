@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -17,6 +17,7 @@ namespace DiscogsInsight.ApiIntegration.Services
         //Cover images, just add the release id - note NOT the release-group id
 
         private const string ImageDataByReleaseUrl = "https://coverartarchive.org/release/";
+        private const string ImageDataByReleaseGroupUrl = "https://coverartarchive.org/release-group/";
 
         //-----------------------------------------------------------------------------
 
@@ -28,20 +29,19 @@ namespace DiscogsInsight.ApiIntegration.Services
             _logger = logger;            
         }
 
-        public async Task<MusicBrainzCover> GetCoverResponseByMusicBrainzReleaseId(string musicBrainzReleaseId)
+        public async Task<MusicBrainzCover> GetCoverResponseByMusicBrainzReleaseId(string musicBrainzReleaseId, bool isAReleaseGroupId)
         {
             try
             {
                 var responseData = new MusicBrainzCover();
 
-                var fullArtistRequestUrl = ImageDataByReleaseUrl + musicBrainzReleaseId;
+                var fullArtistRequestUrl = isAReleaseGroupId ? ImageDataByReleaseGroupUrl + musicBrainzReleaseId  : ImageDataByReleaseUrl + musicBrainzReleaseId;
                 
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                responseData = JsonConvert.DeserializeObject<MusicBrainzCover>(json);
-
+                responseData = JsonSerializer.Deserialize<MusicBrainzCover>(json);
                 if (responseData == null)
                         throw new Exception("Error getting musicbrainz cover data");
 

@@ -63,11 +63,11 @@ namespace DiscogsInsight
 
             //rest of data layer - does the order matter?
             builder.Services.AddSingleton<CollectionDataService>();
+            builder.Services.AddSingleton<ReleaseDataService>();
             builder.Services.AddSingleton<SettingsDataService>();
             builder.Services.AddSingleton<TagsDataService>();
             builder.Services.AddSingleton<ArtistDataService>();
             builder.Services.AddSingleton<TracksViewService>();
-            builder.Services.AddSingleton<ReleaseDataService>();
 
             //view layer
             builder.Services.AddSingleton<UserNotificationService>();
