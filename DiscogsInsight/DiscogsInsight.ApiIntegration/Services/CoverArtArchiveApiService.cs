@@ -16,7 +16,7 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //Cover images, just add the release id - note NOT the release-group id
 
-        private const string ImageDataByReleaseUrl = "http://coverartarchive.org/release/";
+        private const string ImageDataByReleaseUrl = "https://coverartarchive.org/release/";
 
         //-----------------------------------------------------------------------------
 
@@ -60,6 +60,13 @@ namespace DiscogsInsight.ApiIntegration.Services
             try
             {
                 var fullArtistRequestUrl = coverUrl;
+                //need to make the urls https for android to work!
+                //its either do it here or at the saving of the url into the db
+                //...but ill do it here for those already saved in the db
+                if (fullArtistRequestUrl.StartsWith("http://"))
+                {
+                    fullArtistRequestUrl = "https://" + fullArtistRequestUrl.Substring(7); // Skip the "http://"
+                }
 
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();

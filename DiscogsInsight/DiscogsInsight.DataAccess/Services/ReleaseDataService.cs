@@ -88,7 +88,6 @@ namespace DiscogsInsight.DataAccess.Services
             releaseFromDb.MusicBrainzCoverImage = coverByteArray;
 
             await _db.UpdateAsync(releaseFromDb);
-            await _db.SaveItemAsync(releaseFromDb);
 
             return coverByteArray;
         }
