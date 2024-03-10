@@ -19,6 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Fastenshtein" Version="1.0.0.8" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

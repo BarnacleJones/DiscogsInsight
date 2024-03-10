@@ -12,5 +12,7 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
         public DateTime? DateAdded { get; set; }
 
         public List<TrackViewModel>? Tracks { get; set; }
+
+        public byte[] CoverImage { get; set; }
     }
 }

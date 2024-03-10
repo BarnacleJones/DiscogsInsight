@@ -1,10 +1,11 @@
 ﻿@using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
+@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
 <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
-        @* <RadzenImage Path="@order?.Employee?.Photo" Style="width: 100px; height: 100px; border-radius: 50%;" /> *@
+        
         <RadzenStack Gap="0">
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
             <RadzenLink TextStyle="TextStyle.Body1" onclick=@(() => @GoToArtist(Release.DiscogsArtistId))><b>@(Release.Artist)</b></RadzenLink>
@@ -40,9 +41,39 @@
     </RadzenAccordion>
 </RadzenCard>
 
+@if (Release.CoverImage != null)
+{
+   
+    @if (imageData == null)
+    {
+        <img src=" @ConvertByteArrayToImage()" alt="Byte Array Image" />
+    }
+    else
+    {
+        <img src="@imageData" alt="Byte Array Image" />
+    }
+}
+else
+{
+    <p>No cover image available</p>
+}
+
 
 @code
 {
+    string imageData;
+
+
+
+    string ConvertByteArrayToImage()
+    {
+        if (Release.CoverImage != null && Release.CoverImage.Length > 0)
+        {
+            imageData = $"data:image/jpeg;base64,{Convert.ToBase64String(Release.CoverImage)}";
+        }
+        return imageData;
+    }
+
     [Parameter]
     public ReleaseViewModel Release { get; set; }
 

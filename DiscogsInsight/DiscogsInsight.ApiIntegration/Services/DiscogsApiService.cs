@@ -15,18 +15,17 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //If they take a parameter (Eg ArtistId, use value from entity prefixed with Discogs eg. DiscogsArtistId
 
-        private const string ReleaseUrl = "https://api.discogs.com/releases/";
-        private const string MasterReleaseUrl = "https://api.discogs.com/masters/";
-        private const string ArtistUrl = "https://api.discogs.com/artists/";
+        private const string ReleaseUrl = "/releases/";
+        private const string MasterReleaseUrl = "/masters/";
+        private const string ArtistUrl = "/artists/";
 
         //-----------------------------------------------------------------------------
 
 
-        public DiscogsApiService(HttpClient httpClient, ILogger<DiscogsApiService> logger)
+        public DiscogsApiService(IHttpClientFactory httpClientFactory, ILogger<DiscogsApiService> logger)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("DiscogsApiClient");
             _logger = logger;
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DiscogsInsight");
             _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
         }
 
@@ -47,7 +46,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                     _logger.LogError("Empty username");
                     return new DiscogsCollectionResponse();
                 }
-                var collectionUrl = $"https://api.discogs.com/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
+                var collectionUrl = $"/users/{_discogsUserName}/collection/releases/0?page={currentPage}&per_page=1000";//500 is max but hey
 
                 do
                 {
@@ -76,7 +75,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
         public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
@@ -100,7 +99,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
         public async Task<DiscogsArtistResponse> GetArtistFromDiscogs(int discogsArtistId)
@@ -123,7 +122,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from API: {ex.Message}");
+                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
     }

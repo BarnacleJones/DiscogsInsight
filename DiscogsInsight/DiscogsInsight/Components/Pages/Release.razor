@@ -54,6 +54,7 @@ else
         if (result.Success)
         {
             _release = result.Data;
+            StateHasChanged();
         }
         else
         {
