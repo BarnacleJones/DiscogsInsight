@@ -60,6 +60,8 @@ else
             </RadzenColumn>
         </RadzenRow>
     </RadzenCard>
+    @if (_artist.Tags.Any())
+    {
         <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
             <RadzenText TextStyle="TextStyle.H6"><strong>Artist Tags</strong></RadzenText>
             <RadzenRow RowGap="0">
@@ -70,7 +72,8 @@ else
                     }
                 </RadzenColumn>
             </RadzenRow>
-        </RadzenCard>
+        </RadzenCard>        
+    }
 </RadzenCard>
 
 }
