@@ -48,7 +48,7 @@ namespace DiscogsInsight
 
             builder.Services.AddHttpClient("MusicBrainzApiClient", hc => 
             {
-                hc.BaseAddress = new Uri("http://musicbrainz.org");
+                hc.BaseAddress = new Uri("https://musicbrainz.org");
                 hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
