@@ -43,8 +43,10 @@ namespace DiscogsInsight.DataAccess.Services
                 var releases = await _collectionDataService.GetReleases();
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
             }
-            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            var artistsTable = await _db.GetAllEntitiesAsync<Artist>();
+            var artists = artistsTable.ToList();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
+            
 
             if (artist == null) throw new Exception("No artist ????");
             if (release == null) throw new Exception("No release ????");
