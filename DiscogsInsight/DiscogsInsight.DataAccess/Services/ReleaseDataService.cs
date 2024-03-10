@@ -50,8 +50,7 @@ namespace DiscogsInsight.DataAccess.Services
             if (release == null) throw new Exception("No release ????");
 
             if (release.MusicBrainzReleaseId == null || release.MusicBrainzCoverUrl == null)
-            {           
-                
+            {  
                 if(release.MusicBrainzReleaseId == null) //get initial artist call
                     artist = await _artistDataService.GetArtist(release.DiscogsArtistId, true);
                 
@@ -160,7 +159,7 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
-        public async Task<Release> GetRandomRelease()
+        public async Task<Release> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
         {
             var releases = await _db.GetAllEntitiesAsync<Release>();
             if (releases.Count < 1)
@@ -168,14 +167,16 @@ namespace DiscogsInsight.DataAccess.Services
                 releases = await _collectionDataService.GetReleases();
             }
 
-            var randomRelease = releases.OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+            var randomRelease = releases.Select(x => x.DiscogsReleaseId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
 
             if (randomRelease is null)
             {
                 throw new Exception($"Error getting random release.");
             }
 
-            return randomRelease;          
+            var release = await GetRelease(randomRelease);//get additional release info from apis if they dont exist
+
+            return release;          
         }
 
         public async Task<List<Release>> GetNewestReleases(int howManyToReturn)

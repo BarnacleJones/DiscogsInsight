@@ -23,23 +23,28 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 var tagsTable = await _db.GetTable<MusicBrainzTags>();
                 var listFromTagsTable = await tagsTable.ToListAsync();
-                var existingTagNamesInDb = listFromTagsTable.Any() ? listFromTagsTable.Select(x => x.Tag).ToList() : new List<string?>(0);
+                var existingTagNamesInDb = listFromTagsTable.Any() ? listFromTagsTable.Select(x => x.Tag).ToList() : new List<string?>();
 
-                var tagsInResponse = artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).SelectMany(x => x.Tags).ToList();
-                                
-                foreach (var tag in tagsInResponse)
+                var artistFromResponse =   artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).FirstOrDefault();
+                if (artistFromResponse == null) { return true;  } //artist id mismatch potentially
+                var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count > 1).ToList();
+                     
+                if (tagsInResponse.Any()) 
                 {
-                    if (!existingTagNamesInDb.Contains(tag.Name))
+                    foreach (var tag in tagsInResponse)
                     {
-                        var tagToSave = new MusicBrainzTags { Tag = tag.Name };
-                        await _db.SaveItemAsync(tagToSave);
-                    }
+                        if (!existingTagNamesInDb.Contains(tag.Name))
+                        {
+                            var tagToSave = new MusicBrainzTags { Tag = tag.Name };
+                            await _db.SaveItemAsync(tagToSave);
+                        }
+                    }                
                 }
 
                 //get table again with newly saved tags to save to joining table
                 tagsTable = await _db.GetTable<MusicBrainzTags>();
                 var tagsTableList = await tagsTable.ToListAsync();
-
+                
                 foreach (var tag in tagsInResponse)
                 {
                     var tagId = tagsTableList.Where(x => x.Tag == tag.Name).First().Id;

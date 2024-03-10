@@ -13,6 +13,6 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
 
         public List<TrackViewModel>? Tracks { get; set; }
 
-        public ImageSource? CoverImage { get; set; }
+        public byte[] CoverImage { get; set; }
     }
 }

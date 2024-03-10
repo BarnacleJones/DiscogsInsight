@@ -48,7 +48,6 @@ namespace DiscogsInsight.DataAccess.Services
                 saved = await GetAndSaveDiscogsArtistData((int)discogsArtistId);
                 var musicBrainzId = await GetAndSaveInitialMusicBrainzArtistData((int)discogsArtistId);
                 saved = !string.IsNullOrWhiteSpace(musicBrainzId);
-                //saved = await GetArtistFromMusicBrainzApiUsingArtistId(musicBrainzId); unused at this point
             }
 
             if (saved)

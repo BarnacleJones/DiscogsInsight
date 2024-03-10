@@ -1,5 +1,6 @@
 ﻿@using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
+@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
 <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
@@ -42,7 +43,15 @@
 
 @if (Release.CoverImage != null)
 {
-    <img src="@Release.CoverImage" alt="Cover Image" />
+   
+    @if (imageData == null)
+    {
+        <img src=" @ConvertByteArrayToImage()" alt="Byte Array Image" />
+    }
+    else
+    {
+        <img src="@imageData" alt="Byte Array Image" />
+    }
 }
 else
 {
@@ -52,6 +61,19 @@ else
 
 @code
 {
+    string imageData;
+
+
+
+    string ConvertByteArrayToImage()
+    {
+        if (Release.CoverImage != null && Release.CoverImage.Length > 0)
+        {
+            imageData = $"data:image/jpeg;base64,{Convert.ToBase64String(Release.CoverImage)}";
+        }
+        return imageData;
+    }
+
     [Parameter]
     public ReleaseViewModel Release { get; set; }
 
