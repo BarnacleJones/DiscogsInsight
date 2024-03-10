@@ -4,22 +4,23 @@
 @inject NavigationManager NavigationManager
 
 <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
-    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
-        
-        
+    <RadzenStack Orientation="Orientation.Vertical" Gap="1rem" Class="rz-p-4">
+              
 
-        <RadzenStack Gap="0">
+        <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-center">
             @if (Release.CoverImage != null)
             {
                 @if (imageData == null)
                 {
-                    <RadzenImage Path="@ConvertByteArrayToImage()" />
+                    <RadzenImage Style="max-width: 60vw; height: auto;" class="rz-justify-self-center" Path="@ConvertByteArrayToImage()" />
                 }
                 else
                 {
-                    <RadzenImage Path="@imageData" />
+                    <RadzenImage Style="max-width: 60vw; height: auto;" class="rz-justify-self-center" Path="@imageData" />
                 }
             }
+            </RadzenStack>
+        <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
             <RadzenLink TextStyle="TextStyle.Body1" onclick=@(() => @GoToArtist(Release.DiscogsArtistId))><b>@(Release.Artist)</b></RadzenLink>
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Album</RadzenText>

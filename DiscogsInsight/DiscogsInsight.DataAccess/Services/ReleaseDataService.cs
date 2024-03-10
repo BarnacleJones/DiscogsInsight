@@ -74,7 +74,7 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<byte[]> GetCoverInfoAndReturnByteArrayImage(string savedReleaseId, bool isReleaseGroupId)
         {
             var coverApiResponse = await _coverArchiveApiService.GetCoverResponseByMusicBrainzReleaseId(savedReleaseId, isReleaseGroupId);
-
+            
             var releases = await _db.GetAllEntitiesAsync<Release>();
             var releaseFromDb = releases.Where(x => x.MusicBrainzReleaseId == savedReleaseId).FirstOrDefault();
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace DiscogsInsight.ApiIntegration.MusicBrainzResponseModels
 {
@@ -17,32 +12,33 @@ namespace DiscogsInsight.ApiIntegration.MusicBrainzResponseModels
     }
     public class Images
     {
-        [JsonPropertyName("approved")]
-        public bool? Approved { get; set; }
-
-        [JsonPropertyName("back")]
-        public bool? Back { get; set; }
-
-        [JsonPropertyName("comment")]
-        public string Comment { get; set; }
-
-        [JsonPropertyName("edit")]
-        public int? Edit { get; set; }
+        [JsonPropertyName("types")]
+        public List<string> Types { get; set; }
 
         [JsonPropertyName("front")]
         public bool? Front { get; set; }
 
-        [JsonPropertyName("id")]
-        public long? Id { get; set; }
+        [JsonPropertyName("back")]
+        public bool? Back { get; set; }
+
+        [JsonPropertyName("edit")]
+        public int? Edit { get; set; }
 
         [JsonPropertyName("image")]
         public string Image { get; set; }
 
+        [JsonPropertyName("comment")]
+        public string Comment { get; set; }
+
+        [JsonPropertyName("approved")]
+        public bool? Approved { get; set; }
+
+        // Define Id property as object to accommodate both string and number types
+        [JsonPropertyName("id")]
+        public object Id { get; set; }
+
         [JsonPropertyName("thumbnails")]
         public Thumbnails Thumbnails { get; set; }
-
-        [JsonPropertyName("types")]
-        public List<string> Types { get; set; }
     }
 
     public class Thumbnails
