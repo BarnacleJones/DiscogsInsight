@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -54,7 +54,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                     response.EnsureSuccessStatusCode();
 
                     var json = await response.Content.ReadAsStringAsync();
-                    responseData = JsonConvert.DeserializeObject<DiscogsCollectionResponse>(json);
+                    responseData = JsonSerializer.Deserialize<DiscogsCollectionResponse>(json);
 
                     if (responseData == null)
                          throw new Exception("Error getting data");
@@ -75,7 +75,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
+                throw;
             }
         }
         public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
@@ -87,7 +87,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var responseData = JsonConvert.DeserializeObject<DiscogsReleaseResponse>(json);
+                var responseData = JsonSerializer.Deserialize<DiscogsReleaseResponse>(json);
 
                 if (responseData == null)
                 {
@@ -111,7 +111,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var responseData = JsonConvert.DeserializeObject<DiscogsArtistResponse>(json);
+                var responseData = JsonSerializer.Deserialize<DiscogsArtistResponse>(json);
 
                 if (responseData == null)
                 {

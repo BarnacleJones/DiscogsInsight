@@ -5,10 +5,8 @@ using SQLite;
 
 namespace DiscogsInsight.DataAccess
 {
-
     public class DiscogsInsightDb
     {
-
         private readonly ILogger<DiscogsInsightDb> _logger;
         SQLiteAsyncConnection? Database;
 
@@ -23,7 +21,7 @@ namespace DiscogsInsight.DataAccess
             {
                 if (Database is not null)
                     return;
-
+                var a = Constants.DatabasePath;//handy for debugging figuring out where the db is
                 Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
                 
                 await Database.CreateTableAsync<Artist>();
@@ -36,7 +34,7 @@ namespace DiscogsInsight.DataAccess
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb Init:{ex.Message} ");
-                throw new Exception($"Exception at Db Init:{ex.Message} ");
+                throw;
             }
         }
 
@@ -46,12 +44,11 @@ namespace DiscogsInsight.DataAccess
             {
                 await Init();
                 return await Database.Table<T>().ToListAsync();
-
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb GetAllEntitiesAsync:{ex.Message} ");
-                throw new Exception($"Exception at GetAllEntitiesAsync:{ex.Message} ");
+                throw;
             }
         }
 
@@ -64,12 +61,11 @@ namespace DiscogsInsight.DataAccess
                     return await Database.UpdateAsync(item);
 
                 return await Database.InsertAsync(item);
-
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb SaveItemAsync:{ex.Message} ");
-                throw new Exception($"Exception at SaveItemAsync:{ex.Message} ");
+                throw;
             }
         }
 
@@ -85,7 +81,7 @@ namespace DiscogsInsight.DataAccess
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb Purge:{ex.Message} ");
-                throw new Exception($"Exception at Purge:{ex.Message} ");
+                throw;
             }
         }
 
@@ -100,7 +96,7 @@ namespace DiscogsInsight.DataAccess
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb GetTable:{ex.Message} ");
-                throw new Exception($"Exception at GetTable:{ex.Message} ");
+                throw;
             }
         }
 
@@ -111,12 +107,11 @@ namespace DiscogsInsight.DataAccess
                 await Init();
                 var a = await Database.DeleteAsync<T>(entity.Id);
                 return a;
-
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb DeleteAsync:{ex.Message} ");
-                throw new Exception($"Exception at DeleteAsync:{ex.Message} ");
+                throw;
             }
         }
 
@@ -132,7 +127,7 @@ namespace DiscogsInsight.DataAccess
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb InsertAsync:{ex.Message} ");
-                throw new Exception($"Exception at InsertAsync:{ex.Message} ");
+                throw;
             }
         }
         public async Task<int> UpdateAsync<T>(T entity) where T : IDatabaseEntity, new()
@@ -142,12 +137,11 @@ namespace DiscogsInsight.DataAccess
                 await Init();
                 var a = await Database.UpdateAsync(entity);
                 return a;
-
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb UpdateAsync:{ex.Message} ");
-                throw new Exception($"Exception at UpdateAsync:{ex.Message} ");
+                throw;
             }
         }
     }

@@ -70,9 +70,12 @@ namespace DiscogsInsight.DataAccess.Services
                 //dont want to store the artist if not in db already
                 //it hasnt been in the main discogs collection call
                 //i dont know how would one get here...
-                throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in database not able to store info.");
+                throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
             }
-            if (string.IsNullOrEmpty(existingArtist.Profile))
+            var existingArtistNameIsVarious = existingArtist.Name.ToLower() == "various";
+            
+            if (existingArtistNameIsVarious) { return true; } //discogs id of various artists doesnt go anywhere - causes 404s
+            if (string.IsNullOrWhiteSpace(existingArtist.Profile) && !existingArtistNameIsVarious)
             {
                 var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
                 var saved = await SaveDiscogsArtistResponse(existingArtist, result);
@@ -92,8 +95,8 @@ namespace DiscogsInsight.DataAccess.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-                throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                    _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                    throw;
             }
         }
         #endregion
@@ -102,27 +105,42 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task<string> GetAndSaveInitialMusicBrainzArtistData(int discogsArtistId)
         {
-            var artist = await GetArtistByDiscogsId(discogsArtistId);
-            if (artist == null) { throw new Exception("Artist not found, error in GetAndSaveInitialMusicBrainzArtistData"); }
-
-            if (artist.MusicBrainzArtistId == null)
+            try
             {
-                var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(artist?.Name ?? "");
-                return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
+                var existingArtist = await GetArtistByDiscogsId(discogsArtistId);
+                if (existingArtist == null)
+                {
+                    //dont want to store the artist if not in db already
+                    //it hasnt been in the main discogs collection call
+                    //i dont know how would one get here...
+                    throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
+                }
+                var existingArtistNameIsVarious = existingArtist.Name.ToLower() == "various";
+
+                if (existingArtistNameIsVarious) { return "Various"; } //trying to extrapolate the correct various artist is going to be very difficult
+
+                if (existingArtist.MusicBrainzArtistId == null)
+                {
+                    var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist?.Name ?? "");
+                    return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
+                }
+                return existingArtist.MusicBrainzArtistId;
             }
-            return artist.MusicBrainzArtistId;
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private async Task<string> SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(MusicBrainzInitialArtist artistResponse, int discogsArtistId)
         {
             try
             {
-                var artistsTable = await _db.GetTable<Artist>();
                 var existingArtist = await GetArtistByDiscogsId(discogsArtistId);
                 if (existingArtist == null)
                 {
                     //How would this happen...
-                    throw new Exception($"You reached a how did this happen exception: Artist Id{discogsArtistId}) SaveMusicBrainzInitialArtistResponse");
+                    throw new Exception($"Discogs Artist Id {discogsArtistId} does not return a artist from the database. In function SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId");
                 }
                 else
                 {
@@ -193,7 +211,7 @@ namespace DiscogsInsight.DataAccess.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-                throw new Exception($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw;
             }
         }
 

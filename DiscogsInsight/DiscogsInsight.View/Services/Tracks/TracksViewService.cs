@@ -29,7 +29,7 @@ namespace DiscogsInsight.View.Services.Tracks
 
                 var trackList = tracks.ToList();
 
-                var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId);
+                var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
 
                 if (!tracksForListRelease.Any())
                 {
@@ -80,7 +80,7 @@ namespace DiscogsInsight.View.Services.Tracks
                 await _db.UpdateAsync(existingRelease);
 
                 //save the tracks
-                if (!existingTracks.Any() && releaseResponse.tracklist != null)
+                if (existingTracks != null && !existingTracks.Any() && releaseResponse.tracklist != null)
                 {
                     foreach (var track in releaseResponse.tracklist)
                     {
