@@ -49,9 +49,9 @@ namespace DiscogsInsight.DataAccess.Services
             
 
             if (artist == null) 
-                throw new Exception("No artist ????");
+                throw new Exception("No artist - try refreshing data ????");
             if (release == null) 
-                throw new Exception("No release ????");
+                throw new Exception("No release - try refreshing data ????");
 
             if (release.MusicBrainzReleaseId == null || release.MusicBrainzCoverImage == null)
             {  
