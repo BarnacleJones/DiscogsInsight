@@ -75,7 +75,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to get data from discogs API: {ex.Message}");
+                throw;
             }
         }
         public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
