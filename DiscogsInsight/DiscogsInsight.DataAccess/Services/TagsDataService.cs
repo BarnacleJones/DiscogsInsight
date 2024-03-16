@@ -27,7 +27,7 @@ namespace DiscogsInsight.DataAccess.Services
 
                 var artistFromResponse =   artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).FirstOrDefault();
                 if (artistFromResponse == null) { return true;  } //artist id mismatch potentially
-                var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count > 1).ToList();
+                var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count >= 1).ToList();
                      
                 if (tagsInResponse.Any()) 
                 {
@@ -57,7 +57,7 @@ namespace DiscogsInsight.DataAccess.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at SaveTagsByMusicBrainzArtistId:{ex.Message} ");
-                throw new Exception($"Exception at SaveTagsByMusicBrainzArtistId:{ex.Message} ");
+                throw;
             }
         }
 

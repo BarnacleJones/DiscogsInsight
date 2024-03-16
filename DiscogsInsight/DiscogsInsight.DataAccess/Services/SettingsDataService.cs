@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.DataAccess.Services
+namespace DiscogsInsight.DataAccess.Services
 {
     public class SettingsDataService
     {
@@ -22,7 +22,7 @@
 
         public async Task<bool> UpdateDiscogsUsername(string userName)
         {
-            if (userName == string.Empty)
+            if (string.IsNullOrEmpty(userName))
             {
                 Preferences.Default.Remove("discogsUsername");
             }
