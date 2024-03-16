@@ -30,7 +30,7 @@ namespace DiscogsInsight.DataAccess.Services
             return release;
         }
 
-        public async Task<Release?> GetRelease(int? discogsReleaseId)
+        public async Task<(Release?, byte[]?)> GetRelease(int? discogsReleaseId)
         {
             if (discogsReleaseId == null)
                 throw new Exception($"Missing discogs release id");
@@ -43,6 +43,7 @@ namespace DiscogsInsight.DataAccess.Services
                 var releases = await _collectionDataService.GetReleases();
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
             }
+            
             var artistsTable = await _db.GetAllEntitiesAsync<Artist>();
             var artists = artistsTable.ToList();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
@@ -53,7 +54,7 @@ namespace DiscogsInsight.DataAccess.Services
             if (release == null) 
                 throw new Exception("No release - try refreshing data ????");
 
-            if (release.MusicBrainzReleaseId == null || release.MusicBrainzCoverImage == null)
+            if (release.MusicBrainzReleaseId == null)
             {  
                 if(release.MusicBrainzReleaseId == null) //get initial artist call
                     artist = await _artistDataService.GetArtist(artist.DiscogsArtistId, true);
@@ -66,17 +67,16 @@ namespace DiscogsInsight.DataAccess.Services
                     release.MusicBrainzReleaseId = savedRelease.MusicBrainzReleaseId;
                     await _db.UpdateAsync(release);
                 }
-
-                if (savedRelease?.MusicBrainzReleaseId != null)//various artist albums will not get a release id
-                {
-                    var coverImage = GetCoverInfoAndReturnByteArrayImage(savedRelease.MusicBrainzReleaseId, savedRelease.IsAReleaseGroupGroupId);
-                    release.MusicBrainzCoverImage = await coverImage;
-                    await _db.UpdateAsync(release);
-                }
-
-                release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
             }            
-            return release;
+            release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
+            var coverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
+            var coverImage = coverImages.Where(x => x.MusicBrainzReleaseId == release.MusicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
+            if (release?.MusicBrainzReleaseId != null && coverImage == null)//various artist albums will not get a release id
+            {
+                coverImage = await GetCoverInfoAndReturnByteArrayImage(release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
+            }
+
+            return (release, coverImage);
         }
 
         private async Task<byte[]> GetCoverInfoAndReturnByteArrayImage(string savedReleaseId, bool isReleaseGroupId)
@@ -94,9 +94,14 @@ namespace DiscogsInsight.DataAccess.Services
 
             var coverByteArray = await _coverArchiveApiService.GetCoverByteArray(coverUrl);
 
-            releaseFromDb.MusicBrainzCoverImage = coverByteArray;
+            var releaseToCoverImageTable = await _db.GetTable<MusicBrainzReleaseToCoverImage>();
 
-            await _db.UpdateAsync(releaseFromDb);
+            var releaseToCoverImage = new MusicBrainzReleaseToCoverImage
+            {
+                MusicBrainzReleaseId = savedReleaseId,
+                MusicBrainzCoverImage = coverByteArray
+            };
+            await _db.SaveItemAsync(releaseToCoverImage);
 
             return coverByteArray;
         }
@@ -198,7 +203,14 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
-        public async Task<Release> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
+        public async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
+        {
+            var releaseToCoverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
+            var list = releaseToCoverImages.ToList();
+            return releaseToCoverImages.Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
+        }
+
+        public async Task<(Release?, byte[]?)> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
         {
             var releases = await _db.GetAllEntitiesAsync<Release>();
             if (releases.Count < 1)
@@ -215,7 +227,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             var release = await GetRelease(randomRelease);//get additional release info from apis if they dont exist
 
-            return release;          
+            return (release.Item1, release.Item2);          
         }
 
         public async Task<List<Release>> GetNewestReleases(int howManyToReturn)
@@ -236,7 +248,8 @@ namespace DiscogsInsight.DataAccess.Services
 
             foreach ( var release in latestXReleases )
             {
-                returnedReleases.Add(await GetRelease(release.DiscogsReleaseId));//retrieves extra info
+                var releaseToAdd = await GetRelease(release.DiscogsReleaseId);
+                returnedReleases.Add(releaseToAdd.Item1 ?? new Release());//retrieves extra info
             }
             return returnedReleases;
         }

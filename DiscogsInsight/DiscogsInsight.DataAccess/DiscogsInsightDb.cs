@@ -30,6 +30,7 @@ namespace DiscogsInsight.DataAccess
                 await Database.CreateTableAsync<MusicBrainzTags>();
                 await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzTags>();
                 await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                await Database.CreateTableAsync<MusicBrainzReleaseToCoverImage>();
             }
             catch (Exception ex)
             {
