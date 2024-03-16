@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/newest"
 @using DiscogsInsight.View.Services.Collection
 @using DiscogsInsight.View.Services.Releases
 @using DiscogsInsight.ViewModels.EntityViewModels
@@ -9,26 +9,21 @@
 @inject ReleaseViewService ReleaseViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
-<div class="welcome-container">
+
         
     @if (_hasKey)
     {
-        <RadzenText Text="Discogs Insight" TextStyle="TextStyle.DisplayH4" />
+        <RadzenText Text="Newest 5 Releases" TextStyle="TextStyle.DisplayH4" />
         <br />           
 
-        <div class="rz-p-sm-12">
-            <RadzenAccordion>
-                <Items>
-                    <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
-                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
-                                         ExpandAriaLabel="Expand the random panel.">
-                        @if (_randomRelease != null)
-                        {
-                            <ReleaseComponent Release="@_randomRelease" />
-                        }
-                    </RadzenAccordionItem>
-                </Items>
-            </RadzenAccordion>
+        <div class="rz-p-sm-12">            
+            @if (_latestReleases != null)
+            {
+                foreach (var item in _latestReleases)
+                {
+                    <ReleaseComponent Release="@item" />
+                }
+            }
         </div>
     }
     else
@@ -41,12 +36,11 @@
         <p>This app will fetch your Discogs collection (currently up to 1000 items) using your username</p>
         <p>The data will be stored locally and used for gaining statistical insights into your collection.</p>
     }
-</div>
+
 
 @code{
     private static bool _hasKey { get; set; }
     private string discogsUsername = string.Empty;
-    private ReleaseViewModel? _randomRelease;
     private List<ReleaseViewModel>? _latestReleases;
 
     public void handleButtonClick()
@@ -61,15 +55,15 @@
         if (_hasKey)
         {
             var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
-            HandleRandomResult(await ReleaseViewService.GetRandomRelease());
+            HandleNewestReleaseResult(await ReleaseViewService.GetNewestReleases());
         }
     }
-
-    private async void HandleRandomResult(ViewResult<ReleaseViewModel> result)
+    
+    private async void HandleNewestReleaseResult(ViewResult<List<ReleaseViewModel>> result)
     {
         if (result.Success)
         {
-            _randomRelease = result.Data;
+            _latestReleases = result.Data;
         }
         else
         {
