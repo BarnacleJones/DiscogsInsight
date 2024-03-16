@@ -66,12 +66,14 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<ReleaseDataService>();
             builder.Services.AddSingleton<SettingsDataService>();
             builder.Services.AddSingleton<TagsDataService>();
+            builder.Services.AddSingleton<TracksDataService>();
             builder.Services.AddSingleton<ArtistDataService>();
             builder.Services.AddSingleton<TracksViewService>();
 
             //view layer
             builder.Services.AddSingleton<UserNotificationService>();
             builder.Services.AddSingleton<CollectionViewService>();
+            builder.Services.AddSingleton<CollectionStatisticsViewService>();
             builder.Services.AddSingleton<SettingsViewService>();
             builder.Services.AddSingleton<ArtistViewService>();
             builder.Services.AddSingleton<TracksViewService>();

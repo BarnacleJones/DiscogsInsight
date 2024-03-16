@@ -76,7 +76,7 @@ namespace DiscogsInsight.DataAccess
                 await Init();
                 await Database.DeleteAllAsync<Artist>();
                 await Database.DeleteAllAsync<Release>();
-                await Database.DeleteAllAsync<Track>();
+                //intentionally leaving other data. will save api calls. will eventually move to another setting to clear that data too.
             }
             catch (Exception ex)
             {

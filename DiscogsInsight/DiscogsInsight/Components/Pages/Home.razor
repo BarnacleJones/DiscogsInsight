@@ -1,12 +1,14 @@
 ﻿@page "/"
 @using DiscogsInsight.View.Services.Collection
 @using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels
 @using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.DataAccess.Services
 @using DiscogsInsight.View.Services.Notifications
 @using DiscogsInsight.ViewModels.Results
 @inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
+@inject CollectionStatisticsViewService CollectionStatisticsViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
 <div class="welcome-container">
@@ -19,12 +21,28 @@
         <div class="rz-p-sm-12">
             <RadzenAccordion>
                 <Items>
-                    <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
-                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
-                                         ExpandAriaLabel="Expand the random panel.">
+                    <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse." Selected="true"
+                                         ExpandTitle="Expand." CollapseAriaLabel="Collapse the insights panel." class="rz-bg-dark"
+                                         ExpandAriaLabel="Expand the insights panel.">
                         @if (_randomRelease != null)
                         {
                             <ReleaseComponent Release="@_randomRelease" />
+                        }
+                    </RadzenAccordionItem> 
+                    <RadzenAccordionItem Text="Collection Stats" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
+                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
+                                         ExpandAriaLabel="Expand the random panel.">
+                        @if (_collectionStats != null)
+                        {
+                            <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Albums In Collection</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsInCollection)</b></RadzenText>
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Albums Without Tracks Info</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Info is fetched as you browse releases, this will go down.</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsInCollectionWithoutTracksInfo)</b></RadzenText>
+                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Added this month</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsNewToCollectionThisMonth)</b></RadzenText>
+                            </RadzenStack>
                         }
                     </RadzenAccordionItem>
                 </Items>
@@ -47,7 +65,7 @@
     private static bool _hasKey { get; set; }
     private string discogsUsername = string.Empty;
     private ReleaseViewModel? _randomRelease;
-    private List<ReleaseViewModel>? _latestReleases;
+    private CollectionStatsViewModel _collectionStats;
 
     public void handleButtonClick()
     {
@@ -62,6 +80,7 @@
         {
             var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
             HandleRandomResult(await ReleaseViewService.GetRandomRelease());
+            HandleStatisticsResult(await CollectionStatisticsViewService.GetHomePageStatistics());
         }
     }
 
@@ -70,6 +89,17 @@
         if (result.Success)
         {
             _randomRelease = result.Data;
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
+    private async void HandleStatisticsResult(ViewResult<CollectionStatsViewModel> result)
+    {
+        if (result.Success)
+        {
+            _collectionStats = result.Data;
         }
         else
         {

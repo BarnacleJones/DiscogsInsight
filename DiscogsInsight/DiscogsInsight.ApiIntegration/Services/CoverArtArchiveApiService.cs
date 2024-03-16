@@ -50,7 +50,8 @@ namespace DiscogsInsight.ApiIntegration.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get data from API");
-                throw;
+
+                throw new Exception("Issue retrieving cover art for album.");
             }
         }
         
