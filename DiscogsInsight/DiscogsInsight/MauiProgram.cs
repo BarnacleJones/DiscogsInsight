@@ -8,8 +8,6 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
-using System.Net.Http;
-
 
 namespace DiscogsInsight
 {
@@ -53,15 +51,15 @@ namespace DiscogsInsight
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
 
-
             //Data layer
             builder.Services.AddSingleton<DiscogsInsightDb>();
+
             //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
             builder.Services.AddSingleton<MusicBrainzApiService>();
             builder.Services.AddSingleton<CoverArtArchiveApiService>();
 
-            //rest of data layer - does the order matter?
+            //rest of data layer
             builder.Services.AddSingleton<CollectionDataService>();
             builder.Services.AddSingleton<ReleaseDataService>();
             builder.Services.AddSingleton<SettingsDataService>();

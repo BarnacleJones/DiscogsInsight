@@ -30,7 +30,6 @@ else
 <RadzenText TextStyle="TextStyle.H2" TextAlign="TextAlign.Center">Artist</RadzenText>
 <RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 100%">
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4" />
-        @* <RadzenImage Path="@order?.Employee?.Photo" Style="width: 100px; height: 100px; border-radius: 50%;" /> *@
         <RadzenStack Gap="0">
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
             <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.Artist)</b></RadzenText>
@@ -48,12 +47,12 @@ else
             @if (!string.IsNullOrEmpty(_artist.StartYear))
             {
                 <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Years active</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.StartYear) - @(_artist.EndYear)</b></RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.StartYear) - @(_artist.EndYear ?? "")</b></RadzenText>
             }
 
     </RadzenStack>
     <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
-        <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Description</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Discogs Description</strong></RadzenText>
         <RadzenRow RowGap="0">
             <RadzenColumn SizeSM="12">
                         <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(_artist.ArtistDescription)</b></RadzenText>
@@ -62,13 +61,13 @@ else
     </RadzenCard>
     @if (_artist.Tags.Any())
     {
-        <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
+        <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-2" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
             <RadzenText TextStyle="TextStyle.H6"><strong>Artist Tags</strong></RadzenText>
             <RadzenRow RowGap="0">
                 <RadzenColumn SizeSM="12">
                     @foreach (var tag in _artist.Tags)
                     {
-                        <RadzenText TextStyle="TextStyle.Body1"><b>@(tag)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>-@(tag)</b></RadzenText>
                     }
                 </RadzenColumn>
             </RadzenRow>
@@ -82,7 +81,6 @@ else
 {
     [Parameter]
     public int? artistId { get; set; }
-
     private ArtistViewModel? _artist;
 
     protected override async Task OnInitializedAsync()
@@ -90,23 +88,18 @@ else
         try
         {            
             HandleResult(await ArtistViewService.GetArtist(artistId));
-
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+            await UserNotificationService.DisplayNotification("Error", $"{ex.Message}", "OK", "Cancel");            
         }
     }
 
     private async void HandleResult(ViewResult<ArtistViewModel> result)
     {
         if (result.Success)
-        {
             _artist = result.Data;
-        }
         else
-        {
-            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
-        }
+           await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
 }

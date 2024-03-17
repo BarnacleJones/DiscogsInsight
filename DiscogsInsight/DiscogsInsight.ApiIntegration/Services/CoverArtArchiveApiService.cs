@@ -14,8 +14,7 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //MusicBrainz Cover Art Api documentation: https://musicbrainz.org/doc/Cover_Art_Archive/API
 
-        //Cover images, just add the release id - note NOT the release-group id
-
+        
         private const string ImageDataByReleaseUrl = "https://coverartarchive.org/release/";
         private const string ImageDataByReleaseGroupUrl = "https://coverartarchive.org/release-group/";
 
@@ -24,8 +23,7 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         public CoverArtArchiveApiService(IHttpClientFactory httpClientFactory, ILogger<CoverArtArchiveApiService> logger)
         {
-            _httpClient = httpClientFactory.CreateClient("CoverArtApiClient");
-                     
+            _httpClient = httpClientFactory.CreateClient("CoverArtApiClient");                     
             _logger = logger;            
         }
 
@@ -42,20 +40,18 @@ namespace DiscogsInsight.ApiIntegration.Services
 
                 var json = await response.Content.ReadAsStringAsync();
                 responseData = JsonSerializer.Deserialize<MusicBrainzCover>(json);
-                if (responseData == null)
-                        throw new Exception("Error getting musicbrainz cover data");
 
-                return responseData;
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz cover data") 
+                    : responseData;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get data from API");
-
                 throw new Exception("Issue retrieving cover art for album.");
             }
         }
-        
-       
+               
         public async Task<byte[]> GetCoverByteArray(string? coverUrl)
         {
             try
@@ -73,14 +69,10 @@ namespace DiscogsInsight.ApiIntegration.Services
                 response.EnsureSuccessStatusCode();
 
                 var responseData = await response.Content.ReadAsByteArrayAsync();
-                //var json = await response.Content.ReadAsStringAsync();
-                //var responseData = JsonConvert.DeserializeAnonymousType<byte[]>(json);
 
-                if (responseData == null)
-                    throw new Exception("Error getting musicbrainz cover data");
-
-                return responseData;
-
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz cover data") 
+                    : responseData;
             }
             catch (Exception ex)
             {

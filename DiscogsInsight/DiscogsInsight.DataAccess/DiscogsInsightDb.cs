@@ -22,6 +22,7 @@ namespace DiscogsInsight.DataAccess
                 if (Database is not null)
                     return;
                 var a = Constants.DatabasePath;//handy for debugging figuring out where the db is
+
                 Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
                 
                 await Database.CreateTableAsync<Artist>();

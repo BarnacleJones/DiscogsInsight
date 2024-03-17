@@ -53,6 +53,7 @@ namespace DiscogsInsight.View.Services.Collection
 
             var month = DateTime.Now.Month;
             var tracksNewThisMonth = releases.Where(x => x.DateAdded.Value.Month == month).Count();
+
             return new CollectionStatsViewModel
             {
                 AlbumsInCollection = releasesCount,
@@ -60,8 +61,6 @@ namespace DiscogsInsight.View.Services.Collection
                 TracksInCollection = tracksCount,
                 AlbumsNewToCollectionThisMonth = tracksNewThisMonth,
             };
-
-
         }
     }
 }

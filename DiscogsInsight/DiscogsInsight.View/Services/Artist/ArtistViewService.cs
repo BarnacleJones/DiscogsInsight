@@ -14,38 +14,6 @@ namespace DiscogsInsight.View.Services.Artist
             _tagsDataService = tagsDataService; 
         }
 
-        public async Task<ViewResult<List<ArtistViewModel>>> GetArtists()
-        {
-            try
-            {
-                var artists = await _artistDataService.GetArtists();
-
-                var data = artists.Select(x => new ArtistViewModel
-                {
-                    Artist = x.Name,
-                    DiscogsArtistId = x.DiscogsArtistId
-
-                }).ToList();
-
-                return new ViewResult<List<ArtistViewModel>>
-                {
-                    Data = data,
-                    ErrorMessage = "",
-                    Success = true
-                };
-
-            }
-            catch (Exception ex)
-            {
-                return new ViewResult<List<ArtistViewModel>>
-                {
-                    Data = null,
-                    ErrorMessage = ex.Message,
-                    Success = false
-                };
-            }
-        }
-
         public async Task<ViewResult<ArtistViewModel>> GetArtist(int? discogsArtistId)
         {
             try
@@ -72,7 +40,6 @@ namespace DiscogsInsight.View.Services.Artist
                     ErrorMessage = "",
                     Success = true
                 };
-
             }
             catch (Exception ex)
             {
@@ -83,7 +50,6 @@ namespace DiscogsInsight.View.Services.Artist
                     Success = false
                 };
             }
-
         }
     }
 }

@@ -19,7 +19,6 @@ namespace DiscogsInsight.DataAccess.Services
         {
             var tracks = await _db.GetAllEntitiesAsync<Track>();
             return tracks.ToList();
-        }
-               
+        }               
     }
 }

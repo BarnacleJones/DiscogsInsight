@@ -12,7 +12,6 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly CollectionDataService _collectionDataService;
         private readonly ArtistDataService _artistDataService;
         private readonly ILogger<ReleaseDataService> _logger;
-
         public ReleaseDataService(DiscogsInsightDb db, MusicBrainzApiService musicBrainzApiService,ArtistDataService artistDataService , CollectionDataService collectionDataService, CoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
         {
             _db = db;
@@ -21,13 +20,6 @@ namespace DiscogsInsight.DataAccess.Services
             _artistDataService = artistDataService; 
             _coverArchiveApiService = coverArchiveApiService;
             _logger = logger;
-        }
-
-        public async Task<Release?> GetReleaseFromDbByDiscogsReleaseId(int discogsReleaseId)
-        {
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-            var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
-            return release;
         }
 
         public async Task<(Release?, byte[]?)> GetRelease(int? discogsReleaseId)
@@ -48,7 +40,6 @@ namespace DiscogsInsight.DataAccess.Services
             var artists = artistsTable.ToList();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
             
-
             if (artist == null) 
                 throw new Exception("No artist - try refreshing data ????");
             if (release == null) 
@@ -79,6 +70,65 @@ namespace DiscogsInsight.DataAccess.Services
             return (release, coverImage);
         }
 
+        public async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
+        {
+            var releaseToCoverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
+            var list = releaseToCoverImages.ToList();
+            return releaseToCoverImages.Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
+        }
+
+        public async Task<(Release?, byte[]?)> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
+        {
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            if (releases.Count < 1)
+            {
+                releases = await _collectionDataService.GetReleases();
+            }
+
+            var randomRelease = releases.Select(x => x.DiscogsReleaseId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+
+            if (randomRelease is null)
+            {
+                throw new Exception($"Error getting random release.");
+            }
+
+            var release = await GetRelease(randomRelease);//get additional release info from apis if they dont exist
+
+            return (release.Item1, release.Item2);          
+        }
+
+        public async Task<List<Release>> GetNewestReleases(int howManyToReturn)
+        {
+            var returnedReleases = new List<Release>();
+
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+
+            if (releases.Count < 1)//seed the collection if no releases
+            {
+                releases = await _collectionDataService.GetReleases();
+            }
+            var moreReleasesThanHowManyToReturn = releases.Count() >= howManyToReturn;
+
+            var latestXReleases = releases.OrderByDescending(r => r.DateAdded)
+                           .Take(moreReleasesThanHowManyToReturn ? howManyToReturn : 1)
+                           .ToList();
+
+            foreach ( var release in latestXReleases )
+            {
+                var releaseToAdd = await GetRelease(release.DiscogsReleaseId);
+                returnedReleases.Add(releaseToAdd.Item1 ?? new Release());//retrieves extra info
+            }
+            return returnedReleases;
+        }
+
+        private async Task<Release?> GetReleaseFromDbByDiscogsReleaseId(int discogsReleaseId)
+        {
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+            return release;
+        }
+
+        #region Private Methods
         private async Task<byte[]> GetCoverInfoAndReturnByteArrayImage(string savedReleaseId, bool isReleaseGroupId)
         {
             var coverApiResponse = await _coverArchiveApiService.GetCoverResponseByMusicBrainzReleaseId(savedReleaseId, isReleaseGroupId);
@@ -106,7 +156,7 @@ namespace DiscogsInsight.DataAccess.Services
             return coverByteArray;
         }
 
-        public async Task<MusicBrainzArtistToMusicBrainzRelease> SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(Artist artist, Release release)
+        private async Task<MusicBrainzArtistToMusicBrainzRelease> SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(Artist artist, Release release)
         {
             try
             {
@@ -203,56 +253,7 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
-        public async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
-        {
-            var releaseToCoverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
-            var list = releaseToCoverImages.ToList();
-            return releaseToCoverImages.Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
-        }
+        #endregion
 
-        public async Task<(Release?, byte[]?)> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
-        {
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-            if (releases.Count < 1)
-            {
-                releases = await _collectionDataService.GetReleases();
-            }
-
-            var randomRelease = releases.Select(x => x.DiscogsReleaseId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
-
-            if (randomRelease is null)
-            {
-                throw new Exception($"Error getting random release.");
-            }
-
-            var release = await GetRelease(randomRelease);//get additional release info from apis if they dont exist
-
-            return (release.Item1, release.Item2);          
-        }
-
-        public async Task<List<Release>> GetNewestReleases(int howManyToReturn)
-        {
-            var returnedReleases = new List<Release>();
-
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-
-            if (releases.Count < 1)//seed the collection if no releases
-            {
-                releases = await _collectionDataService.GetReleases();
-            }
-            var moreReleasesThanHowManyToReturn = releases.Count() >= howManyToReturn;
-
-            var latestXReleases = releases.OrderByDescending(r => r.DateAdded)
-                           .Take(moreReleasesThanHowManyToReturn ? howManyToReturn : 1)
-                           .ToList();
-
-            foreach ( var release in latestXReleases )
-            {
-                var releaseToAdd = await GetRelease(release.DiscogsReleaseId);
-                returnedReleases.Add(releaseToAdd.Item1 ?? new Release());//retrieves extra info
-            }
-            return returnedReleases;
-        }
-               
     }
 }

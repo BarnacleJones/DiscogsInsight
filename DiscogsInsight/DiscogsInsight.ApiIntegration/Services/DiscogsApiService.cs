@@ -33,9 +33,7 @@ namespace DiscogsInsight.ApiIntegration.Services
         {
             try
             {
-                //API can handle 25 requests per minute - if pages are over that it will not work
-                //todo: create ApiOverloadException and throw in that case
-
+                //API can handle 25 requests per minute
                 var releases = new List<ResponseRelease>();
                 var currentPage = 1;
                 var totalPages = 1;
@@ -73,11 +71,12 @@ namespace DiscogsInsight.ApiIntegration.Services
 
                 return new DiscogsCollectionResponse { releases = releases };
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
         }
+
         public async Task<DiscogsReleaseResponse> GetReleaseFromDiscogs(int discogsReleaseId)
         {
             try
@@ -89,19 +88,16 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var json = await response.Content.ReadAsStringAsync();
                 var responseData = JsonSerializer.Deserialize<DiscogsReleaseResponse>(json);
 
-                if (responseData == null)
-                {
-                    throw new Exception("Error getting data");
-                }
-
-                return responseData;
-
+                return responseData == null 
+                    ? throw new Exception("Error getting data") 
+                    : responseData;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Failed to get data from discogs API: {ex.Message}");
             }
         }
+
         public async Task<DiscogsArtistResponse> GetArtistFromDiscogs(int discogsArtistId)
         {
             try
@@ -113,12 +109,9 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var json = await response.Content.ReadAsStringAsync();
                 var responseData = JsonSerializer.Deserialize<DiscogsArtistResponse>(json);
 
-                if (responseData == null)
-                {
-                    throw new Exception("Error getting data");
-                }
-
-                return responseData;
+                return responseData == null 
+                    ? throw new Exception("Error getting data") 
+                    : responseData;
             }
             catch (Exception ex)
             {

@@ -6,8 +6,7 @@ namespace DiscogsInsight.DataAccess.Entities
     public class MusicBrainzTags : IDatabaseEntity
     {
         [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
-        
+        public int Id { get; set; }        
         public string? Tag {  get; set; }
     }
 }

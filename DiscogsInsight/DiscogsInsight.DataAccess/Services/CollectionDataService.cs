@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 namespace DiscogsInsight.DataAccess.Services
 {
     public class CollectionDataService
-
     {
         private readonly DiscogsInsightDb _db;
         private readonly DiscogsApiService _discogsApiService;
@@ -26,11 +25,14 @@ namespace DiscogsInsight.DataAccess.Services
         {
             var artistList = await GetCollectionEntityAsList<Artist>();
 
-            return artistList.Select(x =>  new DiscogsArtistIdAndName {
+            return artistList.Select(x => 
+            new DiscogsArtistIdAndName 
+            {
                 DiscogsArtistId = x.DiscogsArtistId,
-                Name = x.Name }
-            ).ToList();            
+                Name = x.Name 
+            }).ToList();            
         }
+
         public async Task<List<Release>> GetReleases()
         {
             return await GetCollectionEntityAsList<Release>();
@@ -68,7 +70,7 @@ namespace DiscogsInsight.DataAccess.Services
 
                 return await SaveDiscogsCollectionResponse(data);               
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
@@ -88,7 +90,7 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 foreach (var release in collectionResponse.releases)
                 {
-                    var artistsToSave = release.basic_information.artists.ToList();
+                    var artistsToSave = release.basic_information?.artists?.ToList();
                     foreach (var artist in artistsToSave)
                     {
                         var artistsTable = await _db.GetTable<Artist>();
@@ -128,14 +130,14 @@ namespace DiscogsInsight.DataAccess.Services
                 var artistsFromDb = await artistsTable.ToListAsync();
                 foreach (var release in collectionResponse.releases)
                 {
-                    var artistIdForThisRelease = release.basic_information.artists.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
+                    var artistIdForThisRelease = release.basic_information?.artists?.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
                     var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
 
                     var releaseTable = await _db.GetTable<Release>();
                     var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == release.id).FirstOrDefaultAsync();
                     if (existingRelease == null)
                     {
-                        await _db.InsertAsync(new Release
+                        _ = await _db.InsertAsync(new Release
                         {
                             DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
@@ -148,7 +150,7 @@ namespace DiscogsInsight.DataAccess.Services
                     }
                     else
                     {
-                        await _db.UpdateAsync(new Release
+                        _ = await _db.UpdateAsync(new Release
                         {
                             Id = existingRelease.Id,
                             DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,

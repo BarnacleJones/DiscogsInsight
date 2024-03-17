@@ -1,6 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;
 

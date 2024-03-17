@@ -75,7 +75,6 @@ namespace DiscogsInsight.View.Services.Tracks
                     throw new Exception($"Unhandled exception: Release {releaseResponse.id} not in database not able to store info.");
 
                 //update existing release entity with additional properties
-
                 existingRelease.ReleaseCountry = releaseResponse.country;
                 await _db.UpdateAsync(existingRelease);
 
@@ -84,7 +83,7 @@ namespace DiscogsInsight.View.Services.Tracks
                 {
                     foreach (var track in releaseResponse.tracklist)
                     {
-                        await _db.SaveItemAsync<Track>(new Track
+                        await _db.SaveItemAsync(new Track
                         {
                             DiscogsArtistId = existingRelease.DiscogsArtistId,
                             DiscogsMasterId = existingRelease.DiscogsMasterId,
@@ -101,6 +100,7 @@ namespace DiscogsInsight.View.Services.Tracks
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+
                 return new ViewResult<bool>
                 {
                     ErrorMessage = ex.Message,

@@ -15,9 +15,7 @@ namespace DiscogsInsight.ApiIntegration.Services
         //MusicBrainzApi documentation: https://musicbrainz.org/doc/MusicBrainz_API
 
 
-        //private const string InitialArtistRequest = "/release-group/?query=artist:\"michael jackson\"";
         private const string InitialArtistRequest = "/ws/2/artist/?query=artist:";
-        private const string InitialArtistIncludeUrl = "?inc=aliases";
 
         //know about release groups - thats what you want at this stage, its the main release info https://musicbrainz.org/doc/Release_Group
 
@@ -53,10 +51,9 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var json = await response.Content.ReadAsStringAsync();
                 responseData = JsonSerializer.Deserialize<MusicBrainzInitialArtist>(json);
 
-                if (responseData == null)
-                        throw new Exception("Error getting musicbrainz artist data");
-
-                return responseData;
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz artist data") 
+                    : responseData;
             }
             catch (Exception ex)
             {
@@ -77,11 +74,10 @@ namespace DiscogsInsight.ApiIntegration.Services
 
                 var json = await response.Content.ReadAsStringAsync();
                 responseData = JsonSerializer.Deserialize<MusicBrainzArtist>(json);
-                
-                if (responseData == null)
-                        throw new Exception("Error getting musicbrainz artist data");
 
-                return responseData;
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz artist data") 
+                    : responseData;
             }
             catch (Exception ex)
             {

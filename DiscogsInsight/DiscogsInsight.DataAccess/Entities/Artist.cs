@@ -17,6 +17,5 @@ namespace DiscogsInsight.DataAccess.Entities
         public string? City { get; set; }
         public string? StartYear { get; set; }
         public string? EndYear { get; set; }
-
     }
 }

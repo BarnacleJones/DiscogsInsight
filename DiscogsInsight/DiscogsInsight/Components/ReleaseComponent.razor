@@ -4,15 +4,13 @@
 @inject NavigationManager NavigationManager
 
 <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
-    <RadzenStack Orientation="Orientation.Vertical" Gap="1rem" Class="rz-p-4">
-              
-
+    <RadzenStack Orientation="Orientation.Vertical" Gap="1rem" Class="rz-p-4">  
         <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-center">
             @if (Release.CoverImage != null)
             {
                 <RadzenImage Style="max-width: 60vw; height: auto;" class="rz-justify-self-center" Path="@ConvertByteArrayToImage()" />
             }
-            </RadzenStack>
+        </RadzenStack>
         <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">
             <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
             <RadzenLink TextStyle="TextStyle.Body1" onclick=@(() => @GoToArtist(Release.DiscogsArtistId))><b>@(Release.Artist)</b></RadzenLink>
@@ -41,15 +39,15 @@
                     }
                 }
                 </ul>
-            </RadzenAccordionItem>
-            
-        </Items>
-        
+            </RadzenAccordionItem>            
+        </Items>        
     </RadzenAccordion>
 </RadzenCard>
 
 @code
 {
+    [Parameter]
+    public ReleaseViewModel Release { get; set; }
 
     string ConvertByteArrayToImage()
     {
@@ -59,11 +57,7 @@
             imageData = $"data:image/jpeg;base64,{Convert.ToBase64String(Release.CoverImage)}";
         }
         return imageData;
-
     }
-
-    [Parameter]
-    public ReleaseViewModel Release { get; set; }
 
     void GoToArtist(int? discogsArtistId)
     {
@@ -77,7 +71,6 @@
 
     string GetTrackString(TrackViewModel track)
     {
-        return $"{(track.Position == null ? "" : track.Position + " - ")}{(track.Title == null ? "" : track.Title)}{(track.Duration == null ? "" : " - " + track.Duration)}";
+        return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
     }
-
 }

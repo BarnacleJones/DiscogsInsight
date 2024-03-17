@@ -51,29 +51,5 @@ namespace DiscogsInsight.View.Services.Collection
                 };
             }
         }
-
-        public async Task<ViewResult<int>> GetCollectionSize()
-        {
-            try
-            {
-                var releases = await _collectionDataService.GetReleases();
-                return new ViewResult<int>
-                {
-                    Data = releases.ToList().Count(),
-                    ErrorMessage = "",
-                    Success = true
-                };
-
-            }
-            catch (Exception ex)
-            {
-                return new ViewResult<int>
-                {
-                    Data = 0,
-                    ErrorMessage = ex.Message,
-                    Success = false
-                };
-            }
-        }
     }
 }

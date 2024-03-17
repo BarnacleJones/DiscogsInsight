@@ -22,8 +22,8 @@ namespace DiscogsInsight.DataAccess.Services
         {
             _db = db;
             _discogsApiService = discogsApiService;
-            _musicBrainzApiService = musicBrainzApiService;
             _logger = logger;
+            _musicBrainzApiService = musicBrainzApiService;
             _tagsDataService = tagsDataService;
         }
 
@@ -33,15 +33,10 @@ namespace DiscogsInsight.DataAccess.Services
             return artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
         }
 
-        public async Task<List<Artist>> GetArtists()
-        {
-            return await _db.GetAllEntitiesAsync<Artist>();
-        }
-
         public async Task<Artist?> GetArtist(int? discogsArtistId, bool fetchAndSaveApiData = true)
         {
-            if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }//Todo: Eventually fix error a null displays throughout app
-            bool saved = true;//Todo: I made this to just make sure api data is saved before getting artist
+            if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }
+            bool saved = true;
 
             if (fetchAndSaveApiData && discogsArtistId.HasValue)
             {
@@ -50,15 +45,11 @@ namespace DiscogsInsight.DataAccess.Services
                 saved = !string.IsNullOrWhiteSpace(musicBrainzId);
             }
 
-            if (saved)
-            {
-                return await GetArtistByDiscogsId((int)discogsArtistId);
-            }
-
-            return new Artist() { Name="Error saving artist"};
-
+            return saved 
+                ? await GetArtistByDiscogsId((int)discogsArtistId)
+                : new Artist() { Name="Error saving artist"};
         }
-        
+
         #region Private Discogs Artist Functions
 
         private async Task<bool> GetAndSaveDiscogsArtistData(int discogsArtistId)
@@ -72,9 +63,10 @@ namespace DiscogsInsight.DataAccess.Services
                 //i dont know how would one get here...
                 throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
             }
-            var existingArtistNameIsVarious = existingArtist.Name.ToLower() == "various";
+            var existingArtistNameIsVarious = existingArtist.Name?.ToLower() == "various";
             
             if (existingArtistNameIsVarious) { return true; } //discogs id of various artists doesnt go anywhere - causes 404s
+
             if (string.IsNullOrWhiteSpace(existingArtist.Profile) && !existingArtistNameIsVarious)
             {
                 var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
@@ -95,8 +87,8 @@ namespace DiscogsInsight.DataAccess.Services
             }
             catch (Exception ex)
             {
-                    _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-                    throw;
+                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw;
             }
         }
         #endregion
@@ -115,16 +107,18 @@ namespace DiscogsInsight.DataAccess.Services
                     //i dont know how would one get here...
                     throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
                 }
-                var existingArtistNameIsVarious = existingArtist.Name.ToLower() == "various";
+
+                var existingArtistNameIsVarious = existingArtist.Name?.ToLower() == "various";
 
                 if (existingArtistNameIsVarious) { return "Various"; } //trying to extrapolate the correct various artist is going to be very difficult
 
-                if (existingArtist.MusicBrainzArtistId == null)
+                if (existingArtist.MusicBrainzArtistId == null && existingArtist.Name != null)
                 {
-                    var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist?.Name ?? "");
+                    var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist.Name);
                     return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
                 }
-                return existingArtist.MusicBrainzArtistId;
+
+                return existingArtist.MusicBrainzArtistId ?? "";
             }
             catch (Exception)
             {
@@ -203,9 +197,9 @@ namespace DiscogsInsight.DataAccess.Services
                     await _db.UpdateAsync(existingArtist);
 
                     //save tags
-                    var success = await _tagsDataService.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId);
+                    var success = await _tagsDataService.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
 
-                    return musicBrainsArtistId;
+                    return musicBrainsArtistId ?? "";
                 }
             }
             catch (Exception ex)

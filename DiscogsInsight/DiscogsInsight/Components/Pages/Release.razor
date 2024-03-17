@@ -34,7 +34,6 @@ else
 {
     [Parameter]
     public int? releaseId { get; set; }
-
     private ReleaseViewModel? _release;
 
     protected override async Task OnInitializedAsync()
@@ -45,7 +44,7 @@ else
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error", $"An error occurred: {ex.Message}", "OK");
+            await UserNotificationService.DisplayNotification("Error", $"{ex.Message}", "OK", "Cancel");
         }
     }
 
