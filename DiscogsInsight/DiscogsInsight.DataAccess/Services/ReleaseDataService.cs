@@ -68,6 +68,7 @@ namespace DiscogsInsight.DataAccess.Services
             if (release?.MusicBrainzReleaseId != null && coverImage == null)//various artist albums will not get a release id
             {
                 coverImage = await GetCoverInfoAndReturnByteArrayImage(release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
+                if (coverImage == null) { coverImage = Array.Empty<byte>(); }
             }
 
             return (release, coverImage);
@@ -135,28 +136,31 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<byte[]> GetCoverInfoAndReturnByteArrayImage(string savedReleaseId, bool isReleaseGroupId)
         {
             var coverApiResponse = await _coverArchiveApiService.GetCoverResponseByMusicBrainzReleaseId(savedReleaseId, isReleaseGroupId);
-            
-            var releases = await _db.GetAllEntitiesAsync<Release>();
-            var releaseFromDb = releases.Where(x => x.MusicBrainzReleaseId == savedReleaseId).FirstOrDefault();
-
-            var thumbnailUrls = coverApiResponse.Images.Select(x => x.Thumbnails).ToList();
-            var coverUrl = thumbnailUrls.Select(x => x._500 ?? x.Small).FirstOrDefault();//choosing to save 500 or small one, can go bigger or larger 
-
-            releaseFromDb.MusicBrainzCoverUrl = coverUrl;
-            await _db.UpdateAsync(releaseFromDb);
-
-            var coverByteArray = await _coverArchiveApiService.GetCoverByteArray(coverUrl);
-
-            var releaseToCoverImageTable = await _db.GetTable<MusicBrainzReleaseToCoverImage>();
-
-            var releaseToCoverImage = new MusicBrainzReleaseToCoverImage
+            if (coverApiResponse != null)
             {
-                MusicBrainzReleaseId = savedReleaseId,
-                MusicBrainzCoverImage = coverByteArray
-            };
-            await _db.SaveItemAsync(releaseToCoverImage);
+                var releases = await _db.GetAllEntitiesAsync<Release>();
+                var releaseFromDb = releases.Where(x => x.MusicBrainzReleaseId == savedReleaseId).FirstOrDefault();
 
-            return coverByteArray;
+                var thumbnailUrls = coverApiResponse.Images.Select(x => x.Thumbnails).ToList();
+                var coverUrl = thumbnailUrls.Select(x => x._500 ?? x.Small).FirstOrDefault();//choosing to save 500 or small one, can go bigger or larger 
+
+                releaseFromDb.MusicBrainzCoverUrl = coverUrl;
+                await _db.UpdateAsync(releaseFromDb);
+
+                var coverByteArray = await _coverArchiveApiService.GetCoverByteArray(coverUrl);
+
+                var releaseToCoverImageTable = await _db.GetTable<MusicBrainzReleaseToCoverImage>();
+
+                var releaseToCoverImage = new MusicBrainzReleaseToCoverImage
+                {
+                    MusicBrainzReleaseId = savedReleaseId,
+                    MusicBrainzCoverImage = coverByteArray
+                };
+                await _db.SaveItemAsync(releaseToCoverImage);
+
+                return coverByteArray;
+            }
+            return null;
         }
 
         private async Task<MusicBrainzArtistToMusicBrainzRelease> SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(Artist artist, Release release)
