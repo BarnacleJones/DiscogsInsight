@@ -1,6 +1,8 @@
 ﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.DataAccess.Models;
 using Microsoft.Extensions.Logging;
 using Artist = DiscogsInsight.DataAccess.Entities.Artist;
 
@@ -205,6 +207,28 @@ namespace DiscogsInsight.DataAccess.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw;
+            }
+        }
+
+        public async Task<List<MusicBrainzArtistRelease>> GetArtistsReleasesByMusicBrainzArtistId(string musicBrainzArtistId)
+        {
+            try
+            {
+                var allReleasesTable = await _db.GetTable<MusicBrainzArtistToMusicBrainzRelease>();
+
+                var allReleasesByArtist = await allReleasesTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId).ToListAsync();
+
+                return allReleasesByArtist.Select(x => new MusicBrainzArtistRelease
+                {
+                    MusicBrainzReleaseName = x.MusicBrainzReleaseName ??  " " ,
+                    ReleaseYear = x.ReleaseYear ?? " ",
+                    Status = x.Status ?? " ",
+                }).ToList();
+
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

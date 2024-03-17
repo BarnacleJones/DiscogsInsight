@@ -49,8 +49,11 @@ namespace DiscogsInsight.DataAccess.Services
             {  
                 if(release.MusicBrainzReleaseId == null) //get initial artist call
                     artist = await _artistDataService.GetArtist(artist.DiscogsArtistId, true);
-                
+
                 //using the artist id need to get releases and figure out which one is the right release
+                //potential here for the release not being right.
+                //The release may not exist on that call, this is using Levenshtein algorithm which is not right every time.
+                
                 var savedRelease = await SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(artist, release);
                 if (savedRelease != null) 
                 {

@@ -19,8 +19,25 @@ namespace DiscogsInsight.View.Services.Artist
             try
             {
                 var artist = await _artistDataService.GetArtist(discogsArtistId);
+
                 var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
                 var tagsList = tags.Select(x => x.Tag).ToList();
+                
+                var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+
+                var releasesViewModel = releasesByThisArtist.GroupBy(x => x.Status)
+                    .Select(x => new MusicBrainzArtistsReleasesViewModel
+                    {
+                        Status = x.Key,
+                        Releases = x.OrderBy(y => y.ReleaseYear)
+                                    .ThenBy(y => y.MusicBrainzReleaseName)
+                                    .Select(y => new MusicBrainzReleaseViewModel
+                                    {
+                                        Title = y.MusicBrainzReleaseName,
+                                        Year = y.ReleaseYear
+                                    }).ToList()
+                    }).ToList();
+
                 var data = new ArtistViewModel
                 {
                     Artist = artist.Name,
@@ -31,7 +48,8 @@ namespace DiscogsInsight.View.Services.Artist
                     StartYear = artist.StartYear,
                     EndYear = artist.EndYear,
                     MusicBrainzArtistId = artist.MusicBrainzArtistId,
-                    Tags = tagsList
+                    Tags = tagsList,
+                    ArtistsReleases = releasesViewModel
                 };
 
                 return new ViewResult<ArtistViewModel>
@@ -51,5 +69,6 @@ namespace DiscogsInsight.View.Services.Artist
                 };
             }
         }
+
     }
 }

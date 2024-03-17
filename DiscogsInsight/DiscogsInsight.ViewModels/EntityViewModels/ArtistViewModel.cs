@@ -5,9 +5,6 @@
         public string? Artist { get; set; }
         public string? ArtistDescription { get; set; }
         public int? DiscogsArtistId { get; set; }
-
-        //todo: add releases by this artist - will need to be fetched using musicbrainz artist id for main artist call
-
         public string? MusicBrainzArtistId { get; set; }
         public string? Country { get; set; }
         public string? City { get; set; }
@@ -15,5 +12,19 @@
         public string? EndYear { get; set; }
 
         public List<string> Tags { get; set; }
+        public List<MusicBrainzArtistsReleasesViewModel> ArtistsReleases { get; set; }
+    }
+
+
+    public class MusicBrainzArtistsReleasesViewModel
+    {        
+        public string Status { get; set; }
+        public List<MusicBrainzReleaseViewModel> Releases { get; set; }
+    }
+
+    public class MusicBrainzReleaseViewModel
+    {
+        public string Title { get; set; }
+        public string Year { get; set; }
     }
 }

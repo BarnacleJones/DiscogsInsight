@@ -28,7 +28,7 @@ namespace DiscogsInsight.View.Services.Collection
                     Artist = artistIdsList.Where(y => y.DiscogsArtistId == x.DiscogsArtistId).Select(x => x.Name).FirstOrDefault() ?? "No Name",
                     DiscogsArtistId = x.DiscogsArtistId,
                     DiscogsReleaseId = x.DiscogsReleaseId,
-                    Year = x.Year,
+                    Year = x.Year.ToString(),
                     Title = x.Title,
                     Genres = x.Genres,
                     DateAdded = x.DateAdded
