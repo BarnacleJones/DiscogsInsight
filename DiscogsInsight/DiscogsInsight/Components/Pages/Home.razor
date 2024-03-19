@@ -11,7 +11,7 @@
 @inject CollectionStatisticsViewService CollectionStatisticsViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
-<div class="welcome-container">
+@* <div class="welcome-container">
         
     @if (_hasKey)
     {
@@ -98,4 +98,4 @@
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
-}
+} *@

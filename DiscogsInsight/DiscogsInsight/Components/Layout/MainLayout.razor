@@ -1,4 +1,32 @@
 ﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Color="Color.Primary" Fixed="false">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/BarnacleJones/DiscogsInsight" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen">
+        <Navbar/>
+    </MudDrawer>
+    <MudMainContent MaxWidth="MaxWidth.Medium">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    bool _drawerOpen = true;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
+@* 
 <RadzenLayout>
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
@@ -16,7 +44,7 @@
             <RadzenPanelMenuItem Click="@(() => sidebar1Expanded = false)" Text="Github" Icon="code" Path="https://github.com/BarnacleJones/DiscogsInsight" />
         </RadzenPanelMenu>
         <div class="rz-p-4">
-            @* Sidebar additional content *@
+             Sidebar additional content 
         </div>
     </RadzenSidebar>
     <RadzenBody >
@@ -24,8 +52,8 @@
     </RadzenBody>
     <RadzenFooter>
     </RadzenFooter>
-</RadzenLayout>
-
+</RadzenLayout> *@
+@* 
 @code {
     public static bool sidebar1Expanded = false;
-}
+} *@
