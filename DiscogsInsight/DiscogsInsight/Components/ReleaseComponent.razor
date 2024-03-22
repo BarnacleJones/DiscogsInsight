@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
+@* <RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
     <RadzenStack Orientation="Radzen.Orientation.Vertical" Gap="1rem" Class="rz-p-4">  
         <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-center">
             @if (Release.CoverImage != null)
@@ -43,12 +43,59 @@
             </RadzenAccordionItem>            
         </Items>        
     </RadzenAccordion>
-</RadzenCard>
+</RadzenCard> *@
+
+
+@* df *@
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Color="Color.Secondary">
+                @if (Release.CoverImage != null)
+                {
+                    <MudImage Src="@ConvertByteArrayToImage()"  />
+                }
+
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1">
+                @* <MudLink ="@(() => @GoToArtist(Release.DiscogsArtistId))" /> *@
+                @(Release.Artist)
+            </MudText>
+            <MudText Typo="Typo.body2">
+                @* <MudLink onclick="@(() => @GoToRelease(Release.DiscogsReleaseId))" /> *@
+                @(Release.Title)
+            </MudText>
+        </CardHeaderContent>
+       @*  <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+        </CardHeaderActions> *@
+    </MudCardHeader>
+    @* <MudPaper Height="400px" Width="100%"> *@
+        @* <MudContainer Fixed="true"> *@
+            <MudImage Src="@ConvertByteArrayToImage()" Fluid= "true" ObjectPosition="ObjectPosition.Center" ObjectFit="ObjectFit.Fill" />
+        @* </MudContainer> *@
+    @* </MudPaper> *@
+    <MudCardContent>
+        <MudText Typo="Typo.body2">This photo was taken in a small village in Istra Croatia.</MudText>
+    </MudCardContent>
+    <MudCardActions>
+        <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" />
+        <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Default" OnClick="@(() => OpenLink(@Release.DiscogsReleaseUrl))" />
+
+    </MudCardActions>
+</MudCard>
 
 @code
 {
     [Parameter]
     public ReleaseViewModel Release { get; set; }
+
+    private void OpenLink(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
 
     string ConvertByteArrayToImage()
     {
