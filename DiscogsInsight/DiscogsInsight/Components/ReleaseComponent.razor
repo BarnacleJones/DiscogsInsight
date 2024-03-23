@@ -58,7 +58,7 @@
                             <MudText Typo="Typo.body1">@Release.DateAdded</MudText>                                
                         </MudListItem>                            
                     }
-                    @if (!string.IsNullOrWhiteSpace(Release.Year))
+                    @if (!string.IsNullOrWhiteSpace(Release.Year) && Release.Year != "0")
                     {
                         <MudListItem>
                             <MudText Typo="Typo.body2">Release Year</MudText>
