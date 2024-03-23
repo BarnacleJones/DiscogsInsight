@@ -83,10 +83,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\images\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj" />
       <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.View.csproj" />
       <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.ViewModels.csproj" />

@@ -50,13 +50,18 @@
 <MudCard>
     <MudCardHeader>
         <CardHeaderAvatar>
-            <MudAvatar Color="Color.Secondary">
-                @if (Release.CoverImage != null)
-                {
+            @if (Release.CoverImage != null)
+            {
+                <MudAvatar Color="Color.Secondary">
                     <MudImage Src="@ConvertByteArrayToImage()"  />
-                }
-
-            </MudAvatar>
+                </MudAvatar>
+            }
+            else
+            {
+                <MudAvatar Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicNote" />
+                </MudAvatar>
+            }
         </CardHeaderAvatar>
         <CardHeaderContent>
             <MudText Typo="Typo.body1">
@@ -103,6 +108,10 @@
         if (Release.CoverImage != null && Release.CoverImage.Length > 0)
         {
             imageData = $"data:image/jpeg;base64,{Convert.ToBase64String(Release.CoverImage)}";
+        }
+        else
+        {
+            imageData = "images/album.png";
         }
         return imageData;
     }
