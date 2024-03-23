@@ -8,6 +8,7 @@ using DiscogsInsight.View.Services.Settings;
 using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
+using MudBlazor.Services;
 
 namespace DiscogsInsight
 {
@@ -24,6 +25,7 @@ namespace DiscogsInsight
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddMudServices();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

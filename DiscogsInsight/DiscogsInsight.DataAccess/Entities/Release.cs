@@ -14,6 +14,7 @@ namespace DiscogsInsight.DataAccess.Entities
         public DateTime? DateAdded { get; set; }
         public string? Genres { get; set; }
         public int? Year { get; set; }
+        public string? DiscogsReleaseUrl { get; set; }
         public string? ReleaseCountry { get; set; }
         public string? MusicBrainzReleaseId { get; set; }
         public bool IsAReleaseGroupGroupId { get; set; }

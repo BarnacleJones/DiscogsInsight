@@ -1,53 +1,152 @@
 ﻿@using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
+@using Radzen
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<RadzenCard Class="rz-my-12 rz-mx-auto rz-background-color-base-400" Style="max-width: 100%">
-    <RadzenStack Orientation="Orientation.Vertical" Gap="1rem" Class="rz-p-4">  
-        <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-center">
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderAvatar>
             @if (Release.CoverImage != null)
             {
-                <RadzenImage Style="max-width: 60vw; height: auto;" class="rz-justify-self-center" Path="@ConvertByteArrayToImage()" />
+                <MudAvatar Color="Color.Secondary">
+                    <MudImage Src="@ConvertByteArrayToImage()"  />
+                </MudAvatar>
             }
-        </RadzenStack>
-        <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
-            <RadzenLink TextStyle="TextStyle.Body1" onclick=@(() => @GoToArtist(Release.DiscogsArtistId))><b>@(Release.Artist)</b></RadzenLink>
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Album</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1" onclick=@(() => @GoToRelease(Release.DiscogsReleaseId))><b>@Release.Title</b></RadzenText>
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Date Added</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.DateAdded)</b></RadzenText>
-            @if (Release.ReleaseCountry != null)
+            else
             {
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Release Country</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(Release.ReleaseCountry)</b></RadzenText>                
+                <MudAvatar Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.MusicNote" />
+                </MudAvatar>
             }
-        </RadzenStack>
-    </RadzenStack>
-    <RadzenAccordion class="">
-        <Items>
-            <RadzenAccordionItem Text="Tracklist" Icon="list" CollapseTitle="Collapse Tracklist."
-             ExpandTitle="Expand Tracklist." CollapseAriaLabel="Collapse the Tracklist."
-             ExpandAriaLabel="Expand the Tracklist.">
-                <ul>
-                @foreach (var track in Release.Tracks.OrderBy(x => x.Position).ToList())
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudLink OnClick="@(() => @GoToArtist(Release.DiscogsArtistId))">
+                <MudText Typo="Typo.body1">
+                    @(Release.Artist)
+                </MudText>
+            </MudLink>
+            <MudText Typo="Typo.body2">
+                @(Release.Title)
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudStack>
+            <MudImage Src="@ConvertByteArrayToImage()" Fluid= "true" ObjectPosition="ObjectPosition.Center" ObjectFit="ObjectFit.Fill" />
+            <MudButton OnClick="OnInfoExpandCollapseClick">
+                @if (_infoExpanded)
                 {
-                    if (track is not null)
-                    {
-                            <li style="list-style:none">@GetTrackString(@track)</li>
-                    }
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+                    
                 }
-                </ul>
-            </RadzenAccordionItem>            
-        </Items>        
-    </RadzenAccordion>
-</RadzenCard>
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                }
+                <MudSpacer />
+                INFO
+            </MudButton>
+            <MudDivider />
+            <MudCollapse Expanded="_infoExpanded">                
+                <MudList Clickable="true">
+                    @if (Release.DateAdded.HasValue)
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Date Added</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Release.DateAdded</MudText>                                
+                        </MudListItem>                            
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Release.Year))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Release Year</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Release.Year</MudText>
+                        </MudListItem>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Release.ReleaseCountry))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Release Country</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Release.ReleaseCountry</MudText>
+                        </MudListItem>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Release.Genres))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Genre(s)</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Release.Genres</MudText>
+                        </MudListItem>
+                    }
+                        
+                </MudList>
+            </MudCollapse>
+        </MudStack>
+        @if (Release.Tracks.Any())
+        { 
+            <MudStack>
+            <MudButton OnClick="OnTracksExpandCollapseClick">
+                    @if (_tracksExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
+                <MudSpacer />
+                Tracks
+            </MudButton>
+                <MudDivider />
+                <MudCollapse Expanded="_tracksExpanded">
+                    <MudPaper>
+                        <MudList Clickable="false">
+                            @foreach (var track in Release.Tracks.OrderBy(x => x.Position).ToList())
+                            {
+                                if (track is not null)
+                                {
+                                    <MudListItem Text="@GetTrackString(@track)" Icon="@Icons.Material.Filled.MusicNote" />
+                                }
+                            }
+                        </MudList>
+                    </MudPaper>
+                </MudCollapse>
+            </MudStack>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" />
+        <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Default" OnClick="@(() => OpenDiscogsReleaseLink(@Release.DiscogsReleaseUrl))" />
+    </MudCardActions>
+</MudCard>
 
 @code
 {
     [Parameter]
     public ReleaseViewModel Release { get; set; }
+
+    bool _infoExpanded = false;
+    bool _tracksExpanded = false;
+
+    private void OnTracksExpandCollapseClick()
+    {
+        _tracksExpanded = !_tracksExpanded;
+    }
+
+    private void OnInfoExpandCollapseClick()
+    {
+        _infoExpanded = !_infoExpanded;
+    }
+
+    private void OpenDiscogsReleaseLink(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
 
     string ConvertByteArrayToImage()
     {
@@ -55,6 +154,10 @@
         if (Release.CoverImage != null && Release.CoverImage.Length > 0)
         {
             imageData = $"data:image/jpeg;base64,{Convert.ToBase64String(Release.CoverImage)}";
+        }
+        else
+        {
+            imageData = "images/album.png";
         }
         return imageData;
     }

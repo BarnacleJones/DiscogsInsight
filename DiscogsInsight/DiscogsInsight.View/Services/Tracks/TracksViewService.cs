@@ -34,7 +34,7 @@ namespace DiscogsInsight.View.Services.Tracks
                 if (!tracksForListRelease.Any())
                 {
                     var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
-                    var success = await SaveTracksFromDiscogsReleaseResponse(discogsReleaseResponse);
+                    var success = await SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(discogsReleaseResponse);
                     if (!success.Success)
                     {
                         throw new Exception("Error saving tracklist to database");
@@ -62,7 +62,7 @@ namespace DiscogsInsight.View.Services.Tracks
             }
         }
 
-        public async Task<ViewResult<bool>> SaveTracksFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
+        public async Task<ViewResult<bool>> SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
         {           
             try
             {
@@ -76,6 +76,7 @@ namespace DiscogsInsight.View.Services.Tracks
 
                 //update existing release entity with additional properties
                 existingRelease.ReleaseCountry = releaseResponse.country;
+                existingRelease.DiscogsReleaseUrl = releaseResponse.uri;
                 await _db.UpdateAsync(existingRelease);
 
                 //save the tracks
