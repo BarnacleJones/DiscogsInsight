@@ -1,0 +1,33 @@
+﻿@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@using Radzen
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<MudStack AlignItems="MudBlazor.AlignItems.Center">
+    <MudSpacer />
+    <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.body1">Welcome to Discogs Insights</MudText>
+    <MudSpacer />
+    <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.body2">Please enter your Discogs username to get started.</MudText>
+    <MudSpacer />
+    <MudTextField @bind-Value="TextValue" Label="Discogs Username" Variant="MudBlazor.Variant.Filled"></MudTextField>
+    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="StoreUsername">Store Username</MudButton>
+    <MudSpacer />
+    <MudImage Fluid="true" Width="200" Src="images/loading.png"  />
+</MudStack>
+
+@code
+{
+    public string TextValue { get; set; }
+
+    [Parameter]
+    public EventCallback OnStoreUsernameClick { get; set; }
+
+    private async Task StoreUsername()
+    {
+        if (OnStoreUsernameClick.HasDelegate)
+        {
+            await OnStoreUsernameClick.InvokeAsync(null);
+        }
+    }
+}

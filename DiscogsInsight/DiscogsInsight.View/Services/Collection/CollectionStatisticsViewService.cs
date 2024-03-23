@@ -54,12 +54,23 @@ namespace DiscogsInsight.View.Services.Collection
             var month = DateTime.Now.Month;
             var tracksNewThisMonth = releases.Where(x => x.DateAdded.Value.Month == month).Count();
 
+            //get last 6 months albums 
+            var lastSixMonths = new List<double>();
+            for (int i = 5; i >= 0; i--)
+            {
+                var thisParticularMonth = DateTime.Today.AddMonths(-i).Month;
+                var tracksNewThisParticularMonth = releases.Where(x => x.DateAdded.Value.Month == thisParticularMonth).Count();
+                lastSixMonths.Add(tracksNewThisParticularMonth);
+            }
+
+
             return new CollectionStatsViewModel
             {
                 AlbumsInCollection = releasesCount,
                 AlbumsInCollectionWithoutTracksInfo = releasesWithoutTracks,
                 TracksInCollection = tracksCount,
                 AlbumsNewToCollectionThisMonth = tracksNewThisMonth,
+                AlbumsNewLastSixMonths = lastSixMonths.ToArray()
             };
         }
     }

@@ -15,59 +15,33 @@
         
     @if (_hasKey)
     {
-    @*  <RadzenAccordion>
-                <Items>
-                    <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse." Selected="true"
-                                         ExpandTitle="Expand." CollapseAriaLabel="Collapse the insights panel." class="rz-bg-dark"
-                                         ExpandAriaLabel="Expand the insights panel.">
-                        @if (_randomRelease != null)
-                        {
-                            <ReleaseComponent Release="@_randomRelease" />
-                        }
-                    </RadzenAccordionItem> 
-                    <RadzenAccordionItem Text="Collection Stats" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
-                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
-                                         ExpandAriaLabel="Expand the random panel.">
-                        @if (_collectionStats != null)
-                        {
-                            <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">
-                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Albums In Collection</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsInCollection)</b></RadzenText>
-                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Albums Without Tracks Info</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Info is fetched as you browse releases, this will go down.</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsInCollectionWithoutTracksInfo)</b></RadzenText>
-                                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Added this month</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><b>@(_collectionStats.AlbumsNewToCollectionThisMonth)</b></RadzenText>
-                            </RadzenStack>
-                        }
-                    </RadzenAccordionItem>
-                </Items>
-            </RadzenAccordion> *@
-    @if (_randomRelease != null)
-    {
-        <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
-            <ReleaseComponent Release="@_randomRelease" ShowRefreshRelease="true" OnButtonClick="RefreshRandom" />
-        </MudStack>
-    }
-    else
-    {
-        <LoadingComponent />
-    }
+        @if (_randomRelease != null)
+        {
+            <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+                <MudButton OnClick="OnRandomExpandCollapseClick" Color="Color.Secondary">@(_randomExpanded ? "Hide Random Release" : "Show Random Release")</MudButton>
+                <MudCollapse Expanded="_randomExpanded">
+                    <ReleaseComponent Release="@_randomRelease" ShowRefreshRelease="true" OnButtonClick="RefreshRandom" />
+                </MudCollapse>
+                <MudContainer>
+                    <ReleasesWithoutTracksComponent ReleaseWithAndWithoutTotals=@(CalculateDonutValues()) />
+                    <TimelineBarGraphComponent CollectionStats="@_collectionStats"/>
+                </MudContainer>
+            </MudStack>
+        }
+        else
+        {
+            <LoadingComponent />
+        }
 }
-    else
-    {
-        <label for="userNameInput">Enter Discogs Username: </label>
-        <input type="text" @bind="discogsUsername">
-        <br />
-        <button class="btn btn-primary"   @onclick="handleButtonClick">Store Username</button>
-        <hr />
-        <p>This app will fetch your Discogs collection using your username</p>
-        <p>The data will be stored locally and used for gaining statistical insights into your collection.</p>
-    }
+else
+{
+    <EnterUsernameComponent OnStoreUsernameClick="handleButtonClick" />   
+}
 
 
 @code{
     private static bool _hasKey { get; set; }
+    private bool _randomExpanded { get; set; }
     private string discogsUsername = string.Empty;
     private ReleaseViewModel? _randomRelease;
     private CollectionStatsViewModel? _collectionStats;
@@ -89,12 +63,6 @@
         }
     }
 
-    public async Task RefreshRandom()
-    {
-        HandleRandomResult(await ReleaseViewService.GetRandomRelease());
-        StateHasChanged();
-    }
-
     private async void HandleRandomResult(ViewResult<ReleaseViewModel> result)
     {
         if (result.Success)
@@ -102,11 +70,30 @@
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");       
     }
+
     private async void HandleStatisticsResult(ViewResult<CollectionStatsViewModel> result)
     {
         if (result.Success)
             _collectionStats = result.Data;
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+    }
+
+    private double[] CalculateDonutValues()
+    {
+        var totalInCollectionWithoutTracks = _collectionStats.AlbumsInCollectionWithoutTracksInfo;
+        var totalInCollectionWithTracks = _collectionStats.AlbumsInCollection - _collectionStats.AlbumsInCollectionWithoutTracksInfo;
+        return new double[] { totalInCollectionWithTracks, totalInCollectionWithoutTracks };
+
+    }
+
+    public async Task RefreshRandom()
+    {
+        HandleRandomResult(await ReleaseViewService.GetRandomRelease());
+        StateHasChanged();
+    }
+
+    private void OnRandomExpandCollapseClick() {
+        _randomExpanded = !_randomExpanded;
     }
 }

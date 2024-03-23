@@ -1,0 +1,19 @@
+﻿@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@using Radzen
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<MudChart ChartType="ChartType.Donut" Width="300px" Height="300px" InputData="@ReleaseWithAndWithoutTotals" InputLabels="@labels">
+	<CustomGraphics>
+		<text class="donut-inner-text" x="50%" y="35%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Helvetica" font-size="2">Total in Collection</text>
+		<text class="donut-inner-text" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Helvetica" font-size="5">@ReleaseWithAndWithoutTotals.Sum()</text>
+	</CustomGraphics>
+</MudChart>
+
+@code {
+	[Parameter]
+	public double[] ReleaseWithAndWithoutTotals { get; set; }
+		
+	public string[] labels = { "All API Information Gathered", "Not yet" };
+}

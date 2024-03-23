@@ -1,0 +1,36 @@
+﻿@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@using Radzen
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<div>
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@GetSeries()" @bind-SelectedIndex="Index" XAxisLabels="@GetLastSixMonths()" Width="100%" Height="300px"></MudChart>
+</div>
+
+@code {
+
+    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+
+    [Parameter]
+    public CollectionStatsViewModel CollectionStats { get; set; }
+
+    public List<ChartSeries> GetSeries()
+    {
+        return new List<ChartSeries>()
+        {
+            new ChartSeries() { Name = "Releases Added to Collection", Data = CollectionStats.AlbumsNewLastSixMonths }
+        };
+    }
+
+    public string[] GetLastSixMonths()
+    {
+        List<string> lastSixMonths = new List<string>();
+
+        for (int i = 5; i >= 0; i--)
+        {
+            lastSixMonths.Add(DateTime.Today.AddMonths(-i).ToString("MMMM"));
+        }
+        return lastSixMonths.ToArray();
+    }
+}
