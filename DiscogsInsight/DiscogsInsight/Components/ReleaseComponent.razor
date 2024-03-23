@@ -35,7 +35,15 @@
         <MudStack>
             <MudImage Src="@ConvertByteArrayToImage()" Fluid= "true" ObjectPosition="ObjectPosition.Center" ObjectFit="ObjectFit.Fill" />
             <MudButton OnClick="OnInfoExpandCollapseClick">
-                <MudIcon Icon="@Icons.Material.Filled.Add" />
+                @if (_infoExpanded)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+                    
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                }
                 <MudSpacer />
                 INFO
             </MudButton>
@@ -53,7 +61,7 @@
                     @if (!string.IsNullOrWhiteSpace(Release.Year))
                     {
                         <MudListItem>
-                            <MudText Typo="Typo.body2">Year</MudText>
+                            <MudText Typo="Typo.body2">Release Year</MudText>
                             <MudSpacer />
                             <MudText Typo="Typo.body1">@Release.Year</MudText>
                         </MudListItem>
@@ -61,7 +69,7 @@
                     @if (!string.IsNullOrWhiteSpace(Release.ReleaseCountry))
                     {
                         <MudListItem>
-                            <MudText Typo="Typo.body2">Country</MudText>
+                            <MudText Typo="Typo.body2">Release Country</MudText>
                             <MudSpacer />
                             <MudText Typo="Typo.body1">@Release.ReleaseCountry</MudText>
                         </MudListItem>
@@ -82,7 +90,15 @@
         { 
             <MudStack>
             <MudButton OnClick="OnTracksExpandCollapseClick">
-                <MudIcon Icon="@Icons.Material.Filled.Add" />
+                    @if (_tracksExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
                 <MudSpacer />
                 Tracks
             </MudButton>
@@ -114,7 +130,7 @@
     [Parameter]
     public ReleaseViewModel Release { get; set; }
 
-    bool _infoExpanded = true;
+    bool _infoExpanded = false;
     bool _tracksExpanded = false;
 
     private void OnTracksExpandCollapseClick()
