@@ -3,7 +3,7 @@
 @using Radzen
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
-
+@inject IBrowserViewportService ViewportService
 <MudCard>
     <MudCardHeader>
         <CardHeaderAvatar>
@@ -26,14 +26,22 @@
                     @(Release.Artist)
                 </MudText>
             </MudLink>
-            <MudText Typo="Typo.body2">
-                @(Release.Title)
-            </MudText>
+            <MudLink OnClick="@(() => OpenDiscogsReleaseLink(@Release.DiscogsReleaseUrl))">
+                <MudText Typo="Typo.body2">
+                    @(Release.Title)
+                </MudText>
+            </MudLink>
         </CardHeaderContent>
+            <CardHeaderActions>
+                @if(ShowRefreshRelease == true)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="RefreshCard" Color="Color.Default" />
+                }
+            </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudStack>
-            <MudImage Src="@ConvertByteArrayToImage()" Fluid= "true" ObjectPosition="ObjectPosition.Center" ObjectFit="ObjectFit.Fill" />
+            <MudImage Src="@ConvertByteArrayToImage()" Fluid="true" ObjectPosition="ObjectPosition.Center" ObjectFit="ObjectFit.Fill" Style="@ImageStyle" />
             <MudButton OnClick="OnInfoExpandCollapseClick">
                 @if (_infoExpanded)
                 {
@@ -119,10 +127,6 @@
             </MudStack>
         }
     </MudCardContent>
-    <MudCardActions>
-        <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" />
-        <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Default" OnClick="@(() => OpenDiscogsReleaseLink(@Release.DiscogsReleaseUrl))" />
-    </MudCardActions>
 </MudCard>
 
 @code
@@ -130,8 +134,46 @@
     [Parameter]
     public ReleaseViewModel Release { get; set; }
 
-    bool _infoExpanded = false;
-    bool _tracksExpanded = false;
+    [Parameter]
+    public bool? ShowRefreshRelease { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnButtonClick { get; set; }
+
+    private bool _infoExpanded = false;
+    private bool _tracksExpanded = false;
+    private string ImageStyle { get; set; } = "width: 200px;"; // Default width
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SetCoverImageStyle();
+        }
+    }
+
+    private async Task RefreshCard()
+    {
+        if (OnButtonClick.HasDelegate)
+        {
+            await OnButtonClick.InvokeAsync(null);
+        }
+    }
+
+    private void GoToArtist(int? discogsArtistId)
+    {
+        NavigationManager.NavigateTo("/artist/" + discogsArtistId);
+    }
+
+    private void GoToRelease(int? releaseId)
+    {
+        NavigationManager.NavigateTo($"/release/{releaseId}");
+    }
+
+    private void OpenDiscogsReleaseLink(string url)
+    {
+        NavigationManager.NavigateTo(url);
+    }
 
     private void OnTracksExpandCollapseClick()
     {
@@ -143,12 +185,19 @@
         _infoExpanded = !_infoExpanded;
     }
 
-    private void OpenDiscogsReleaseLink(string url)
+    private async Task SetCoverImageStyle()
     {
-        NavigationManager.NavigateTo(url);
+        bool isLargeScreen = await ViewportService.IsBreakpointWithinWindowSizeAsync(Breakpoint.MdAndUp);
+
+        if (!isLargeScreen)
+            ImageStyle = "width: 100%;";
+        else
+            ImageStyle = "width: 200px;";
+        
+        StateHasChanged();
     }
 
-    string ConvertByteArrayToImage()
+    private string ConvertByteArrayToImage()
     {
         string imageData = "";
         if (Release.CoverImage != null && Release.CoverImage.Length > 0)
@@ -162,17 +211,7 @@
         return imageData;
     }
 
-    void GoToArtist(int? discogsArtistId)
-    {
-        NavigationManager.NavigateTo("/artist/" + discogsArtistId);
-    }
-
-    void GoToRelease(int? releaseId)
-    {
-        NavigationManager.NavigateTo($"/release/{releaseId}");
-    }
-
-    string GetTrackString(TrackViewModel track)
+    private string GetTrackString(TrackViewModel track)
     {
         return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
     }

@@ -12,22 +12,11 @@
 
 @if (_release is null)
 {
-    <div class="d-flex justify-content-center">
-        <div class="row">
-            <div class="col-12">
-                <img src="/images/loading.svg" />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <p><em>Loading...</em></p>
-            </div>
-        </div>
-    </div>
+    <LoadingComponent />
 }
 else
 {
-    <ReleaseComponent Release="@_release" />
+    <ReleaseComponent Release="@_release" ShowRefreshRelease="false" />
 }
 
 @code

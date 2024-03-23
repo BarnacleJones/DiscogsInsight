@@ -14,29 +14,12 @@
 
 @if (_release is null)
 {
-    <div class="d-flex justify-content-center">
-        <div class="row">
-            <div class="col-12">
-                <img src="images/loading.png" width="150px"/>
-            </div>
-        </div>
-        <br />
-        <div class="row">
-            <div class="col-12">
-                <p><em>Loading...</em></p>
-            </div>
-        </div>
-    </div>
+    <LoadingComponent />
 }
 else
 {
-    <MudStack AlignItems="MudBlazor.AlignItems.Center">
-        <MudButton FullWidth OnClick="RefreshPage">
-            <MudIcon Icon="@Icons.Material.Filled.Refresh" />
-            <MudSpacer />
-            <MudText Typo="Typo.h4">Random</MudText>
-        </MudButton>   
-        <ReleaseComponent Release="@_release" />
+    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+        <ReleaseComponent Release="@_release" ShowRefreshRelease="true" OnButtonClick="RefreshPage" />
     </MudStack>
 }
 

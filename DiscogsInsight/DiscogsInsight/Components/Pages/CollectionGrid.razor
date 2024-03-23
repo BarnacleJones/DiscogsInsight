@@ -10,18 +10,7 @@
 
 @if (_collectionViewModel == null)
 {
-    <div class="d-flex justify-content-center">
-        <div class="row">
-            <div class="col-12">
-                <img src="images/loading.svg" />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <p><em>Loading...</em></p>
-            </div>
-        </div>
-    </div>
+    <LoadingComponent />
 }
 else{
     <RadzenText TextStyle="TextStyle.H4">Collection</RadzenText>

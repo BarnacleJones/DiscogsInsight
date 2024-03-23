@@ -11,15 +11,11 @@
 @inject CollectionStatisticsViewService CollectionStatisticsViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
-<div class="welcome-container">
+
         
     @if (_hasKey)
     {
-        <RadzenText Text="Discogs Insight" TextStyle="TextStyle.DisplayH4" />
-        <br />           
-
-        <div class="rz-p-sm-12">
-            <RadzenAccordion>
+    @*  <RadzenAccordion>
                 <Items>
                     <RadzenAccordionItem Text="Random Release" Icon="refresh" CollapseTitle="Collapse." Selected="true"
                                          ExpandTitle="Expand." CollapseAriaLabel="Collapse the insights panel." class="rz-bg-dark"
@@ -46,9 +42,18 @@
                         }
                     </RadzenAccordionItem>
                 </Items>
-            </RadzenAccordion>
-        </div>
+            </RadzenAccordion> *@
+    @if (_randomRelease != null)
+    {
+        <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+            <ReleaseComponent Release="@_randomRelease" ShowRefreshRelease="true" OnButtonClick="RefreshRandom" />
+        </MudStack>
     }
+    else
+    {
+        <LoadingComponent />
+    }
+}
     else
     {
         <label for="userNameInput">Enter Discogs Username: </label>
@@ -59,7 +64,7 @@
         <p>This app will fetch your Discogs collection using your username</p>
         <p>The data will be stored locally and used for gaining statistical insights into your collection.</p>
     }
-</div>
+
 
 @code{
     private static bool _hasKey { get; set; }
@@ -82,6 +87,12 @@
             HandleRandomResult(await ReleaseViewService.GetRandomRelease());
             HandleStatisticsResult(await CollectionStatisticsViewService.GetHomePageStatistics());
         }
+    }
+
+    public async Task RefreshRandom()
+    {
+        HandleRandomResult(await ReleaseViewService.GetRandomRelease());
+        StateHasChanged();
     }
 
     private async void HandleRandomResult(ViewResult<ReleaseViewModel> result)
