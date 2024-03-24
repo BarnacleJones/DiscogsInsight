@@ -19,7 +19,7 @@ namespace DiscogsInsight.View.Services.Tracks
             _db = db;
         }
 
-        public async Task<ViewResult<List<Track>>> GetTracksForRelease(int? discogsReleaseId)
+        public async Task<ViewResult<List<Track>>> GetTracksForRelease(int? discogsReleaseId, bool updateReleaseWithReleaseResponse)
         {
             try
             {
@@ -31,8 +31,11 @@ namespace DiscogsInsight.View.Services.Tracks
 
                 var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
 
-                if (!tracksForListRelease.Any())
+                if (!tracksForListRelease.Any() || updateReleaseWithReleaseResponse)
                 {
+                    //updateReleaseWithReleaseResponse is option to save additional information again for data that is missing
+                    //such as when entities existed and i then came and added url to the entity. wasnt getting updated because tracks were retrieved.
+                    //dont want to purge track info when its just to get these few properties
                     var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
                     var success = await SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(discogsReleaseResponse);
                     if (!success.Success)
