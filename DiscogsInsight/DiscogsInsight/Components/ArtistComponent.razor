@@ -1,0 +1,195 @@
+﻿@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@using Radzen
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IBrowserViewportService ViewportService
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderAvatar>            
+            <MudAvatar Color="Color.Primary">
+                <MudIcon Icon="@Icons.Material.Filled.MusicNote" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>            
+                <MudText Typo="Typo.body1">
+                    @(Artist.Artist)
+                </MudText>
+                @if (!string.IsNullOrEmpty(Artist.StartYear))
+                {
+                    <MudText Typo="Typo.body2">
+                    @(Artist.StartYear) - @(Artist.EndYear ?? "")
+                    </MudText>
+                }
+        </CardHeaderContent>          
+    </MudCardHeader>
+    <MudCardContent>
+        <MudStack>
+            <MudButton OnClick="OnInfoExpandCollapseClick">
+                @if (_infoExpanded)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+                    
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                }
+                <MudSpacer />
+                INFO
+            </MudButton>
+            <MudDivider />
+            <MudCollapse Expanded="_infoExpanded">                
+                <MudList Clickable="true">
+                    @if (!string.IsNullOrEmpty(Artist.Country))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Country</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Artist.Country</MudText>                                
+                        </MudListItem>                            
+                    }
+                    @if (!string.IsNullOrEmpty(Artist.City))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">City</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Artist.City</MudText>
+                        </MudListItem>
+                    }
+                    @if (!string.IsNullOrEmpty(Artist.StartYear))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Start Year</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Artist.StartYear</MudText>
+                        </MudListItem>
+                    }
+                        
+                </MudList>
+            </MudCollapse>
+        </MudStack>      
+        @if (!string.IsNullOrWhiteSpace(Artist.ArtistDescription))
+        {
+            <MudStack>
+            <MudButton OnClick="OnDescriptionExpandCollapseClick">
+                    @if (_descriptionExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
+                <MudSpacer />
+                Description
+            </MudButton>
+                <MudDivider />
+                <MudCollapse Expanded="_descriptionExpanded">
+                    <MudText Typo="Typo.body1">@Artist.ArtistDescription</MudText>
+                </MudCollapse>
+            </MudStack>            
+        }
+        @if (Artist.Tags.Any())
+        {
+            <MudStack>
+                <MudButton OnClick="OnTagsExpandCollapseClick">
+                    @if (_tagsExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
+                    <MudSpacer />
+                    Artist Tags
+                </MudButton>
+                <MudDivider />
+                <MudCollapse Expanded="_tagsExpanded">
+                    <MudPaper>
+                        <MudList Clickable="false">
+                            @foreach (var tag in Artist.Tags)
+                            {
+                                if (tag is not null)
+                                {
+                                    <MudListItem Text="@tag" Icon="@Icons.Material.Filled.Tag" />
+                                }
+                            }
+                        </MudList>
+                    </MudPaper>
+                </MudCollapse>
+            </MudStack>
+        }
+        @if (Artist.ArtistsReleases.Any())
+        {
+            <MudStack>
+                <MudButton OnClick="OnReleasesExpandCollapseClick">
+                    @if (_releasesExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
+                    <MudSpacer />
+                    Artist Releases
+                </MudButton>
+                <MudDivider />
+                <MudCollapse Expanded="_releasesExpanded">
+                    <MudPaper>
+                        <MudTreeView T="string">
+                            @foreach (var releaseGroup in Artist.ArtistsReleases)
+                            {
+                                <MudTreeViewItem Value="@releaseGroup.Status">
+                                    @foreach (var release in releaseGroup.Releases)
+                                    {
+                                        var title = $"{release.Title} - {release.Year}";
+                                        <MudTreeViewItem Value="title" />                                
+                                    }
+                                </MudTreeViewItem>                                    
+                            }
+                        </MudTreeView>
+                    </MudPaper>
+                </MudCollapse>
+            </MudStack>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code
+{
+    [Parameter]
+    public ArtistViewModel Artist { get; set; }
+    private bool _infoExpanded = true;
+    private bool _tagsExpanded = false;
+    private bool _releasesExpanded = false;
+    private bool _descriptionExpanded = false;
+    
+
+    private void OnDescriptionExpandCollapseClick()
+    {
+        _descriptionExpanded = !_descriptionExpanded;
+    }
+
+    private void OnInfoExpandCollapseClick()
+    {
+        _infoExpanded = !_infoExpanded;
+    }
+    private void OnTagsExpandCollapseClick()
+    {
+        _tagsExpanded = !_tagsExpanded;
+    }
+    private void OnReleasesExpandCollapseClick()
+    {
+        _releasesExpanded = !_releasesExpanded;
+    }
+
+    }
+
+}

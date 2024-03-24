@@ -17,84 +17,11 @@
 }
 else
 {
-<RadzenText TextStyle="TextStyle.H2" TextAlign="TextAlign.Center">Artist</RadzenText>
-<RadzenCard Class="rz-my-12 rz-mx-auto" Style="max-width: 100%">
-    <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4" />
-        <RadzenStack Gap="0">
-            <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Artist</RadzenText>
-            <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.Artist)</b></RadzenText>
-
-            @if (!string.IsNullOrEmpty(_artist.Country))
-            {
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Country</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.Country)</b></RadzenText>            
-            }
-            @if (!string.IsNullOrEmpty(_artist.City))
-            {
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">City</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.City)</b></RadzenText>            
-            }
-            @if (!string.IsNullOrEmpty(_artist.StartYear))
-            {
-                <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Years active</RadzenText>
-                <RadzenText TextStyle="TextStyle.Body1"><b>@(_artist.StartYear) - @(_artist.EndYear ?? "")</b></RadzenText>
-            }
-
-    </RadzenStack>
-    <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
-        <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Discogs Description</strong></RadzenText>
-        <RadzenRow RowGap="0">
-            <RadzenColumn SizeSM="12">
-                        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(_artist.ArtistDescription)</b></RadzenText>
-            </RadzenColumn>
-        </RadzenRow>
-    </RadzenCard>
-    @if (_artist.Tags.Any())
-    {
-        <RadzenAccordion>
-                <Items>
-                    
-                    <RadzenAccordionItem Text="Artist Tags" Icon="refresh" CollapseTitle="Collapse random." Selected="true"
-                                         ExpandTitle="Expand random." CollapseAriaLabel="Collapse the random panel." class="rz-bg-dark"
-                                         ExpandAriaLabel="Expand the random panel.">
-                        
-                            <RadzenStack Gap="0" class="rz-display-flex rz-justify-content-start">                                
-                                    @foreach (var tag in _artist.Tags)
-                                    {
-                                        <RadzenText TextStyle="TextStyle.Body1"><b>-@(tag)</b></RadzenText>
-                                    }
-                            </RadzenStack>
-                        
-                    </RadzenAccordionItem>
-                </Items>
-            </RadzenAccordion>
-    }
-    @if (_artist.ArtistsReleases.Any())
-    {
-        <RadzenCard>
-            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Releases By Artist</RadzenText>
-            <RadzenText TextStyle="TextStyle.Caption" class="rz-display-flex rz-mt-2 rz-my-0">*Releases from the MusicBrainz Database</RadzenText>
-            <RadzenTree>
-                @foreach ( var releaseGroup  in _artist.ArtistsReleases)
-                {
-                    <RadzenTreeItem Text="@releaseGroup.Status">
-                        <ChildContent>
-                            @foreach (var release in releaseGroup.Releases)
-                            {
-                                var releaseText = $"{release.Title} - {release.Year}";
-                                <RadzenTreeItem Text="@releaseText" />                                    
-                            }
-                        </ChildContent>
-                        <Template>
-                            <b>@releaseGroup.Status</b>
-                        </Template>
-                    </RadzenTreeItem>
-                }
-            </RadzenTree>
-        </RadzenCard>
-    }
-</RadzenCard>
-
+    <MudStack AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6">Artist</MudText>
+        <MudSpacer />
+        <ArtistComponent Artist="_artist" />
+    </MudStack>
 }
 
 @code
