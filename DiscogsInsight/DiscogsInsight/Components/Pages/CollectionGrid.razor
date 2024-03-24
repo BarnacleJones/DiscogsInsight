@@ -21,11 +21,13 @@ else{
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
-        <Columns>
-            
-            <PropertyColumn Property="x => x.Artist" Hidden="true" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />
-            
-            <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy" />
+        <Columns>            
+            <PropertyColumn Property="x => x.Artist" Hidden="true" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />            
+            <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy">
+                <CellTemplate>
+                    <MudText onclick="@(() => GoToRelease(context.Item.DiscogsReleaseId))">@context.Item.Title</MudText>
+                </CellTemplate>                
+            </PropertyColumn>
         </Columns>
         <PagerContent>
             <MudDataGridPager T="ReleaseViewModel" />
