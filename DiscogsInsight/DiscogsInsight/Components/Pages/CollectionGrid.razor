@@ -12,46 +12,33 @@
 {
     <LoadingComponent />
 }
-else{
-    <RadzenText TextStyle="TextStyle.H4">Collection</RadzenText>
-    <RadzenDataGrid 
-        AllowFiltering="true" AllowColumnResize="true" 
-        AllowAlternatingRows="false" 
-        FilterMode="FilterMode.Advanced" 
-        AllowSorting="true" 
-        PageSize="50" 
-        AllowPaging="true"
-        Style="width: 100%"
-        PagerHorizontalAlign="HorizontalAlign.Left" 
-        ShowPagingSummary="true"
-        Data="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" 
-        TItem="ReleaseViewModel"
-        LogicalFilterOperator="LogicalFilterOperator.Or">
+else{  
+    <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+                 Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Collection</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
         <Columns>
-            <RadzenDataGridColumn 
-                TItem="ReleaseViewModel" Property="Artist" 
-                Title="Artist" 
-                Width="50%"             
-                TextAlign="TextAlign.Left">
-                    <Template Context="data">
-                    <RadzenLink class="m-1" onclick=@(() => GoToArtist(data.DiscogsArtistId)) Text="@data.Artist"></RadzenLink>
-                    </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn 
-                TItem="ReleaseViewModel" Property="Title" 
-                Title="Album" 
-                Width="50%" 
-                TextAlign="TextAlign.Left">
-                <Template Context="data">
-                    <RadzenLink class="m-1" onclick=@(() => GoToRelease(data.DiscogsReleaseId)) Text="@data.Title"></RadzenLink>
-                </Template>
-            </RadzenDataGridColumn>
+            
+            <PropertyColumn Property="x => x.Artist" Hidden="true" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />
+            
+            <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy" />
         </Columns>
-    </RadzenDataGrid>
+        <PagerContent>
+            <MudDataGridPager T="ReleaseViewModel" />
+        </PagerContent>
+    </MudDataGrid>
 }
+
+
 @code {
-    private DiscogsCollectionViewModel? _collectionViewModel;
-   
+    public static DiscogsCollectionViewModel? _collectionViewModel;
+    private IEnumerable<ReleaseViewModel> Elements = new List<ReleaseViewModel>();
+    private string _searchString;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -81,4 +68,32 @@ else{
         else
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
+       
+    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist;
+
+    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist;
+
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<ReleaseViewModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Artist.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
 }
+
+<style>
+    /* Custom styling for hiding the Artist column */
+    .custom-mud-datagrid .mud-table-row .mud-table-cell {
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+</style>
