@@ -110,7 +110,6 @@
                 </MudButton>
                 <MudDivider />
                 <MudCollapse Expanded="_tagsExpanded">
-                    <MudPaper>
                         <MudList Clickable="false">
                             @foreach (var tag in Artist.Tags)
                             {
@@ -120,7 +119,6 @@
                                 }
                             }
                         </MudList>
-                    </MudPaper>
                 </MudCollapse>
             </MudStack>
         }
@@ -142,7 +140,6 @@
                 </MudButton>
                 <MudDivider />
                 <MudCollapse Expanded="_releasesExpanded">
-                    <MudPaper>
                         <MudTreeView T="string">
                             @foreach (var releaseGroup in Artist.ArtistsReleases)
                             {
@@ -155,7 +152,6 @@
                                 </MudTreeViewItem>                                    
                             }
                         </MudTreeView>
-                    </MudPaper>
                 </MudCollapse>
             </MudStack>
         }
