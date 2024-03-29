@@ -19,6 +19,8 @@ namespace DiscogsInsight.ApiIntegration.Services
         private const string MasterReleaseUrl = "/masters/";
         private const string ArtistUrl = "/artists/";
 
+        //collection url is in GetCollectionFromDiscogsApi function
+
         //-----------------------------------------------------------------------------
 
 

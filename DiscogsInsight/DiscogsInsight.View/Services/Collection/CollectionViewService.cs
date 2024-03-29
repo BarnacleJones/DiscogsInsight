@@ -30,7 +30,6 @@ namespace DiscogsInsight.View.Services.Collection
                     DiscogsReleaseId = x.DiscogsReleaseId,
                     Year = x.Year.ToString(),
                     Title = x.Title,
-                    Genres = x.Genres,
                     DateAdded = x.DateAdded
                 }).ToList();
 

@@ -39,7 +39,7 @@
     {
         public BasicInformation? basic_information { get; set; }
         public DateTime? date_added { get; set; }
-        public int? id { get; set; }
+        public int? id { get; set; } //discogs release id foreign key
         public int? instance_id { get; set; }
         public int? rating { get; set; }
     }

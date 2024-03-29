@@ -83,9 +83,10 @@ namespace DiscogsInsight.DataAccess.Services
 
                 await SaveTracksFromDiscogsReleaseResponse(releaseResponse, existingRelease, existingTracks);
                 
-                var success = await _discogsGenresAndTagsDataService.SaveTagsFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
+                //save genres (styles) from release
+                var success = await _discogsGenresAndTagsDataService.SaveStylesFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
 
-                return true;
+                return success;
             }
             catch (Exception ex)
             {

@@ -11,13 +11,15 @@ namespace DiscogsInsight.DataAccess.Services
     {
         private readonly DiscogsInsightDb _db;
         private readonly DiscogsApiService _discogsApiService;
+        private readonly DiscogsGenresAndTagsDataService _genresAndTagsDataService;
         private readonly ILogger<CollectionDataService> _logger;
 
-        public CollectionDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<CollectionDataService> logger)
+        public CollectionDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, DiscogsGenresAndTagsDataService genresAndTagsDataService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
             _logger = logger;
+            _genresAndTagsDataService = genresAndTagsDataService;
         }
 
         #region Public Methods
@@ -79,9 +81,13 @@ namespace DiscogsInsight.DataAccess.Services
         {
             await SaveArtistsFromCollectionResponse(collectionResponse);
             await SaveReleasesWithArtistIds(collectionResponse);
+            
             //Todo: These would be a good behind a setting
+            
             await RemoveReleasesNoLongerInCollection(collectionResponse);
             await RemoveArtistsNoLongerInCollection(collectionResponse);
+            //Todo: remove other database info when artist or release isnt in collection, could grow over time
+            //musicbrainz images, track info, genre, etc
             return true;
         }
         private async Task SaveArtistsFromCollectionResponse(DiscogsCollectionResponse collectionResponse)
@@ -142,7 +148,6 @@ namespace DiscogsInsight.DataAccess.Services
                             DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
                             DiscogsMasterId = release.basic_information.master_id,
-                            Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join - todo - task is made
                             Title = release.basic_information.title,
                             Year = release.basic_information.year,
                             DateAdded = release.date_added
@@ -156,12 +161,14 @@ namespace DiscogsInsight.DataAccess.Services
                             DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
                             DiscogsMasterId = release.basic_information.master_id,
-                            Genres = string.Join(",", release.basic_information.genres),//intending not to save list, but string.join
                             Title = release.basic_information.title,
                             Year = release.basic_information.year,
                             DateAdded = release.date_added
                         });
                     }
+
+                    //save genres
+                    var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
                 }
             }
             catch (Exception ex)
