@@ -8,15 +8,18 @@ namespace DiscogsInsight.DataAccess.Services
     public class TracksDataService
     {
         private readonly DiscogsInsightDb _db;
-        private readonly ILogger<ArtistDataService> _logger;
+        private readonly ILogger<TracksDataService> _logger;
         private DiscogsApiService _discogsApiService;
+        private DiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
         public TracksDataService(DiscogsInsightDb db,
-            ILogger<ArtistDataService> logger, DiscogsApiService discogsApiService)
+            ILogger<TracksDataService> logger, DiscogsApiService discogsApiService,
+             DiscogsGenresAndTagsDataService discogsGenresAndTagsDataService)
         {
             _db = db;
             _logger = logger;
             _discogsApiService = discogsApiService;
+            _discogsGenresAndTagsDataService = discogsGenresAndTagsDataService;
         }
 
         public async Task<List<Track>> GetAllTracks()
@@ -47,9 +50,6 @@ namespace DiscogsInsight.DataAccess.Services
 
                 if (!tracksForListRelease.Any() || updateReleaseWithReleaseResponse)
                 {
-                    //updateReleaseWithReleaseResponse is option to save additional information again for data that is missing
-                    //such as when entities existed and i then came and added url to the entity. wasnt getting updated because tracks were retrieved.
-                    //dont want to purge track info when its just to get these few properties
                     var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
                     var success = await SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(discogsReleaseResponse);
                     if (!success)
@@ -75,37 +75,15 @@ namespace DiscogsInsight.DataAccess.Services
                 var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync();
                 var tracksTable = await _db.GetTable<Track>();
                 var existingTracks = await tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync();
-                if (existingRelease == null)
+                if (existingRelease == null || existingRelease.DiscogsArtistId == null || existingRelease.DiscogsReleaseId == null)
                     //at this stage, dont want to store the release info if not in db already
                     throw new Exception($"Unhandled exception: Release {releaseResponse.id} not in database not able to store info.");
 
-                //update existing release entity with additional properties
-                existingRelease.ReleaseCountry = releaseResponse.country;
-                existingRelease.ReleaseNotes = releaseResponse.notes;
-                existingRelease.DiscogsReleaseUrl = releaseResponse.uri;
-                await _db.UpdateAsync(existingRelease);
+                await UpdateAdditionalReleaseProperties(releaseResponse, existingRelease);//todo: this could be moved to release data service
 
-                //save the tracks
-                if (existingTracks != null && !existingTracks.Any() && releaseResponse.tracklist != null)
-                {
-                    foreach (var track in releaseResponse.tracklist)
-                    {
-                        await _db.SaveItemAsync(new Track
-                        {
-                            DiscogsArtistId = existingRelease.DiscogsArtistId,
-                            DiscogsMasterId = existingRelease.DiscogsMasterId,
-                            DiscogsReleaseId = releaseResponse.id,
-                            Duration = track.duration,
-                            Title = track.title,
-                            Position = track.position
-                        });
-                    }
-                }
-                //save the genre tags
-                var discogsGenreTagsToDiscogsReleaseTable = await _db.GetTable<DiscogsGenreTagToDiscogsRelease>();
-                var discogsGenreTags = await _db.GetTable<DiscogsGenreTags>();
-
-                var existingGenreTags = await tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync();
+                await SaveTracksFromDiscogsReleaseResponse(releaseResponse, existingRelease, existingTracks);
+                
+                var success = await _discogsGenresAndTagsDataService.SaveTagsFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
 
                 return true;
             }
@@ -116,5 +94,33 @@ namespace DiscogsInsight.DataAccess.Services
             }
         }
 
+        private async Task SaveTracksFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse, Release existingRelease, List<Track> existingTracks)
+        {
+            //save the tracks
+            if (existingTracks != null && !existingTracks.Any() && releaseResponse.tracklist != null)
+            {
+                foreach (var track in releaseResponse.tracklist)
+                {
+                    await _db.SaveItemAsync(new Track
+                    {
+                        DiscogsArtistId = existingRelease.DiscogsArtistId,
+                        DiscogsMasterId = existingRelease.DiscogsMasterId,
+                        DiscogsReleaseId = releaseResponse.id,
+                        Duration = track.duration,
+                        Title = track.title,
+                        Position = track.position
+                    });
+                }
+            }
+        }
+
+        private async Task UpdateAdditionalReleaseProperties(DiscogsReleaseResponse releaseResponse, Release existingRelease)
+        {
+            //update existing release entity with additional properties
+            existingRelease.ReleaseCountry = releaseResponse.country;
+            existingRelease.ReleaseNotes = releaseResponse.notes;
+            existingRelease.DiscogsReleaseUrl = releaseResponse.uri;
+            await _db.UpdateAsync(existingRelease);
+        }
     }
 }
