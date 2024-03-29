@@ -68,7 +68,7 @@
                         
                 </MudList>
             </MudCollapse>
-        </MudStack>      
+        </MudStack>  
         @if (!string.IsNullOrWhiteSpace(Artist.ArtistDescription))
         {
             <MudStack>
@@ -90,6 +90,34 @@
                     <MudText Typo="Typo.body1">@Artist.ArtistDescription</MudText>
                 </MudCollapse>
             </MudStack>            
+        }
+        @if (Artist.ReleasesInCollection.Any())
+        {
+            <MudStack>
+                <MudButton OnClick="OnCollectionReleasesExpandCollapseClick">
+                    @if (_collectionReleasesExpanded)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
+
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" />
+                    }
+                    <MudSpacer />
+                    Releases in your collection
+                </MudButton>
+                <MudDivider />
+                <MudCollapse Expanded="_collectionReleasesExpanded">
+                    @foreach (var release in Artist.ReleasesInCollection)
+                    {
+                        if (release != null)
+                        {
+                            <ReleaseComponent Release="release" ShowRefreshRelease="false" />
+                        }
+                    }
+                </MudCollapse>
+            </MudStack>
         }
         @if (Artist.Tags.Any())
         {
@@ -164,6 +192,7 @@
     private bool _infoExpanded = true;
     private bool _tagsExpanded = false;
     private bool _releasesExpanded = false;
+    private bool _collectionReleasesExpanded = false;
     private bool _descriptionExpanded = false;
     
 
@@ -179,6 +208,10 @@
     private void OnTagsExpandCollapseClick()
     {
         _tagsExpanded = !_tagsExpanded;
+    }
+    private void OnCollectionReleasesExpandCollapseClick()
+    {
+        _collectionReleasesExpanded = !_collectionReleasesExpanded;
     }
     private void OnReleasesExpandCollapseClick()
     {

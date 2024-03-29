@@ -54,7 +54,7 @@ namespace DiscogsInsight.DataAccess.Services
                 var discogsGenreTagsList = await GetAllGenreTagsAsList();
 
                 var releaseStylesFromReleaseResponse = releaseResponse.styles;
-                var stylesNotInDatabaseAlready = releaseStylesFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag));
+                var stylesNotInDatabaseAlready = releaseStylesFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag)).ToList();
 
                 if (stylesNotInDatabaseAlready.Any())
                 {

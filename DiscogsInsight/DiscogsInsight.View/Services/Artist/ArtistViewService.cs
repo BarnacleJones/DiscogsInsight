@@ -1,4 +1,5 @@
 ﻿using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 
@@ -8,10 +9,12 @@ namespace DiscogsInsight.View.Services.Artist
     {
         private readonly ArtistDataService _artistDataService;
         private readonly TagsDataService _tagsDataService;
-        public ArtistViewService(ArtistDataService artistDataService, TagsDataService tagsDataService)
+        private readonly ReleaseViewService _releaseViewService;
+        public ArtistViewService(ArtistDataService artistDataService, TagsDataService tagsDataService, ReleaseViewService releaseViewService)
         {
             _artistDataService = artistDataService;
             _tagsDataService = tagsDataService; 
+            _releaseViewService = releaseViewService;
         }
 
         public async Task<ViewResult<ArtistViewModel>> GetArtist(int? discogsArtistId)
@@ -38,6 +41,8 @@ namespace DiscogsInsight.View.Services.Artist
                                     }).ToList()
                     }).ToList();
 
+                var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId, artist.Name);
+
                 var data = new ArtistViewModel
                 {
                     Artist = artist.Name,
@@ -49,7 +54,8 @@ namespace DiscogsInsight.View.Services.Artist
                     EndYear = artist.EndYear,
                     MusicBrainzArtistId = artist.MusicBrainzArtistId,
                     Tags = tagsList,
-                    ArtistsReleases = releasesViewModel
+                    ArtistsReleases = releasesViewModel,
+                    ReleasesInCollection = releasesInCollection
                 };
 
                 return new ViewResult<ArtistViewModel>
