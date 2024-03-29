@@ -17,6 +17,15 @@ namespace DiscogsInsight.View.Services.Artist
             _releaseViewService = releaseViewService;
         }
 
+        public async Task<ViewResult<ArtistViewModel>> GetRandomArtist()
+        {
+            var allArtists = await _artistDataService.GetArtists();
+
+            var randomArtistId = allArtists.Select(x => x.DiscogsArtistId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+
+            return await GetArtist(randomArtistId);
+        }
+
         public async Task<ViewResult<ArtistViewModel>> GetArtist(int? discogsArtistId)
         {
             try

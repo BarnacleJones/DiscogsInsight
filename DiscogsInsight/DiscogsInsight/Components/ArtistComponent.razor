@@ -21,7 +21,13 @@
                     @(Artist.StartYear) - @(Artist.EndYear ?? "")
                     </MudText>
                 }
-        </CardHeaderContent>          
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (ShowRefreshArtist == true)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="RefreshCard" Color="Color.Default" />
+            }
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudStack>
@@ -189,12 +195,24 @@
 {
     [Parameter]
     public ArtistViewModel Artist { get; set; }
+    [Parameter]
+    public bool? ShowRefreshArtist { get; set; } = false;
+    [Parameter]
+    public EventCallback OnButtonClick { get; set; }
+
     private bool _infoExpanded = true;
     private bool _tagsExpanded = false;
     private bool _releasesExpanded = false;
     private bool _collectionReleasesExpanded = false;
     private bool _descriptionExpanded = false;
     
+    private async Task RefreshCard()
+    {
+        if (OnButtonClick.HasDelegate)
+        {
+            await OnButtonClick.InvokeAsync(null);
+        }
+    }
 
     private void OnDescriptionExpandCollapseClick()
     {

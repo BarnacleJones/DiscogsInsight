@@ -35,6 +35,12 @@ namespace DiscogsInsight.DataAccess.Services
             return artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
         }
 
+        public async Task<List<Artist>?> GetArtists()
+        {
+            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            return artists.ToList();
+        }
+
         public async Task<Artist?> GetArtist(int? discogsArtistId, bool fetchAndSaveApiData = true)
         {
             if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }
