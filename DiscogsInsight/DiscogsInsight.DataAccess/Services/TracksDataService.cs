@@ -59,7 +59,7 @@ namespace DiscogsInsight.DataAccess.Services
                         throw new Exception("Error saving tracklist to database");
                     }
                     tracks = await _db.GetAllEntitiesAsync<Track>();
-                    trackList = tracks.ToList();
+                    trackList = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
                 }
 
                 return trackList;
