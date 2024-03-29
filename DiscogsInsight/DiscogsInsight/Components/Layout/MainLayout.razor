@@ -8,13 +8,15 @@
     <MudAppBar Color="Color.Primary" Fixed="false">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/BarnacleJones/DiscogsInsight" />
+        <MudImage Src="images/loading.png" Style="width: 48px; height: 48px;" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
         <Navbar/>
     </MudDrawer>
     <MudMainContent MaxWidth="MaxWidth.Medium" Elevation="0">
-        @Body
+        <MudContainer>
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 

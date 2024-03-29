@@ -2,35 +2,23 @@
 @using DiscogsInsight.View.Services.Notifications
 @using DiscogsInsight.View.Services.Settings
 @using DiscogsInsight.ViewModels.Results
-@using Microsoft.Maui.Controls
 @inject NavigationManager NavigationManager
 @inject SettingsViewService SettingsViewService
 @inject UserNotificationService UserNotificationService
 
-<div class="container mt-5">
-    <div class="row mb-3">
-        <RadzenText Text="Settings" TextStyle="TextStyle.DisplayH4" />
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <p>Change your Discogs username. <strong><br />Warning: </strong>This will DELETE all of your saved collection data. The task will take a while to complete for larger collections.</p>
-        </div>
-        <div class="col-12 col-md-6 mb-3">
-            <label for="userNameInput">Discogs Username:</label>
-            <input type="text" class="form-control" @bind="discogsUsername">
-        </div>
-        <div class="col-12 col-md-6 mb-3">
-            <button class="btn btn-primary" @onclick="SaveUsername">Save</button>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <p>Fetch your collection data to update. <strong><br/>Warning: </strong>Deletes items no longer in your Discogs collection from the local db.</p>
-            
-            <button class="btn btn-primary" @onclick="UpdateApiData">Refresh Collection Data</button>
-        </div>
-    </div>
-</div>
+<MudStack AlignItems="MudBlazor.AlignItems.Start">
+    <MudText Typo="Typo.h5">Settings <MudIcon Icon="@Icons.Material.Filled.Settings"></MudIcon></MudText>
+    <MudSpacer />
+    <MudStack Row="true">
+        <MudTextField @bind-Value="discogsUsername" Label="Discogs Username" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField>   
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="@SaveUsername"  Size="Size.Small">Save Username</MudButton>
+    </MudStack>
+    <MudSpacer />
+    <MudStack Row="true">  
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="@UpdateApiData" Size="Size.Small">Update Collection Data</MudButton>
+    </MudStack>
+</MudStack>
+
 
 @code {
     private string discogsUsername = string.Empty;
