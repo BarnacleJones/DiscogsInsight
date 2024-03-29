@@ -17,9 +17,11 @@ ONce this is entered your collection will be seeded to the database and you can 
 ![image](https://github.com/BarnacleJones/DiscogsInsight/assets/88416885/154381a8-51b4-4395-9c7d-e7d6704ff3e1)
 
 Home page - indicates how much full collection data has been retrieved - the more data, the more accurate the insights are:
+
 ![image](https://github.com/BarnacleJones/DiscogsInsight/assets/88416885/8bdf6f69-302f-4cb1-b246-d8a8827aa5b0)
 
 Sample release page:
+
 ![image](https://github.com/BarnacleJones/DiscogsInsight/assets/88416885/89c0cc4b-9a79-4666-89bf-123c93ff9ccf)
 
 Work in progress with many features still to implement.  
