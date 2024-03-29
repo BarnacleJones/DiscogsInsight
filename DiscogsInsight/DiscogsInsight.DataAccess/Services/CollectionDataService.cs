@@ -69,8 +69,11 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var data = await _discogsApiService.GetCollectionFromDiscogsApi();
-
-                return await SaveDiscogsCollectionResponse(data);               
+                if (data != null)
+                {
+                    return await SaveDiscogsCollectionResponse(data);
+                }
+                return false;
             }
             catch
             {
@@ -94,29 +97,32 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                foreach (var release in collectionResponse.releases)
+                if (collectionResponse.releases != null)
                 {
-                    var artistsToSave = release.basic_information?.artists?.ToList();
-                    foreach (var artist in artistsToSave)
+                    foreach (var release in collectionResponse.releases)
                     {
-                        var artistsTable = await _db.GetTable<Artist>();
-                        var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
-                        if (await existingArtist == null)
+                        var artistsToSave = release.basic_information?.artists?.ToList();
+                        foreach (var artist in artistsToSave)
                         {
-                            await _db.InsertAsync(new Artist
+                            var artistsTable = await _db.GetTable<Artist>();
+                            var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
+                            if (await existingArtist == null)
                             {
-                                DiscogsArtistId = artist.id,
-                                Name = artist.name,
-                            });
-                        }
-                        else
-                        {
-                            await _db.UpdateAsync(new Artist
+                                await _db.InsertAsync(new Artist
+                                {
+                                    DiscogsArtistId = artist.id,
+                                    Name = artist.name,
+                                });
+                            }
+                            else
                             {
-                                Id = existingArtist.Id,
-                                DiscogsArtistId = artist.id,
-                                Name = artist.name
-                            });
+                                await _db.UpdateAsync(new Artist
+                                {
+                                    Id = existingArtist.Id,
+                                    DiscogsArtistId = artist.id,
+                                    Name = artist.name
+                                });
+                            }
                         }
                     }
                 }
@@ -134,41 +140,44 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 var artistsTable = await _db.GetTable<Artist>();
                 var artistsFromDb = await artistsTable.ToListAsync();
-                foreach (var release in collectionResponse.releases)
+                if (collectionResponse.releases != null)
                 {
-                    var artistIdForThisRelease = release.basic_information?.artists?.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
-                    var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
-
-                    var releaseTable = await _db.GetTable<Release>();
-                    var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == release.id).FirstOrDefaultAsync();
-                    if (existingRelease == null)
+                    foreach (var release in collectionResponse.releases)
                     {
-                        _ = await _db.InsertAsync(new Release
-                        {
-                            DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
-                            DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
-                            DiscogsMasterId = release.basic_information.master_id,
-                            Title = release.basic_information.title,
-                            Year = release.basic_information.year,
-                            DateAdded = release.date_added
-                        });
-                    }
-                    else
-                    {
-                        _ = await _db.UpdateAsync(new Release
-                        {
-                            Id = existingRelease.Id,
-                            DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
-                            DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
-                            DiscogsMasterId = release.basic_information.master_id,
-                            Title = release.basic_information.title,
-                            Year = release.basic_information.year,
-                            DateAdded = release.date_added
-                        });
-                    }
+                        var artistIdForThisRelease = release.basic_information?.artists?.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
+                        var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
 
-                    //save genres
-                    var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
+                        var releaseTable = await _db.GetTable<Release>();
+                        var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == release.id).FirstOrDefaultAsync();
+                        if (existingRelease == null)
+                        {
+                            _ = await _db.InsertAsync(new Release
+                            {
+                                DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
+                                DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                                DiscogsMasterId = release.basic_information.master_id,
+                                Title = release.basic_information.title,
+                                Year = release.basic_information.year,
+                                DateAdded = release.date_added
+                            });
+                        }
+                        else
+                        {
+                            _ = await _db.UpdateAsync(new Release
+                            {
+                                Id = existingRelease.Id,
+                                DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
+                                DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                                DiscogsMasterId = release.basic_information.master_id,
+                                Title = release.basic_information.title,
+                                Year = release.basic_information.year,
+                                DateAdded = release.date_added
+                            });
+                        }
+
+                        //save genres
+                        var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
+                    }
                 }
             }
             catch (Exception ex)

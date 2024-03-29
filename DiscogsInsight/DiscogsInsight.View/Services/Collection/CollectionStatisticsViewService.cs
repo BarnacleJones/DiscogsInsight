@@ -56,11 +56,11 @@ namespace DiscogsInsight.View.Services.Collection
 
             //get last 6 months albums 
             var lastSixMonths = new List<double>();
-            var thisYear = DateTime.Now.Year;
             for (int i = 5; i >= 0; i--)
             {
                 var thisParticularMonth = DateTime.Today.AddMonths(-i).Month;
-                var tracksNewThisParticularMonth = releases.Where(x => x.DateAdded.Value.Month == thisParticularMonth && x.DateAdded.Value.Year == thisYear).Count();
+                var thisParticularYear = DateTime.Today.AddMonths(-i).Year;
+                var tracksNewThisParticularMonth = releases.Where(x => x.DateAdded.Value.Month == thisParticularMonth && x.DateAdded.Value.Year == thisParticularYear).Count();
                 lastSixMonths.Add(tracksNewThisParticularMonth);
             }
 

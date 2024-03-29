@@ -68,7 +68,7 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<TagsDataService>();
             builder.Services.AddSingleton<TracksDataService>();
             builder.Services.AddSingleton<ArtistDataService>();
-            builder.Services.AddSingleton<TracksViewService>();
+            builder.Services.AddSingleton<DiscogsGenresAndTagsDataService>();
 
             //view layer
             builder.Services.AddSingleton<UserNotificationService>();

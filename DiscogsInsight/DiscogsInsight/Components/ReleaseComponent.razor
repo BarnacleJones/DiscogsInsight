@@ -81,6 +81,14 @@
                             <MudSpacer />
                             <MudText Typo="Typo.body1">@Release.ReleaseCountry</MudText>
                         </MudListItem>
+                    }    
+                    @if (!string.IsNullOrWhiteSpace(Release.ReleaseNotes))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Release Notes</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Release.ReleaseNotes</MudText>
+                        </MudListItem>
                     }                        
                 </MudList>
             </MudCollapse>
@@ -88,7 +96,7 @@
         @if (Release.Genres.Any())
         {
             <MudStack>
-                <MudButton OnClick="OnTracksExpandCollapseClick">
+                <MudButton OnClick="OnGenresExpandCollapseClick">
                     @if (_genresExpanded)
                     {
                         <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />

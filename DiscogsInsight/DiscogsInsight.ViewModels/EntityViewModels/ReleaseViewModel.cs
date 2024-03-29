@@ -5,6 +5,7 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
         public string? Year { get; set; }
         public string? Title { get; set; }
         public string? Artist { get; set; }
+        public string? ReleaseNotes { get; set; }
         public string? ReleaseCountry { get; set; }
         public int? DiscogsArtistId { get; set; }
         public int? DiscogsReleaseId { get; set; }
