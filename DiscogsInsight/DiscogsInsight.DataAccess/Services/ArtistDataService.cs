@@ -31,13 +31,13 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<Artist?> GetArtistByDiscogsId(int discogsArtistId)
         {
-            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
             return artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
         }
 
         public async Task<List<Artist>?> GetArtists()
         {
-            var artists = await _db.GetAllEntitiesAsync<Artist>();
+            var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
             return artists.ToList();
         }
 

@@ -47,7 +47,7 @@ namespace DiscogsInsight.DataAccess.Services
         }
         public async Task<List<Track>> GetAllTracks()
         {
-            var tracks = await _db.GetAllEntitiesAsync<Track>();
+            var tracks = await _db.GetAllEntitiesAsListAsync<Track>();
             return tracks.ToList();
         }
 
@@ -57,7 +57,7 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 if (discogsReleaseId == null) throw new Exception("No release id provided for getting tracklist");
 
-                var tracks = await _db.GetAllEntitiesAsync<Track>();
+                var tracks = await _db.GetAllEntitiesAsListAsync<Track>();
 
                 var trackList = tracks.ToList();
 
@@ -67,7 +67,7 @@ namespace DiscogsInsight.DataAccess.Services
                 //but for now this is the place I will update the whatever is the latest 
                 //property added to the release entity, to help determine if api needs to be hit again
 
-                var release = await _db.GetAllEntitiesAsync<Release>();
+                var release = await _db.GetAllEntitiesAsListAsync<Release>();
                 var thisRelease = release.ToList().FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
                 //see readme in solution items
                 //latest added is release notes
@@ -81,7 +81,7 @@ namespace DiscogsInsight.DataAccess.Services
                     {
                         throw new Exception("Error saving tracklist to database");
                     }
-                    tracks = await _db.GetAllEntitiesAsync<Track>();
+                    tracks = await _db.GetAllEntitiesAsListAsync<Track>();
                     trackList = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
                 }
 

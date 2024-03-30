@@ -42,7 +42,7 @@ namespace DiscogsInsight.DataAccess
             }
         }
 
-        public async Task<List<T>> GetAllEntitiesAsync<T>() where T : IDatabaseEntity, new()
+        public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : IDatabaseEntity, new()
         {
             try
             {

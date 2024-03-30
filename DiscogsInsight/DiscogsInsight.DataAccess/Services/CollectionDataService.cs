@@ -48,13 +48,13 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<List<T>> GetCollectionEntityAsList<T>() where T : IDatabaseEntity, new()
         {
             List<T> entityList;
-            var entities = await _db.GetAllEntitiesAsync<T>();
+            var entities = await _db.GetAllEntitiesAsListAsync<T>();
             entityList = entities.ToList();
 
             if (!entityList.Any())
             {
                 await CollectionSavedOrUpdatedFromDiscogs();
-                var newEntity = await _db.GetAllEntitiesAsync<T>();
+                var newEntity = await _db.GetAllEntitiesAsListAsync<T>();
                 entityList = newEntity.ToList();
             }
             return entityList;
