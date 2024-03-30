@@ -1,6 +1,6 @@
 ﻿namespace DiscogsInsight.ViewModels.Collection
 {
-    public class TracksGridItemViewModel
+    public class TracksItemViewModel
     {
         public string? Title { get; set; }
         public string? Duration { get; set; }

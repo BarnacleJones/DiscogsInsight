@@ -268,7 +268,7 @@
         return imageData;
     }
 
-    private string GetTrackString(TracksGridItemViewModel track)
+    private string GetTrackString(TracksItemViewModel track)
     {
         return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
     }

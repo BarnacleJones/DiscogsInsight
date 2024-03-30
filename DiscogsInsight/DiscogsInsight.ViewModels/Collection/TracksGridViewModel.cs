@@ -2,6 +2,6 @@
 {
     public class TracksGridViewModel
     {
-        public List<TracksGridItemViewModel>? Tracks { get; set; }
+        public List<TracksItemViewModel>? Tracks { get; set; }
     }
 }

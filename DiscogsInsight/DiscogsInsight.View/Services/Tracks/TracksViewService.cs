@@ -27,7 +27,7 @@ namespace DiscogsInsight.View.Services.Tracks
             return success;
         }
 
-        public async Task<ViewResult<TracksGridItemViewModel>> GetRandomTrack() 
+        public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack() 
         {
             try
             {
@@ -43,7 +43,7 @@ namespace DiscogsInsight.View.Services.Tracks
                     var releaseTitle = releases.Where(x => x.DiscogsReleaseId == randomTrack.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
                     var releaseArtist = artists.Where(x => x.DiscogsArtistId == randomTrack.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
 
-                    var data = new TracksGridItemViewModel
+                    var data = new TracksItemViewModel
                     {
                         DiscogsArtistId = randomTrack.DiscogsArtistId ?? 0,
                         DiscogsReleaseId = randomTrack.DiscogsReleaseId ?? 0,
@@ -55,14 +55,14 @@ namespace DiscogsInsight.View.Services.Tracks
                         Release = releaseTitle
                     };
 
-                    return new ViewResult<TracksGridItemViewModel>
+                    return new ViewResult<TracksItemViewModel>
                     {
                         Data = data,
                         ErrorMessage = "",
                         Success = true
                     };
                 }
-                return new ViewResult<TracksGridItemViewModel>
+                return new ViewResult<TracksItemViewModel>
                 {
                     Data = null,
                     ErrorMessage = "Random track was null",
@@ -72,7 +72,7 @@ namespace DiscogsInsight.View.Services.Tracks
             }
             catch (Exception ex)
             {
-                return new ViewResult<TracksGridItemViewModel>
+                return new ViewResult<TracksItemViewModel>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -87,7 +87,7 @@ namespace DiscogsInsight.View.Services.Tracks
             {
                 var tracks = await _tracksDataService.GetAllTracks();
 
-                var tracksAsGridItems = tracks.Select(x => new TracksGridItemViewModel
+                var tracksAsGridItems = tracks.Select(x => new TracksItemViewModel
                 {
                     DiscogsArtistId = x.DiscogsArtistId ?? 0,
                     DiscogsReleaseId = x.DiscogsReleaseId ?? 0,

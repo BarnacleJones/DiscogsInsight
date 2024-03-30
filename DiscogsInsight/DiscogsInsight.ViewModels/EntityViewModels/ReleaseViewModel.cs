@@ -14,7 +14,7 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
         public List<string?>? Genres { get; set; }
         public string? DiscogsReleaseUrl { get; set; }
         public DateTime? DateAdded { get; set; }
-        public List<TracksGridItemViewModel>? Tracks { get; set; }
+        public List<TracksItemViewModel>? Tracks { get; set; }
         public byte[] CoverImage { get; set; }
         public bool IsFavourited { get; set; }
     }

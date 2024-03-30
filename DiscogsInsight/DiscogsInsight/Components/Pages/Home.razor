@@ -52,7 +52,7 @@ else
     private bool _randomTrackExpanded { get; set; }
     private string discogsUsername = string.Empty;
     private ReleaseViewModel? _randomRelease;
-    private TracksGridItemViewModel? _randomTrack;
+    private TracksItemViewModel? _randomTrack;
     private CollectionStatsViewModel? _collectionStats;
 
     public void handleButtonClick()
@@ -81,7 +81,7 @@ else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");       
     }
 
-    private async void HandleRandomTrackResult(ViewResult<TracksGridItemViewModel> result)
+    private async void HandleRandomTrackResult(ViewResult<TracksItemViewModel> result)
     {
         if (result.Success)
             _randomTrack = result.Data;        

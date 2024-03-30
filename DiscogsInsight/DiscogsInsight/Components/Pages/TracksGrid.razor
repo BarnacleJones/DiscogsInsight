@@ -13,7 +13,7 @@
 }
 else{  
     <MudText Typo="Typo.h6">Tracks</MudText>
-    <MudDataGrid T="@TracksGridItemViewModel" MultiSelection="true" Items="@_trackGridViewModel.Tracks?.OrderBy(x => x.Title)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    <MudDataGrid T="@TracksItemViewModel" MultiSelection="true" Items="@_trackGridViewModel.Tracks?.OrderBy(x => x.Title)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
                  Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50">
         <ToolBarContent>
             <MudSpacer />
@@ -40,7 +40,7 @@ else{
 
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="TracksGridItemViewModel" />
+            <MudDataGridPager T="TracksItemViewModel" />
         </PagerContent>
     </MudDataGrid>
 }
@@ -48,7 +48,7 @@ else{
 
 @code {
     public static TracksGridViewModel? _trackGridViewModel;
-    private IEnumerable<TracksGridItemViewModel> Elements = new List<TracksGridItemViewModel>();
+    private IEnumerable<TracksItemViewModel> Elements = new List<TracksItemViewModel>();
     private string _searchString;
     protected override async Task OnInitializedAsync()
     {
@@ -80,12 +80,12 @@ else{
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
        
-    private Func<TracksGridItemViewModel, object> _sortBy => x => x.Title;
+    private Func<TracksItemViewModel, object> _sortBy => x => x.Title;
 
-    private Func<TracksGridItemViewModel, object> _groupBy => x => x.Title;
+    private Func<TracksItemViewModel, object> _groupBy => x => x.Title;
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<TracksGridItemViewModel, bool> _quickFilter => x =>
+    private Func<TracksItemViewModel, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
