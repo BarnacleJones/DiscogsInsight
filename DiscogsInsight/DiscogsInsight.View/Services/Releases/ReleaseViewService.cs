@@ -34,7 +34,7 @@ namespace DiscogsInsight.View.Services.Releases
                 if (discogsReleaseId == null)
                     throw new Exception($"Missing release info");
 
-                var release = await _releaseDataService.GetRelease(discogsReleaseId);
+                var release = await _releaseDataService.GetReleaseAndImageAndRetrieveAllApiDataForRelease(discogsReleaseId);
 
                 if (release.Item1 == null)
                     throw new Exception("No release");
@@ -251,7 +251,7 @@ namespace DiscogsInsight.View.Services.Releases
 
             foreach (var releaseId in discogsReleaseIdsForArtist)
             {
-                var release = await _releaseDataService.GetRelease(releaseId);
+                var release = await _releaseDataService.GetReleaseAndImageAndRetrieveAllApiDataForRelease(releaseId);
 
                 var releaseTrackList = await _tracksDataService.GetTracksForRelease(release.Item1.DiscogsReleaseId);
 

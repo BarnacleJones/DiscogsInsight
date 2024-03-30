@@ -65,7 +65,7 @@ namespace DiscogsInsight.DataAccess.Services
                 if (!tracksForListRelease.Any() || updateReleaseWithReleaseResponse)
                 {
                     //updates all track info too - not using release info
-                    var a = await _releaseDataService.GetRelease(discogsReleaseId);
+                    var a = await _releaseDataService.GetReleaseAndImageAndRetrieveAllApiDataForRelease(discogsReleaseId);
                     tracks = await _db.GetAllEntitiesAsListAsync<Track>();
 
                     tracksForListRelease = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
