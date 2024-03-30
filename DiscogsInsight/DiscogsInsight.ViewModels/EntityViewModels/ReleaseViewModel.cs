@@ -1,3 +1,5 @@
+using DiscogsInsight.ViewModels.Collection;
+
 namespace DiscogsInsight.ViewModels.EntityViewModels
 {
     public class ReleaseViewModel
@@ -12,7 +14,7 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
         public List<string?>? Genres { get; set; }
         public string? DiscogsReleaseUrl { get; set; }
         public DateTime? DateAdded { get; set; }
-        public List<TrackViewModel>? Tracks { get; set; }
+        public List<TracksGridItemViewModel>? Tracks { get; set; }
         public byte[] CoverImage { get; set; }
         public bool IsFavourited { get; set; }
     }

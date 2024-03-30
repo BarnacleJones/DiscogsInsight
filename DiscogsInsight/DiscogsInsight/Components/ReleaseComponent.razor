@@ -1,4 +1,5 @@
 ﻿@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels.Collection
 @using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
 @inject IJSRuntime JS
@@ -152,7 +153,8 @@
                                 if (track is not null)
                                 {
                                     <MudListItem Text="@GetTrackString(@track)" Icon="@Icons.Material.Filled.MusicNote" />
-                                }
+                                    <TrackRatingComponent Track="@track" />
+                            }
                             }
                         </MudList>
                 </MudCollapse>
@@ -266,7 +268,7 @@
         return imageData;
     }
 
-    private string GetTrackString(TrackViewModel track)
+    private string GetTrackString(TracksGridItemViewModel track)
     {
         return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
     }
