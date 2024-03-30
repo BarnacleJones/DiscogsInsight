@@ -63,15 +63,10 @@ namespace DiscogsInsight.DataAccess.Services
 
                 var tracksForListRelease = trackList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
 
-                //there is a better way to do this
-                //but for now this is the place I will update the whatever is the latest 
-                //property added to the release entity, to help determine if api needs to be hit again
-
                 var release = await _db.GetAllEntitiesAsListAsync<Release>();
                 var thisRelease = release.ToList().FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
-                //see readme in solution items
-                //latest added is release notes
-                var updateReleaseWithReleaseResponse = thisRelease.ReleaseNotes == null;
+            
+                var updateReleaseWithReleaseResponse = !thisRelease.HasAllApiData;
 
                 if (!tracksForListRelease.Any() || updateReleaseWithReleaseResponse)
                 {
@@ -83,6 +78,8 @@ namespace DiscogsInsight.DataAccess.Services
                     }
                     tracks = await _db.GetAllEntitiesAsListAsync<Track>();
                     trackList = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
+                    thisRelease.HasAllApiData = true;
+                    await _db.UpdateAsync(thisRelease);
                 }
 
                 return trackList;

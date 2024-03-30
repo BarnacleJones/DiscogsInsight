@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -108,6 +108,8 @@ namespace DiscogsInsight.DataAccess.Services
                 coverImage = await GetCoverInfoAndReturnByteArrayImage(release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
                 if (coverImage == null) { coverImage = Array.Empty<byte>(); }
             }
+            release.HasAllApiData = true;//all api data retrieved for release
+            await _db.UpdateAsync(release);
 
             return (release, coverImage);
         }
