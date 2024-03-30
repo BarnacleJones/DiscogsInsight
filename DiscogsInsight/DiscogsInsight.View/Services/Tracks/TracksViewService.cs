@@ -20,6 +20,59 @@ namespace DiscogsInsight.View.Services.Tracks
             _artistDataService = artistDataService;
         }
 
+        public async Task<ViewResult<TracksGridItemViewModel>> GetRandomTrack() 
+        {
+            try
+            {
+                var tracks = await _tracksDataService.GetAllTracks();
+
+                var random = new Random();
+                var randomTrack = tracks.OrderBy(x => random.Next()).FirstOrDefault();
+
+                if (randomTrack != null) 
+                {
+                    var releases = await _releaseDataService.GetAllReleasesAsList();
+                    var artists = await _artistDataService.GetArtists();
+                    var releaseTitle = releases.Where(x => x.DiscogsReleaseId == randomTrack.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
+                    var releaseArtist = artists.Where(x => x.DiscogsArtistId == randomTrack.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
+
+                    var data = new TracksGridItemViewModel
+                    {
+                        DiscogsArtistId = randomTrack.DiscogsArtistId ?? 0,
+                        DiscogsReleaseId = randomTrack.DiscogsReleaseId ?? 0,
+                        Duration = randomTrack.Duration,
+                        Title = randomTrack.Title,
+                        Position = randomTrack.Position,
+                        Rating = randomTrack.Rating,
+                        Artist = releaseArtist,
+                        Release = releaseTitle
+                    };
+
+                    return new ViewResult<TracksGridItemViewModel>
+                    {
+                        Data = data,
+                        ErrorMessage = "",
+                        Success = true
+                    };
+                }
+                return new ViewResult<TracksGridItemViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = "Random track was null",
+                    Success = false
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<TracksGridItemViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+        }
 
         public async Task<ViewResult<TracksGridViewModel>> GetTracksForTracksGrid()
         {

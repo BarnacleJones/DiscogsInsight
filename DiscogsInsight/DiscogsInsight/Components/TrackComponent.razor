@@ -1,0 +1,89 @@
+﻿@using DiscogsInsight.ViewModels.Collection
+@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IBrowserViewportService ViewportService
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body2">
+            @(Track.Title)
+            </MudText>
+            <MudLink OnClick="@(() => @GoToArtist(Track.DiscogsArtistId))">
+                <MudText Typo="Typo.body1">
+                    @(Track.Artist)
+                </MudText>
+            </MudLink>
+        </CardHeaderContent>
+            <CardHeaderActions>
+                @if(ShowRefreshTrack == true)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="RefreshCard" Color="Color.Default" />
+                }
+            </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudStack> 
+                <MudList Clickable="true">
+                @if (!string.IsNullOrWhiteSpace(Track.Duration))
+                {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Duration</MudText>
+                            <MudSpacer />
+                            <MudText Typo="Typo.body1">@Track.Duration</MudText>                                
+                        </MudListItem>                            
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Track.Release))
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Release</MudText>
+                            <MudSpacer />
+                            <MudLink OnClick="@(() => @GoToRelease(Track.DiscogsReleaseId))">
+                                <MudText Typo="Typo.body1">
+                                    @(Track.Release)
+                                </MudText>
+                            </MudLink>
+                        </MudListItem>
+                    }
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Rating</MudText>
+                            <MudSpacer />
+                            <MudRating SelectedValue="2" Size="Size.Small" />       
+                        </MudListItem>            
+                </MudList>
+        </MudStack>          
+    </MudCardContent>
+</MudCard>
+
+@code
+{
+    [Parameter]
+    public TracksGridItemViewModel Track { get; set; }
+
+    [Parameter]
+    public bool? ShowRefreshTrack { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnButtonClick { get; set; }
+
+    
+    private async Task RefreshCard()
+    {
+        if (OnButtonClick.HasDelegate)
+        {
+            await OnButtonClick.InvokeAsync(null);
+        }
+    }
+
+    private void GoToArtist(int? discogsArtistId)
+    {
+        NavigationManager.NavigateTo("/artist/" + discogsArtistId);
+    }
+
+    private void GoToRelease(int? releaseId)
+    {
+        NavigationManager.NavigateTo($"/release/{releaseId}");
+    }
+
+}
