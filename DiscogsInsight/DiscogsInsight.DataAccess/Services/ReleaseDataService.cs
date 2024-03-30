@@ -23,9 +23,28 @@ namespace DiscogsInsight.DataAccess.Services
         }
 
 
+        public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
+        {
+            try
+            {
+                var release = await _db.GetAllEntitiesAsListAsync<Release>();
+
+                var thisRelease = release.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault();
+
+                thisRelease.IsFavourited = favourited; 
+                
+                await _db.SaveItemAsync(thisRelease);
+
+                return true; 
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
         public async Task<List<Release>> GetAllReleasesAsList()
         {
-            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var releases = await _db.GetAllEntitiesAsListAsync<Release>();
             return releases;
         }
 
@@ -33,7 +52,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             if (discogsArtistId == null) { return new List<int?>(); }
 
-            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var releases = await _db.GetAllEntitiesAsListAsync<Release>();
             var releaseList = releases.ToList();
 
             return releaseList.Where(x => x.DiscogsArtistId == discogsArtistId)
@@ -55,7 +74,7 @@ namespace DiscogsInsight.DataAccess.Services
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
             }
             
-            var artistsTable = await _db.GetAllEntitiesAsync<Artist>();
+            var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
             var artists = artistsTable.ToList();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
             
@@ -82,7 +101,7 @@ namespace DiscogsInsight.DataAccess.Services
                 }
             }            
             release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
-            var coverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
+            var coverImages = await _db.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>();
             var coverImage = coverImages.Where(x => x.MusicBrainzReleaseId == release.MusicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
             if (release?.MusicBrainzReleaseId != null && coverImage == null)//various artist albums will not get a release id
             {
@@ -95,14 +114,14 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
         {
-            var releaseToCoverImages = await _db.GetAllEntitiesAsync<MusicBrainzReleaseToCoverImage>();
+            var releaseToCoverImages = await _db.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>();
             var list = releaseToCoverImages.ToList();
             return releaseToCoverImages.Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
         }
 
         public async Task<(Release?, byte[]?)> GetRandomRelease()//not doing any checks for cover art/musicbrainz data - todo fix this
         {
-            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var releases = await _db.GetAllEntitiesAsListAsync<Release>();
             if (releases.Count < 1)
             {
                 releases = await _collectionDataService.GetReleases();
@@ -124,7 +143,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             var returnedReleases = new List<Release>();
 
-            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var releases = await _db.GetAllEntitiesAsListAsync<Release>();
 
             if (releases.Count < 1)//seed the collection if no releases
             {
@@ -146,7 +165,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task<Release?> GetReleaseFromDbByDiscogsReleaseId(int discogsReleaseId)
         {
-            var releases = await _db.GetAllEntitiesAsync<Release>();
+            var releases = await _db.GetAllEntitiesAsListAsync<Release>();
             var release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
             return release;
         }
@@ -157,7 +176,7 @@ namespace DiscogsInsight.DataAccess.Services
             var coverApiResponse = await _coverArchiveApiService.GetCoverResponseByMusicBrainzReleaseId(savedReleaseId, isReleaseGroupId);
             if (coverApiResponse != null)
             {
-                var releases = await _db.GetAllEntitiesAsync<Release>();
+                var releases = await _db.GetAllEntitiesAsListAsync<Release>();
                 var releaseFromDb = releases.Where(x => x.MusicBrainzReleaseId == savedReleaseId).FirstOrDefault();
 
                 var thumbnailUrls = coverApiResponse.Images.Select(x => x.Thumbnails).ToList();
@@ -194,7 +213,7 @@ namespace DiscogsInsight.DataAccess.Services
                 
                 var releasesByArtist = artistCallResponse.Releases?.ToList();
                 var releaseGroupsByArtist = artistCallResponse.ReleaseGroups?.ToList();
-                var existingJoins = await _db.GetAllEntitiesAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                var existingJoins = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
                 var existingReleasesForThisArtistList = existingJoins.Where(x => x.MusicBrainzArtistId == artist.MusicBrainzArtistId).Select(x => x.MusicBrainzReleaseId).ToList();
                 
                 if (releasesByArtist != null && releasesByArtist.Any())
@@ -257,7 +276,7 @@ namespace DiscogsInsight.DataAccess.Services
             //using Fastenshtein.Levenshtein.Distance algorithm 
             https://github.com/DanHarltey/Fastenshtein
             //to get the most similar musicbrainz title based on the discogs title
-            var releaseJoiningTable = await _db.GetAllEntitiesAsync<MusicBrainzArtistToMusicBrainzRelease>();
+            var releaseJoiningTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
 
             var releaseJoiningListByDiscogsArtist = releaseJoiningTable.Where(x => x.DiscogsArtistId == discogsArtistId).ToList();
             var levenshteinDistanceAndReleaseIds = new List<(int, MusicBrainzArtistToMusicBrainzRelease)>();

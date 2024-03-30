@@ -19,5 +19,6 @@ namespace DiscogsInsight.DataAccess.Entities
         public string? MusicBrainzReleaseId { get; set; }
         public bool IsAReleaseGroupGroupId { get; set; }
         public string? MusicBrainzCoverUrl { get; set; }
+        public bool IsFavourited { get; set; }
     }
 }

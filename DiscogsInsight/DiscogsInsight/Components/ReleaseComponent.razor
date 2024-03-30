@@ -1,7 +1,9 @@
-﻿@using DiscogsInsight.ViewModels.EntityViewModels
+﻿@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject ReleaseViewService ReleaseViewService
 @inject IBrowserViewportService ViewportService
 <MudCard>
     <MudCardHeader>
@@ -157,6 +159,9 @@
             </MudStack>
         }
     </MudCardContent>
+    <MudCardActions>        
+        <MudIconButton Icon="@(IsFavourited ? Icons.Material.Filled.Favorite : Icons.Material.Outlined.FavoriteBorder )" Color="Color.Default" OnClick="SetFavourite" />
+    </MudCardActions>
 </MudCard>
 
 @code
@@ -174,6 +179,11 @@
     private bool _genresExpanded = false;
     private bool _tracksExpanded = false;
     private string ImageStyle { get; set; } = "width: 200px;"; // Default width
+
+    //favourite release
+    private bool IsFavourited { get; set; }
+
+    protected override async Task OnInitializedAsync() => IsFavourited = Release.IsFavourited;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -229,7 +239,7 @@
             ImageStyle = "width: 100%;";
         else
             ImageStyle = "width: 200px;";
-        
+
         StateHasChanged();
     }
 
@@ -250,5 +260,15 @@
     private string GetTrackString(TrackViewModel track)
     {
         return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
+    }
+
+
+    private async Task SetFavourite()
+    {
+        var newFavouriteValue = !IsFavourited;
+        await ReleaseViewService.SetFavouriteBooleanOnRelease(newFavouriteValue, Release.DiscogsReleaseId ?? 0);
+        IsFavourited = newFavouriteValue;
+        StateHasChanged();
+
     }
 }
