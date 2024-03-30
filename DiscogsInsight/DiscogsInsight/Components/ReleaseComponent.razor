@@ -72,7 +72,11 @@
                         <MudListItem>
                             <MudText Typo="Typo.body2">Release Year</MudText>
                             <MudSpacer />
-                            <MudText Typo="Typo.body1">@Release.Year</MudText>
+                            <MudLink OnClick="@(() => OpenDiscogsReleaseYear(Release.Year))">
+                                <MudText Typo="Typo.body1">
+                                    @(Release.Year)
+                                </MudText>
+                            </MudLink>
                         </MudListItem>
                     }
                     @if (!string.IsNullOrWhiteSpace(Release.ReleaseCountry))
@@ -200,6 +204,15 @@
     private void GoToArtist(int? discogsArtistId)
     {
         NavigationManager.NavigateTo("/artist/" + discogsArtistId);
+    }
+
+    private void OpenDiscogsReleaseYear(string releaseYear)
+    {
+        var releaseYearIsInt = int.TryParse(releaseYear, out var year);
+        if (releaseYearIsInt)
+        {
+            NavigationManager.NavigateTo($"/releasesByYear/{year}");            
+        }
     }
 
     private void GoToRelease(int? releaseId)
