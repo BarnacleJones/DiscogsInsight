@@ -34,7 +34,7 @@ else{
             </PropertyColumn>
             <PropertyColumn Property="x => x.Rating" Title="Rating" SortBy="@_sortBy">
                 <CellTemplate>
-                    <MudRating SelectedValue="2" Size="Size.Small" />
+                    <TrackRatingComponent Track="context.Item" />
                 </CellTemplate>                
             </PropertyColumn>
 

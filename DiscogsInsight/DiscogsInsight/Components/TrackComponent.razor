@@ -1,6 +1,7 @@
 ﻿@using DiscogsInsight.ViewModels.Collection
 @using DiscogsInsight.ViewModels.EntityViewModels
 @using DiscogsInsight.ViewModels;
+@using DiscogsInsight.Components;
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 @inject IBrowserViewportService ViewportService
@@ -49,7 +50,7 @@
                         <MudListItem>
                             <MudText Typo="Typo.body2">Rating</MudText>
                             <MudSpacer />
-                            <MudRating SelectedValue="2" Size="Size.Small" />       
+                            <TrackRatingComponent Track ="Track" />       
                         </MudListItem>            
                 </MudList>
         </MudStack>          

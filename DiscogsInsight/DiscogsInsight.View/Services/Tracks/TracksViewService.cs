@@ -20,6 +20,13 @@ namespace DiscogsInsight.View.Services.Tracks
             _artistDataService = artistDataService;
         }
 
+
+        public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
+        {
+            var success = await _tracksDataService.SetRatingOnTrack(rating, discogsReleaseId, title);
+            return success;
+        }
+
         public async Task<ViewResult<TracksGridItemViewModel>> GetRandomTrack() 
         {
             try
@@ -43,7 +50,7 @@ namespace DiscogsInsight.View.Services.Tracks
                         Duration = randomTrack.Duration,
                         Title = randomTrack.Title,
                         Position = randomTrack.Position,
-                        Rating = randomTrack.Rating,
+                        Rating = randomTrack.Rating ?? 0,
                         Artist = releaseArtist,
                         Release = releaseTitle
                     };
@@ -87,7 +94,7 @@ namespace DiscogsInsight.View.Services.Tracks
                     Duration = x.Duration,
                     Title = x.Title,
                     Position = x.Position,
-                    Rating = x.Rating
+                    Rating = x.Rating ?? 0
                 }).ToList();
 
                 var releases = await _releaseDataService.GetAllReleasesAsList();

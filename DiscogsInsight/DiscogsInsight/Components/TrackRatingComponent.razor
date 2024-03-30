@@ -1,0 +1,22 @@
+﻿@using DiscogsInsight.ViewModels.Collection
+@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.ViewModels;
+@inject DiscogsInsight.View.Services.Tracks.TracksViewService TracksViewService;
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IBrowserViewportService ViewportService
+
+<MudRating SelectedValue="Track.Rating" SelectedValueChanged="SetRating" Size="Size.Small" />
+
+@code
+{
+    [Parameter]
+    public TracksGridItemViewModel Track { get; set; }
+
+
+    private async Task SetRating(int rating)
+    {
+        Track.Rating = rating;
+        await TracksViewService.SetRatingOnTrack(rating, Track.DiscogsReleaseId, Track.Title);
+    }
+}

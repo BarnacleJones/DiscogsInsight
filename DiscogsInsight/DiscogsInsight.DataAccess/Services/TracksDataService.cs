@@ -22,6 +22,29 @@ namespace DiscogsInsight.DataAccess.Services
             _discogsGenresAndTagsDataService = discogsGenresAndTagsDataService;
         }
 
+
+        public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
+        {
+            try
+            {
+                var tracks = await GetAllTracks();
+                if (tracks == null) { return true; }
+
+                var track = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId)
+                                  .Where(x => x.Title == title)
+                                  .FirstOrDefault();
+                if (track == null) { return true; }
+
+                track.Rating = rating;
+                await _db.SaveItemAsync(track);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
         public async Task<List<Track>> GetAllTracks()
         {
             var tracks = await _db.GetAllEntitiesAsync<Track>();
