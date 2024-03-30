@@ -1,51 +1,60 @@
 @page "/TracksGrid"
-@using DiscogsInsight.ViewModels.Collection
-@using DiscogsInsight.View.Services.Collection
-@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.View.Services.Tracks
 @using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.ViewModels.Collection
 @using DiscogsInsight.ViewModels.Results
 @inject UserNotificationService UserNotificationService
 @inject NavigationManager NavigationManager
-@inject CollectionViewService CollectionViewService
+@inject TracksViewService TracksViewService
 
-@if (_collectionViewModel == null)
+@if (_trackGridViewModel == null)
 {
     <LoadingComponent />
 }
 else{  
-    <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    <MudText Typo="Typo.h6">Tracks</MudText>
+    <MudDataGrid T="@TracksGridItemViewModel" MultiSelection="true" Items="@_trackGridViewModel.Tracks?.OrderBy(x => x.Title)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
                  Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Collection</MudText>
             <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
-        <Columns>            
-            <PropertyColumn Property="x => x.Artist" Hidden="true" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />            
-            <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy">
+        <Columns>
+            <PropertyColumn Property="x => x.Title" Title="Track Name" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />
+            <PropertyColumn Property="x => x.Artist" Title="Artist" SortBy="@_sortBy">
                 <CellTemplate>
-                    <MudText onclick="@(() => GoToRelease(context.Item.DiscogsReleaseId))">@context.Item.Title</MudText>
+                    <MudText onclick="@(() => GoToArtist(context.Item.DiscogsArtistId))">@context.Item.Artist</MudText>
                 </CellTemplate>                
             </PropertyColumn>
+            <PropertyColumn Property="x => x.Release" Title="Release" SortBy="@_sortBy">
+                <CellTemplate>
+                    <MudText onclick="@(() => GoToRelease(context.Item.DiscogsReleaseId))">@context.Item.Release</MudText>
+                </CellTemplate>                
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.Rating" Title="Rating" SortBy="@_sortBy">
+                <CellTemplate>
+                    <MudRating SelectedValue="2" Size="Size.Small" />
+                </CellTemplate>                
+            </PropertyColumn>
+
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="ReleaseViewModel" />
+            <MudDataGridPager T="TracksGridItemViewModel" />
         </PagerContent>
     </MudDataGrid>
 }
 
 
 @code {
-    public static DiscogsCollectionViewModel? _collectionViewModel;
-    private IEnumerable<ReleaseViewModel> Elements = new List<ReleaseViewModel>();
+    public static TracksGridViewModel? _trackGridViewModel;
+    private IEnumerable<TracksGridItemViewModel> Elements = new List<TracksGridItemViewModel>();
     private string _searchString;
-
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            HandleResult(await CollectionViewService.GetCollection());
+            HandleResult(await TracksViewService.GetTracksForTracksGrid());
         }
         catch (Exception ex)
         {
@@ -63,20 +72,20 @@ else{
         NavigationManager.NavigateTo($"release/{releaseId}");
     }
     
-    private async void HandleResult(ViewResult<DiscogsCollectionViewModel> result)
+    private async void HandleResult(ViewResult<TracksGridViewModel> result)
     {
         if (result.Success)
-            _collectionViewModel = result.Data;
+            _trackGridViewModel = result.Data;
         else
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
        
-    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist;
+    private Func<TracksGridItemViewModel, object> _sortBy => x => x.Title;
 
-    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist;
+    private Func<TracksGridItemViewModel, object> _groupBy => x => x.Title;
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<ReleaseViewModel, bool> _quickFilter => x =>
+    private Func<TracksGridItemViewModel, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;

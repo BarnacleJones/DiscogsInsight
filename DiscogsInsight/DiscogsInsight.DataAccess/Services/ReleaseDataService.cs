@@ -22,6 +22,13 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
+
+        public async Task<List<Release>> GetAllReleasesAsList()
+        {
+            var releases = await _db.GetAllEntitiesAsync<Release>();
+            return releases;
+        }
+
         public async Task<List<int?>> GetAllDiscogsReleaseIdsForArtist(int? discogsArtistId)
         {
             if (discogsArtistId == null) { return new List<int?>(); }
