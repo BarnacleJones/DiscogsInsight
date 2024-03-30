@@ -49,7 +49,7 @@ namespace DiscogsInsight.View.Services.Collection
             var tracksCount = tracks.Count();
             var tracksReleasesList = tracks.Select(x => x.DiscogsReleaseId).ToList();
 
-            var releasesWithoutTracks = releases.Where(x => !tracksReleasesList.Contains(x.DiscogsReleaseId)).ToList().Count();
+            var releasesWithoutAllApiData = releases.Where(x => !x.HasAllApiData).ToList().Count;
 
             var month = DateTime.Now.Month;
             var tracksNewThisMonth = releases.Where(x => x.DateAdded.Value.Month == month).Count();
@@ -68,7 +68,7 @@ namespace DiscogsInsight.View.Services.Collection
             return new CollectionStatsViewModel
             {
                 AlbumsInCollection = releasesCount,
-                AlbumsInCollectionWithoutTracksInfo = releasesWithoutTracks,
+                AlbumsInCollectionWithoutTracksInfo = releasesWithoutAllApiData,
                 TracksInCollection = tracksCount,
                 AlbumsNewToCollectionThisMonth = tracksNewThisMonth,
                 AlbumsNewLastSixMonths = lastSixMonths.ToArray()
