@@ -56,8 +56,8 @@ namespace DiscogsInsight.View.Services.Collection
             try
             {
                 var releases = await _collectionDataService.GetReleases();
-                //MusicBrainzId is the deciding factor as to if all API data has been retrieved
-                var releaseList = releases.Where(x => x.MusicBrainzReleaseId == null).ToList();
+
+                var releaseList = releases.Where(x => !x.HasAllApiData).ToList();
 
                 var artistIdsList = await _collectionDataService.GetArtistsIdsAndNames();
 
