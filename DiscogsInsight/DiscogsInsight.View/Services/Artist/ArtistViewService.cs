@@ -84,6 +84,5 @@ namespace DiscogsInsight.View.Services.Artist
                 };
             }
         }
-
     }
 }

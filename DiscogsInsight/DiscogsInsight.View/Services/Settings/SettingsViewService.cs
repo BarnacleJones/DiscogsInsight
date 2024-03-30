@@ -31,12 +31,10 @@ namespace DiscogsInsight.View.Services.Settings
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
-
         public string GetDiscogsUsername()
         {
             return _settingsDataService.GetDiscogsUsername();
         }
-
         public async Task<ViewResult<bool>> UpdateDiscogsUsername(string userName)
         {
             try
@@ -73,7 +71,6 @@ namespace DiscogsInsight.View.Services.Settings
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
-
     }
 }
 
