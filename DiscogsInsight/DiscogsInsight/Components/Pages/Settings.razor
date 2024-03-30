@@ -14,8 +14,13 @@
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="@SaveUsername"  Size="Size.Small">Save Username</MudButton>
     </MudStack>
     <MudSpacer />
-    <MudStack Row="true">  
+    <MudStack Row="true">
+        <MudText Typo="Typo.caption">Syncronises collection from Discogs</MudText>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="@UpdateApiData" Size="Size.Small">Update Collection Data</MudButton>
+    </MudStack>
+    <MudStack Row="true">  
+        <MudText Typo="Typo.caption">WARNING: Purges All Data</MudText>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Warning" OnClick="@PurgeDatabase" Size="Size.Small">Purge Database</MudButton>
     </MudStack>
 </MudStack>
 
@@ -31,6 +36,10 @@
     public async Task UpdateApiData()
     {
         HandleResult(await SettingsViewService.UpdateCollection(), "Updated Collection");
+    }
+    public async Task PurgeDatabase()
+    {
+        HandleResult(await SettingsViewService.PurgeEntireDatabase(), "Purged Database");
     }
 
     protected override void OnInitialized()

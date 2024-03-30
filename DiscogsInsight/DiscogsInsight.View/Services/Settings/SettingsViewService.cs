@@ -55,6 +55,24 @@ namespace DiscogsInsight.View.Services.Settings
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
+        public async Task<ViewResult<bool>> PurgeEntireDatabase()
+        {
+            try
+            {
+                var success = await _settingsDataService.PurgeEntireDb();
+
+                if (success)
+                {
+                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                }
+
+                return new ViewResult<bool> { Success = false, ErrorMessage = "Error PurgingDatabase. " };
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
+            }
+        }
 
     }
 }

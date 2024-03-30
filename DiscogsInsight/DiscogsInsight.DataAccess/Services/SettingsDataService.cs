@@ -33,6 +33,12 @@ namespace DiscogsInsight.DataAccess.Services
             await _collectionDataService.PurgeEntireCollection();
             return true;
         }
+        
+        public async Task<bool> PurgeEntireDb()
+        {            
+            await _collectionDataService.PurgeEntireDatabase();
+            return true;
+        }
 
     }
 }

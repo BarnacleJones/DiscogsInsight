@@ -80,11 +80,33 @@ namespace DiscogsInsight.DataAccess
                 await Init();
                 await Database.DeleteAllAsync<Artist>();
                 await Database.DeleteAllAsync<Release>();
-                //intentionally leaving other data. will save making api calls. will eventually move to another setting to clear that data too.
+                //intentionally leaving other data. Use PurgeEntireDb for the other
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception at DiscogsInsightDb Purge:{ex.Message} ");
+                throw;
+            }
+        }
+
+        public async Task PurgeEntireDb()
+        {
+            try
+            {
+                await Init();
+                await Database.DeleteAllAsync<Artist>();
+                await Database.DeleteAllAsync<DiscogsGenreTags>();
+                await Database.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
+                await Database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                await Database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
+                await Database.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
+                await Database.DeleteAllAsync<MusicBrainzTags>();
+                await Database.DeleteAllAsync<Release>();
+                await Database.DeleteAllAsync<Track>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at DiscogsInsightDb Purge all database data:{ex.Message} ");
                 throw;
             }
         }

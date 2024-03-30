@@ -64,6 +64,10 @@ namespace DiscogsInsight.DataAccess.Services
         {
             await _db.Purge();
         }
+        public async Task PurgeEntireDatabase()
+        {
+            await _db.PurgeEntireDb();
+        }
         public async Task<bool> CollectionSavedOrUpdatedFromDiscogs()
         {
             try
@@ -83,10 +87,7 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {
             await SaveArtistsFromCollectionResponse(collectionResponse);
-            await SaveReleasesWithArtistIds(collectionResponse);
-            
-            //Todo: These would be a good behind a setting
-            
+            await SaveReleasesWithArtistIds(collectionResponse);            
             await RemoveReleasesNoLongerInCollection(collectionResponse);
             await RemoveArtistsNoLongerInCollection(collectionResponse);
             //Todo: remove other database info when artist or release isnt in collection, could grow over time
