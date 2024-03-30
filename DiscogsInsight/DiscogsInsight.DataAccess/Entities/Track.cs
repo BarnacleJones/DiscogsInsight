@@ -12,6 +12,7 @@ namespace DiscogsInsight.DataAccess.Entities
         public int? DiscogsMasterId { get; set; }
         public string? Title { get; set; }
         public string? Duration { get; set; }
+        public long? MusicBrainzTrackLength { get; set; }
         public string? Position { get; set; }//Eg A1, A2, B1, etc - sorting property
         public int? Rating { get; set; }
     }

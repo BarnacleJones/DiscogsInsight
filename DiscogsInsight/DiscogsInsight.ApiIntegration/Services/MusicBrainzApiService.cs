@@ -19,10 +19,10 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //know about release groups - thats what you want at this stage, its the main release info https://musicbrainz.org/doc/Release_Group
 
-        private const string ReleaseGroupUrl = "/ws/2/release-group/940a8468-73dd-4c0c-94a8-823b1b13c736";
+        private const string ReleaseGroupUrl = "/ws/2/release-group/";
         private const string ReleaseGroupIncludeUrl = "?inc=artists+releases";
 
-        private const string ReleaseUrl = "/ws/2/release/59211ea4-ffd2-4ad9-9a4e-941d3148024a";
+        private const string ReleaseUrl = "/ws/2/release/";
         private const string ReleaseIncludeUrl = "?inc=artist-credits+labels+discids+recordings+tags";
 
         private const string ArtistUrl = "/ws/2/artist/";
@@ -77,6 +77,55 @@ namespace DiscogsInsight.ApiIntegration.Services
 
                 return responseData == null 
                     ? throw new Exception("Error getting musicbrainz artist data") 
+                    : responseData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get data from API");
+                throw;
+            }
+        }
+        public async Task<MusicBrainzRelease> GetReleaseFromMusicBrainzApiUsingMusicBrainsReleaseId(string musicBrainzReleaseId)
+        {
+            try
+            {
+                var responseData = new MusicBrainzRelease();
+
+                var fullReleaseRequestUrl = ReleaseUrl + $"{musicBrainzReleaseId}" + ReleaseIncludeUrl;
+
+                var response = await _httpClient.GetAsync(fullReleaseRequestUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                responseData = JsonSerializer.Deserialize<MusicBrainzRelease>(json);
+
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz release data") 
+                    : responseData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get data from API");
+                throw;
+            }
+        } 
+        
+        public async Task<MusicBrainzReleaseGroup> GetReleaseGroupFromMusicBrainzApiUsingMusicBrainsReleaseId(string musicBrainzReleaseId)
+        {
+            try
+            {
+                var responseData = new MusicBrainzReleaseGroup();
+
+                var fullReleaseRequestUrl = ReleaseGroupUrl + $"{musicBrainzReleaseId}" + ReleaseGroupIncludeUrl;
+
+                var response = await _httpClient.GetAsync(fullReleaseRequestUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                responseData = JsonSerializer.Deserialize<MusicBrainzReleaseGroup>(json);
+
+                return responseData == null 
+                    ? throw new Exception("Error getting musicbrainz release group data") 
                     : responseData;
             }
             catch (Exception ex)

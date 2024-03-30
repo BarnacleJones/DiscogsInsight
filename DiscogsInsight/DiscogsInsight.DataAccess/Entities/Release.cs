@@ -12,13 +12,15 @@ namespace DiscogsInsight.DataAccess.Entities
         public int? DiscogsMasterId { get; set; }
         public string? Title { get; set; }
         public DateTime? DateAdded { get; set; }
-        public int? Year { get; set; }
+        public int? Year { get; set; } //this is year of the pressing itself
+        public string? OriginalReleaseYear { get; set; }
         public string? DiscogsReleaseUrl { get; set; }
         public string? ReleaseCountry { get; set; }
         public string? ReleaseNotes { get; set; }
         public string? MusicBrainzReleaseId { get; set; }
         public bool IsAReleaseGroupGroupId { get; set; }
         public string? MusicBrainzCoverUrl { get; set; }
+
         public bool IsFavourited { get; set; }
         public bool HasAllApiData { get; set; }//When musicbrainz info is all fetched
     }

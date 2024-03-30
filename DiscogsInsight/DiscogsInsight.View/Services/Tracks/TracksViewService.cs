@@ -47,7 +47,9 @@ namespace DiscogsInsight.View.Services.Tracks
                     {
                         DiscogsArtistId = randomTrack.DiscogsArtistId ?? 0,
                         DiscogsReleaseId = randomTrack.DiscogsReleaseId ?? 0,
-                        Duration = randomTrack.Duration,
+                        Duration = randomTrack.MusicBrainzTrackLength == null
+                                    ? randomTrack.Duration
+                                    : TimeSpan.FromMilliseconds(randomTrack.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
                         Title = randomTrack.Title,
                         Position = randomTrack.Position,
                         Rating = randomTrack.Rating ?? 0,
@@ -91,7 +93,9 @@ namespace DiscogsInsight.View.Services.Tracks
                 {
                     DiscogsArtistId = x.DiscogsArtistId ?? 0,
                     DiscogsReleaseId = x.DiscogsReleaseId ?? 0,
-                    Duration = x.Duration,
+                    Duration = x.MusicBrainzTrackLength == null
+                                    ? x.Duration
+                                    : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
                     Title = x.Title,
                     Position = x.Position,
                     Rating = x.Rating ?? 0

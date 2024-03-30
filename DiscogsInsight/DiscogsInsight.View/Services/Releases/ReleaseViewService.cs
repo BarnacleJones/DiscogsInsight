@@ -70,10 +70,6 @@ namespace DiscogsInsight.View.Services.Releases
                 var release =  await _releaseDataService.GetRandomRelease();
 
                 var tracks = await _tracksDataService.GetTracksForRelease(release.Item1.DiscogsReleaseId);
-                //sometimes the release is added to, so grab it again
-                //todo fix this flow to cut down on calls!
-                release = await _releaseDataService.GetRelease(release.Item1.DiscogsReleaseId);
-
                 var artist = await _artistDataService.GetArtist(release.Item1.DiscogsArtistId, true);
 
                 var data = await GetReleaseViewModel(release.Item1, tracks, artist.Name, release.Item2);
@@ -217,7 +213,9 @@ namespace DiscogsInsight.View.Services.Releases
         {
             var trackListAsViewModel = trackList.Select(x => new TracksItemViewModel
             {
-                Duration = x.Duration,
+                Duration = x.MusicBrainzTrackLength == null
+               ? x.Duration
+               : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
                 Position = x.Position,
                 Title = x.Title,
                 Rating = x.Rating ?? 0,
@@ -231,6 +229,7 @@ namespace DiscogsInsight.View.Services.Releases
             {
                 Artist = releaseArtistName ?? "Missing Artist",
                 Year = release.Year.ToString(),
+                OriginalReleaseYear = release.OriginalReleaseYear,
                 ReleaseCountry = release.ReleaseCountry,
                 Title = release.Title ?? "Missing Title",
                 ReleaseNotes = release.ReleaseNotes ?? "",

@@ -1,3 +1,4 @@
+using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;
@@ -8,17 +9,22 @@ namespace DiscogsInsight.DataAccess.Services
     {
         private readonly DiscogsInsightDb _db;
         private readonly MusicBrainzApiService _musicBrainzApiService;
+        private readonly DiscogsApiService _discogsApiService;
         private readonly CoverArtArchiveApiService _coverArchiveApiService;
         private readonly CollectionDataService _collectionDataService;
         private readonly ArtistDataService _artistDataService;
         private readonly ILogger<ReleaseDataService> _logger;
-        public ReleaseDataService(DiscogsInsightDb db, MusicBrainzApiService musicBrainzApiService,ArtistDataService artistDataService , CollectionDataService collectionDataService, CoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        private readonly DiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
+
+        public ReleaseDataService(DiscogsInsightDb db, MusicBrainzApiService musicBrainzApiService, DiscogsGenresAndTagsDataService discogsGenresAndTags,ArtistDataService artistDataService, DiscogsApiService discogsApiService, CollectionDataService collectionDataService, CoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
             _collectionDataService = collectionDataService;
             _artistDataService = artistDataService; 
             _coverArchiveApiService = coverArchiveApiService;
+            _discogsApiService = discogsApiService;
+            _discogsGenresAndTagsDataService = discogsGenresAndTags;
             _logger = logger;
         }
 
@@ -72,8 +78,19 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 var releases = await _collectionDataService.GetReleases();
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
+
             }
-            
+            if (!release.HasAllApiData)
+            {
+                var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
+                var success = await SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(discogsReleaseResponse);
+                if (!success)
+                {
+                    throw new Exception("Error saving tracklist to database");
+                }
+                var tracks = await _db.GetAllEntitiesAsListAsync<Track>();
+                var trackList = tracks.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();                
+            }
             var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
             var artists = artistsTable.ToList();
             var artist = artists.FirstOrDefault(x => x.DiscogsArtistId == release.DiscogsArtistId);
@@ -98,9 +115,17 @@ namespace DiscogsInsight.DataAccess.Services
                     release.IsAReleaseGroupGroupId = savedRelease.IsAReleaseGroupGroupId;                
                     release.MusicBrainzReleaseId = savedRelease.MusicBrainzReleaseId;
                     await _db.UpdateAsync(release);
+
                 }
             }            
             release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
+            
+            if (release.MusicBrainzReleaseId != null)
+            {
+                //now make the musicbrainz relese call with the release id and get all the track lengths (if not a releasegroup) and original year
+                var savedMusicBrainzTrackLengths = await MakeMusicBrainzReleaseCallAndSaveTracks(release, release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
+
+            }
             var coverImages = await _db.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>();
             var coverImage = coverImages.Where(x => x.MusicBrainzReleaseId == release.MusicBrainzReleaseId).Select(x => x.MusicBrainzCoverImage).FirstOrDefault();
             if (release?.MusicBrainzReleaseId != null && coverImage == null)//various artist albums will not get a release id
@@ -114,6 +139,106 @@ namespace DiscogsInsight.DataAccess.Services
             return (release, coverImage);
         }
 
+        private async Task<bool> MakeMusicBrainzReleaseCallAndSaveTracks(Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
+        {
+            if (!isAReleaseGroupUrl)
+            {
+                //save tracks and release year
+                var releaseData = await _musicBrainzApiService.GetReleaseFromMusicBrainzApiUsingMusicBrainsReleaseId(musicBrainzReleaseId);
+                release.OriginalReleaseYear = releaseData.Date;
+                await _db.UpdateAsync(release);
+
+                var tracks = await _db.GetAllEntitiesAsListAsync<Track>();
+                var tracksForThisRelease = tracks.Where(x => x.DiscogsReleaseId == release.DiscogsReleaseId).ToList();
+                var tracksFromReleaseData = releaseData.Media.SelectMany(x => x.Tracks).ToList();
+                if (!tracksFromReleaseData.Any()) { return true; }
+                foreach (var track in tracksForThisRelease)
+                {
+                    var levenshteinDistanceAndTrackLength = new List<(int, int?)>();
+                    foreach (var apiTrack in tracksFromReleaseData)
+                    {
+                        //compare each track name in response to track name of album
+                        //store the Levenshtein Distance and the length from api
+                        int levenshteinDistance = Fastenshtein.Levenshtein.Distance(apiTrack.Title, track.Title);
+                        levenshteinDistanceAndTrackLength.Add((levenshteinDistance, apiTrack.Length));
+                    }
+                    //sort by distance - lowest number of edits is the most similar
+                    if (levenshteinDistanceAndTrackLength.Any())
+                    {
+                        levenshteinDistanceAndTrackLength.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+                        var matchingRelease = levenshteinDistanceAndTrackLength.First();
+
+                        track.MusicBrainzTrackLength = matchingRelease.Item2;
+                        await _db.UpdateAsync(track);
+                    }
+                }
+            }
+            else
+            {
+                //just save year
+                var releaseGroupData = await _musicBrainzApiService.GetReleaseGroupFromMusicBrainzApiUsingMusicBrainsReleaseId(musicBrainzReleaseId);
+                release.OriginalReleaseYear = releaseGroupData.FirstReleaseDate;
+                await _db.UpdateAsync(release);
+            }
+            return true;
+        }
+
+        public async Task<bool> SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse)
+        {
+            try
+            {
+                var releaseTable = await _db.GetTable<Release>();
+                var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync();
+                var tracksTable = await _db.GetTable<Track>();
+                var existingTracks = await tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync();
+                if (existingRelease == null || existingRelease.DiscogsArtistId == null || existingRelease.DiscogsReleaseId == null)
+                    //at this stage, dont want to store the release info if not in db already
+                    throw new Exception($"Unhandled exception: Release {releaseResponse.id} not in database not able to store info.");
+
+                await UpdateAdditionalReleaseProperties(releaseResponse, existingRelease);//todo: this could be moved to release data service
+
+                await SaveTracksFromDiscogsReleaseResponse(releaseResponse, existingRelease, existingTracks);
+
+                //save genres (styles) from release
+                var success = await _discogsGenresAndTagsDataService.SaveStylesFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
+
+                return success;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                throw;
+            }
+        }
+
+        private async Task SaveTracksFromDiscogsReleaseResponse(DiscogsReleaseResponse releaseResponse, Release existingRelease, List<Track> existingTracks)
+        {
+            //save the tracks
+            if (existingTracks != null && !existingTracks.Any() && releaseResponse.tracklist != null)
+            {
+                foreach (var track in releaseResponse.tracklist)
+                {
+                    await _db.SaveItemAsync(new Track
+                    {
+                        DiscogsArtistId = existingRelease.DiscogsArtistId,
+                        DiscogsMasterId = existingRelease.DiscogsMasterId,
+                        DiscogsReleaseId = releaseResponse.id,
+                        Duration = track.duration,
+                        Title = track.title,
+                        Position = track.position
+                    });
+                }
+            }
+        }
+
+        private async Task UpdateAdditionalReleaseProperties(DiscogsReleaseResponse releaseResponse, Release existingRelease)
+        {
+            //update existing release entity with additional properties
+            existingRelease.ReleaseCountry = releaseResponse.country;
+            existingRelease.ReleaseNotes = releaseResponse.notes;
+            existingRelease.DiscogsReleaseUrl = releaseResponse.uri;
+            await _db.UpdateAsync(existingRelease);
+        }
         public async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
         {
             var releaseToCoverImages = await _db.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>();

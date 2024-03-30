@@ -71,11 +71,23 @@
                     @if (!string.IsNullOrWhiteSpace(Release.Year) && Release.Year != "0")
                     {
                         <MudListItem>
-                            <MudText Typo="Typo.body2">Release Year</MudText>
+                            <MudText Typo="Typo.body2">Release Year (specific to pressing)</MudText>
                             <MudSpacer />
                             <MudLink OnClick="@(() => OpenDiscogsReleaseYear(Release.Year))">
                                 <MudText Typo="Typo.body1">
                                     @(Release.Year)
+                                </MudText>
+                            </MudLink>
+                        </MudListItem>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Release.OriginalReleaseYear) && Release.OriginalReleaseYear != "0")
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">Original Release Year</MudText>
+                            <MudSpacer />
+                            <MudLink OnClick="@(() => OpenDiscogsReleaseYear(Release.OriginalReleaseYear))">
+                                <MudText Typo="Typo.body1">
+                                    @(Release.OriginalReleaseYear)
                                 </MudText>
                             </MudLink>
                         </MudListItem>
