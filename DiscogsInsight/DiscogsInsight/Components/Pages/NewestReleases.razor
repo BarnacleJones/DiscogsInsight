@@ -19,14 +19,25 @@
             <MudStack AlignItems="MudBlazor.AlignItems.Center">
                 <MudText Typo="Typo.h6">Latest In Collection</MudText>
                 <MudSpacer />
-                <MudCarousel Class="mud-width-full" Style="height:180vh" ShowArrows="true" ArrowsPosition="Position.Start" ShowBullets="false" BulletsPosition="Position.Top" EnableSwipeGesture="true" AutoCycle="false" TData="List<ReleaseViewModel>">
-                    @foreach (var item in _latestReleases)
-                    {
-                        <MudCarouselItem Transition="Transition.Slide" Color="@Color.Dark" >
-                            <MudSpacer />
-                            <ReleaseComponent Release="@item" />
-                        </MudCarouselItem>
-                    }
+                <MudCarousel 
+                    Class="mud-width-full" 
+                    Style="height:180vh" 
+                    ShowArrows="true" 
+                    ArrowsPosition="Position.Start" 
+                    ShowBullets="false" 
+                    BulletsPosition="Position.Top" 
+                    EnableSwipeGesture="true" 
+                    AutoCycle="false" 
+                    TData="List<ReleaseViewModel>">
+                        @foreach (var item in _latestReleases)
+                        {
+                            <MudCarouselItem 
+                                Transition="Transition.Slide" 
+                                Color="@Color.Dark" >                                
+                                    <MudSpacer />                               
+                                    <ReleaseComponent Release="@item" />
+                            </MudCarouselItem>
+                        }
                 </MudCarousel>
             </MudStack>
         }
