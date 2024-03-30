@@ -1,4 +1,4 @@
-@page "/collectionGrid"
+@page "/TracksGrid"
 @using DiscogsInsight.ViewModels.Collection
 @using DiscogsInsight.View.Services.Collection
 @using DiscogsInsight.ViewModels.EntityViewModels
@@ -13,10 +13,10 @@
     <LoadingComponent />
 }
 else{  
-    <MudText Typo="Typo.h6">Collection</MudText>
     <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
-                 Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50" FixedHeader="true">
+                 Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50">
         <ToolBarContent>
+            <MudText Typo="Typo.h6">Collection</MudText>
             <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
