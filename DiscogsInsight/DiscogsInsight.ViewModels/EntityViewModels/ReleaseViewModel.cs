@@ -11,7 +11,7 @@ namespace DiscogsInsight.ViewModels.EntityViewModels
         public string? ReleaseCountry { get; set; }
         public int? DiscogsArtistId { get; set; }
         public int? DiscogsReleaseId { get; set; }
-        public List<string?>? Genres { get; set; }
+        public List<(string? Name, int Id)>? Genres { get; set; }
         public string? DiscogsReleaseUrl { get; set; }
         public DateTime? DateAdded { get; set; }
         public List<TracksItemViewModel>? Tracks { get; set; }

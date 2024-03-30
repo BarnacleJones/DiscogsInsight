@@ -33,9 +33,9 @@ namespace DiscogsInsight.DataAccess.Services
             return await discogsGenreTagToDiscogsRelease.ToListAsync();
         }
 
-        public async Task<List<string?>> GetGenresForDiscogsRelease(int? discogsReleaseId)
+        public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)
         {
-            if (discogsReleaseId == null) { return new List<string?>(); };
+            if (discogsReleaseId == null) { return new List<(string?, int)>(); };
 
             var discogsGenreJoiningTableList = await GetDiscogsGenreTagToDiscogsReleaseAsList();
             
@@ -43,7 +43,7 @@ namespace DiscogsInsight.DataAccess.Services
             
             var genreTable = await GetAllGenreTagsAsList();
 
-            return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => x.DiscogsTag).ToList();
+            return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => (x.DiscogsTag, x.Id)).ToList();
 
         }
 

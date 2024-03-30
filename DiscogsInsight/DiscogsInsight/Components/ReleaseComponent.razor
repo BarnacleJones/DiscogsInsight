@@ -118,11 +118,11 @@
                 <MudDivider />
                 <MudCollapse Expanded="_genresExpanded">
                         <MudList Clickable="false">
-                            @foreach (var genre in Release.Genres.OrderBy(x => x).ToList())
+                            @foreach (var genre in Release.Genres.OrderBy(x => x.Name).ToList())
                             {
-                                if (genre is not null)
+                                if (genre.Name is not null)
                                 {
-                                    <MudListItem Text="@genre" Icon="@Icons.Material.Filled.MusicNote" />
+                                    <MudListItem Text="@genre.Name" Icon="@Icons.Material.Filled.MusicNote" OnClick="@(() => OpenReleasesByGenre(genre.Id))" />
                                 }
                             }
                         </MudList>
@@ -215,6 +215,10 @@
         {
             NavigationManager.NavigateTo($"/releasesByYear/{year}");            
         }
+    }
+    private void OpenReleasesByGenre(int genreId)
+    {
+        NavigationManager.NavigateTo($"/releasesByGenreId/{genreId}");            
     }
 
     private void GoToRelease(int? releaseId)
