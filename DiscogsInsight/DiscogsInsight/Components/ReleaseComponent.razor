@@ -112,7 +112,6 @@
                 </MudButton>
                 <MudDivider />
                 <MudCollapse Expanded="_genresExpanded">
-                    <MudPaper>
                         <MudList Clickable="false">
                             @foreach (var genre in Release.Genres.OrderBy(x => x).ToList())
                             {
@@ -122,7 +121,6 @@
                                 }
                             }
                         </MudList>
-                    </MudPaper>
                 </MudCollapse>
             </MudStack>
         }
@@ -144,7 +142,6 @@
             </MudButton>
                 <MudDivider />
                 <MudCollapse Expanded="_tracksExpanded">
-                    <MudPaper>
                         <MudList Clickable="false">
                             @foreach (var track in Release.Tracks.OrderBy(x => x.Position).ToList())
                             {
@@ -154,7 +151,6 @@
                                 }
                             }
                         </MudList>
-                    </MudPaper>
                 </MudCollapse>
             </MudStack>
         }
