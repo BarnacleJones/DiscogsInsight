@@ -83,7 +83,6 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<ReleaseInsightsViewService>();
             builder.Services.AddSingleton<ArtistInsightsViewService>();
             builder.Services.AddSingleton<TracksInsightsViewService>();
-            builder.Services.AddSingleton<CollectionInsightsViewService>();
 
 
             return builder.Build();
