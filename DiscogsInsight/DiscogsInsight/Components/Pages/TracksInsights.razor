@@ -15,7 +15,20 @@
 @if (_tracksInsightsStats != null)
 {
     <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
-                
+        <MudText Typo="Typo.h5">Tracks Insights</MudText>
+        <MudSpacer />
+        <MudList>
+            <MudListItem>
+                <MudText Typo="Typo.body2">Average Track Length</MudText>
+                <MudSpacer />
+                <MudText Typo="Typo.body1">@_tracksInsightsStats.AverageTrackLength</MudText>
+            </MudListItem>
+            <MudListItem>
+                <MudText Typo="Typo.body2">Average Tracks Per Release</MudText>
+                <MudSpacer />
+                <MudText Typo="Typo.body1">@_tracksInsightsStats.AverageTracksPerRelease</MudText>
+            </MudListItem>
+        </MudList>
     </MudStack>
 }
 else
@@ -40,14 +53,4 @@ else
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
-
-    private double[] CalculateDonutValues()
-    {
-        // var totalInCollectionWithoutTracks = _collectionStats.AlbumsInCollectionWithoutTracksInfo;
-        // var totalInCollectionWithTracks = _collectionStats.AlbumsInCollection - _collectionStats.AlbumsInCollectionWithoutTracksInfo;
-        // return new double[] { totalInCollectionWithTracks, totalInCollectionWithoutTracks };
-        return null;
-
-    }
-
 }

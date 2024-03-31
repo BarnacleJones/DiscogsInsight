@@ -14,8 +14,9 @@
         
 @if (_releaseInsightsStats != null)
 {
-    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">   
-        
+    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+        <MudText Typo="Typo.h5">Release Insights</MudText>
+        <MudSpacer />
         <MudList>
             <MudListItem>
                 <MudText Typo="Typo.body2">Average Release Pressed Year</MudText>
@@ -28,11 +29,10 @@
                 <MudText Typo="Typo.body1">@_releaseInsightsStats.EarliestReleaseYear</MudText>
             </MudListItem>  
         </MudList>
-
+        <MudSpacer />
         <MudChart ChartType="ChartType.Line" ChartSeries="@ReleasesOverTimeSeries" @bind-SelectedIndex="Index" XAxisLabels="@releasesOverTimeGraphLabels" Width="100%" Height="350px" ChartOptions="@Options" />
-
+        <MudSpacer />
         <MudChart ChartType="ChartType.Pie" InputData="@releasesPressedCountryValues" @bind-SelectedIndex="Index" InputLabels="@releasesPressedCountryLabels" Width="300px" Height="300px" />
-
     </MudStack>
 }
 else
