@@ -14,7 +14,21 @@
         
 @if (_releaseInsightsStats != null)
 {
-    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">   
+        
+        <MudList>
+            <MudListItem>
+                <MudText Typo="Typo.body2">Average Release Pressed Year</MudText>
+                    <MudSpacer />
+                <MudText Typo="Typo.body1">@_releaseInsightsStats.AverageReleasePressingYear</MudText>
+            </MudListItem>
+            <MudListItem>
+                <MudText Typo="Typo.body2">Earliest Release Year</MudText>
+                    <MudSpacer />
+                <MudText Typo="Typo.body1">@_releaseInsightsStats.EarliestReleaseYear</MudText>
+            </MudListItem>  
+        </MudList>
+
         <MudChart ChartType="ChartType.Line" ChartSeries="@ReleasesOverTimeSeries" @bind-SelectedIndex="Index" XAxisLabels="@releasesOverTimeGraphLabels" Width="100%" Height="350px" ChartOptions="@Options" />
     </MudStack>
 }
@@ -29,12 +43,12 @@ else
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     public ChartOptions Options = new ChartOptions();
     public string[] releasesOverTimeGraphLabels;
+    
 
     protected override async Task OnInitializedAsync()
     {        
         HandleStatisticsResult(await ReleaseInsightsViewService.GetReleaseStatistics());
         PassDataToReleasesOverTime();
-
     }
 
     private async void HandleStatisticsResult(ViewResult<ReleaseInsightsStatsModel> result)

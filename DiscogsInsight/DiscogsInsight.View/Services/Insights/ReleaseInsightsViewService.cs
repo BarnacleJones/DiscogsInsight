@@ -21,11 +21,29 @@ namespace DiscogsInsight.View.Services.Insights
                 //get data
                 var releases = await _releaseDataService.GetAllReleasesAsList();
 
+                var earliestRelease = releases.Where(x => !string.IsNullOrWhiteSpace(x.OriginalReleaseYear))
+                                              .OrderBy(x => x.OriginalReleaseYear)
+                                              .FirstOrDefault();
+
+                var earliestReleaseText = $"{earliestRelease.OriginalReleaseYear} - {earliestRelease.Title}";
+
+                var releasePressingYears = releases.Where(x => x.Year.HasValue && x.Year.Value > 0)
+                                                   .OrderBy(x => x.Year)
+                                                   .Select(x => x.Year)
+                                                   .ToList();
+
+                var averagePressingYear = releasePressingYears.Average() ?? 0;
+
+                var averagePressingYearText = Math.Round(averagePressingYear, 0, MidpointRounding.AwayFromZero).ToString();
+
+
                 var releasesOverTimeLineChartSeriesData = GenerateDataForReleasesOverTimeGraph(releases);
 
                 var data = new ReleaseInsightsStatsModel
                 {
-                    ReleasesOverTimeLineChartSeriesData = releasesOverTimeLineChartSeriesData
+                    ReleasesOverTimeLineChartSeriesData = releasesOverTimeLineChartSeriesData,
+                    EarliestReleaseYear = earliestReleaseText ?? "",
+                    AverageReleasePressingYear = averagePressingYearText
                 };
 
                 return new ViewResult<ReleaseInsightsStatsModel>
