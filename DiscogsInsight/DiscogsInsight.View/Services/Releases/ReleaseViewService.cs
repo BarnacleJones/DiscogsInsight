@@ -3,6 +3,7 @@ using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 using DiscogsInsight.ViewModels.Collection;
+using DiscogsInsight.ViewModels.DataCorrectionViewModels;
 
 namespace DiscogsInsight.View.Services.Releases
 {
@@ -20,13 +21,6 @@ namespace DiscogsInsight.View.Services.Releases
             _tracksDataService = tracksDataService;
             _discogsGenresAndTagsDataService = discogsGenresAndTagsDataService;
         }
-
-        public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
-        {
-            var success = await _releaseDataService.SetFavouriteBooleanOnRelease(favourited, discogsReleaseId);
-            return success;
-        }
-                
         public async Task<ViewResult<ReleaseViewModel>> GetRelease(int? discogsReleaseId)
         {
             try
@@ -62,7 +56,43 @@ namespace DiscogsInsight.View.Services.Releases
                 };
             }
         }
+        public async Task<ViewResult<List<ReleaseViewModel>>> GetNewestReleases()
+        {
+            try
+            {
+                var returnedReleases = new List<ReleaseViewModel>();
+                var newestNumber = 5; //todo: will update this to a setting value
+                var newestFiveReleases = await _releaseDataService.GetNewestReleases(newestNumber);
 
+                foreach (var item in newestFiveReleases)
+                {
+                    var thisItem = item;
+                    var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
+                    var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
+                          
+                    var artist = await _artistDataService.GetArtist(item.DiscogsArtistId, true);
+                    var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
+                    returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
+                }
+
+                return new ViewResult<List<ReleaseViewModel>>
+                {
+                    Data = returnedReleases,
+                    ErrorMessage = "",
+                    Success = true
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<List<ReleaseViewModel>>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+        }
         public async Task<ViewResult<ReleaseViewModel>> GetRandomRelease()
         {
             try
@@ -91,7 +121,6 @@ namespace DiscogsInsight.View.Services.Releases
                 };
             }
         }
-
         public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByGenreId(int genreId)
         {
             try
@@ -132,8 +161,7 @@ namespace DiscogsInsight.View.Services.Releases
                     Success = false
                 };
             }
-        }
-        
+        }        
         public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByYear(int? releaseYear)
         {
             try
@@ -169,38 +197,40 @@ namespace DiscogsInsight.View.Services.Releases
                     Success = false
                 };
             }
+        }        
+        public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
+        {
+            var success = await _releaseDataService.SetFavouriteBooleanOnRelease(favourited, discogsReleaseId);
+            return success;
         }
-        
-        public async Task<ViewResult<List<ReleaseViewModel>>> GetNewestReleases()
+
+        #region DataCorrection
+
+        public async Task<ViewResult<List<CorrectArtistDataViewModel>>> GetPossibleArtistsBasedOnDiscogsReleaseId(int? discogsReleaseId)
         {
             try
             {
-                var returnedReleases = new List<ReleaseViewModel>();
-                var newestNumber = 5; //todo: will update this to a setting value
-                var newestFiveReleases = await _releaseDataService.GetNewestReleases(newestNumber);
 
-                foreach (var item in newestFiveReleases)
-                {
-                    var thisItem = item;
-                    var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
-                    var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
-                          
-                    var artist = await _artistDataService.GetArtist(item.DiscogsArtistId, true);
-                    var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
-                    returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
-                }
+            var data = await _artistDataService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+            
+            var viewModel = data.Select(x => new CorrectArtistDataViewModel
+            {
+                ArtistName = x.ArtistName,
+                CorrectArtistMusicBrainzId = x.CorrectArtistMusicBrainzId,
+                Country = x.Country,
+                Disambiguation = x.Disambiguation,
+            }).ToList();
 
-                return new ViewResult<List<ReleaseViewModel>>
-                {
-                    Data = returnedReleases,
-                    ErrorMessage = "",
-                    Success = true
-                };
-
+            return new ViewResult<List<CorrectArtistDataViewModel>>
+            {
+                Data = viewModel,
+                ErrorMessage = "",
+                Success = true
+            };
             }
             catch (Exception ex)
             {
-                return new ViewResult<List<ReleaseViewModel>>
+                return new ViewResult<List<CorrectArtistDataViewModel>>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -208,6 +238,36 @@ namespace DiscogsInsight.View.Services.Releases
                 };
             }
         }
+        public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseUrl, string musicBrainzId)
+        {
+            var  success = await _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseUrl, musicBrainzId);
+            return success;
+        }
+        public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleImagesBasedOnDiscogsReleaseId(int? discogsReleaseId)
+        {
+            try
+            {
+                var data = _releaseDataService.GetPossibleImagesForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+
+                return new ViewResult<CorrectImageDataViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = "",
+                    Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<CorrectImageDataViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+        }
+
+        #endregion
 
         private async Task<ReleaseViewModel> GetReleaseViewModel(Release release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
         {
