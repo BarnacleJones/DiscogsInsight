@@ -1,4 +1,5 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.DataAccess.Services;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
@@ -19,37 +20,17 @@ namespace DiscogsInsight.View.Services.Insights
             {
                 var tracks = await _trackDataService.GetAllTracks();
 
-                var list = new List<string>();
+                var averageTrackLengthFormatted = GetAverageTrackLengthStringFormatted(tracks);
+                var averageTracksPerReleaseText = GetAverageTracksPerReleaseStringFormatted(tracks);
 
-                var unformattedAverageTrackLength = tracks
-                                                    .Where(x => x.MusicBrainzTrackLength != null)
-                                                    .Average(x => x.MusicBrainzTrackLength);
-                var averageTrackLengthFormatted = "";
-                if (unformattedAverageTrackLength.HasValue)
-                {
-                    averageTrackLengthFormatted = $"{TimeSpan.FromMilliseconds(unformattedAverageTrackLength.Value).ToString(@"mm\:ss")}";
-                }
-
-                var releasesToTracks = tracks.GroupBy(x => x.DiscogsReleaseId).ToList();
-                
-                var tracksPerReleaseCount = new List<int>();
-                foreach ( var release in releasesToTracks ) 
-                {
-                    tracksPerReleaseCount.Add(release.Count());
-                }
-                var averageTracksPerReleaseText = Math.Round(tracksPerReleaseCount.Average(), 0, MidpointRounding.AwayFromZero).ToString();
-
-
-                var trackStatModel = new TracksInsightsStatsModel
+                var data = new TracksInsightsStatsModel
                 {
                     AverageTrackLength = averageTrackLengthFormatted,
-                    AverageTracksPerRelease = averageTracksPerReleaseText,
-                    HighestRatedTracks = list
-
+                    AverageTracksPerRelease = averageTracksPerReleaseText
                 };
                 return new ViewResult<TracksInsightsStatsModel>
                 {
-                    Data = trackStatModel,
+                    Data = data,
                     ErrorMessage = "",
                     Success = true
                 };
@@ -63,6 +44,33 @@ namespace DiscogsInsight.View.Services.Insights
                     Success = false
                 };
             }
+        }
+
+        private static string GetAverageTracksPerReleaseStringFormatted(List<Track> tracks)
+        {
+            var releasesToTracks = tracks.GroupBy(x => x.DiscogsReleaseId).ToList();
+
+            var tracksPerReleaseCount = new List<int>();
+            foreach (var release in releasesToTracks)
+            {
+                tracksPerReleaseCount.Add(release.Count());
+            }
+            var averageTracksPerReleaseText = Math.Round(tracksPerReleaseCount.Average(), 0, MidpointRounding.AwayFromZero).ToString();
+            return averageTracksPerReleaseText;
+        }
+
+        private static string GetAverageTrackLengthStringFormatted(List<Track> tracks)
+        {
+            var unformattedAverageTrackLength = tracks
+                                                .Where(x => x.MusicBrainzTrackLength != null)
+                                                .Average(x => x.MusicBrainzTrackLength);
+            var averageTrackLengthFormatted = "";
+            if (unformattedAverageTrackLength.HasValue)
+            {
+                averageTrackLengthFormatted = $"{TimeSpan.FromMilliseconds(unformattedAverageTrackLength.Value).ToString(@"mm\:ss")}";
+            }
+
+            return averageTrackLengthFormatted;
         }
     }
 }
