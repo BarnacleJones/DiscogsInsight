@@ -28,7 +28,6 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
-
         public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
         {
             try

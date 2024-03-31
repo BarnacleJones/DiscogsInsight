@@ -9,6 +9,7 @@ using DiscogsInsight.View.Services.Artist;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
 using MudBlazor.Services;
+using DiscogsInsight.View.Services.Insights;
 
 namespace DiscogsInsight
 {
@@ -78,6 +79,11 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<ArtistViewService>();
             builder.Services.AddSingleton<TracksViewService>();
             builder.Services.AddSingleton<ReleaseViewService>();
+
+            builder.Services.AddSingleton<ReleaseInsightsViewService>();
+            builder.Services.AddSingleton<ArtistInsightsViewService>();
+            builder.Services.AddSingleton<TracksInsightsViewService>();
+            builder.Services.AddSingleton<CollectionInsightsViewService>();
 
 
             return builder.Build();

@@ -1,0 +1,53 @@
+﻿@page "/artistInsights"
+@using DiscogsInsight.View.Services.Collection
+@using DiscogsInsight.View.Services.Insights
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.View.Services.Tracks
+@using DiscogsInsight.ViewModels
+@using DiscogsInsight.ViewModels.Insights
+@using DiscogsInsight.ViewModels.Results
+@inject ArtistInsightsViewService ArtistInsightsViewService
+@inject UserNotificationService UserNotificationService
+@inject NavigationManager NavigationManager
+
+        
+@if (_artistInsightsStats != null)
+{
+    <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
+                
+    </MudStack>
+}
+else
+{
+    <LoadingComponent />
+}
+
+@code{
+    private ArtistInsightsStatsModel _artistInsightsStats;
+
+
+    protected override async Task OnInitializedAsync()
+    {        
+        HandleStatisticsResult(await ArtistInsightsViewService.GetArtistStatistics());
+
+    }
+
+    private async void HandleStatisticsResult(ViewResult<ArtistInsightsStatsModel> result)
+    {
+        if (result.Success)
+            _artistInsightsStats = result.Data;
+        else
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+    }
+
+    private double[] CalculateDonutValues()
+    {
+        // var totalInCollectionWithoutTracks = _collectionStats.AlbumsInCollectionWithoutTracksInfo;
+        // var totalInCollectionWithTracks = _collectionStats.AlbumsInCollection - _collectionStats.AlbumsInCollectionWithoutTracksInfo;
+        // return new double[] { totalInCollectionWithTracks, totalInCollectionWithoutTracks };
+        return null;
+
+    }
+
+}
