@@ -1,0 +1,75 @@
+﻿@page "/correctArtistData/{releaseId:int?}"
+
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels.DataCorrectionViewModels
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
+@inject NavigationManager NavigationManager
+@inject ReleaseViewService ReleaseViewService
+
+@if (_potentialArtists is null)
+{
+    <LoadingComponent />
+}
+else
+{
+    <MudText>Please use the select list to choose the correct artist</MudText>
+    <MudSelect T="string" Label="Correct Artist" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" ValueChanged="HandleArtistSelection">
+        @foreach (var item in _potentialArtists)
+        {        
+            <MudSelectItem Value="item.CorrectArtistMusicBrainzId">@item.ArtistName @item.Country @item.Disambiguation</MudSelectItem>
+        }
+    </MudSelect>
+}
+
+@code
+{
+    [Parameter]
+    public int? releaseId { get; set; }
+
+    private List<CorrectArtistDataViewModel>? _potentialArtists;
+    private string? _selectedArtist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            HandleResult(await ReleaseViewService.GetPossibleArtistsBasedOnDiscogsReleaseId(releaseId));
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{ex.Message}", "OK", "Cancel");
+        }
+    }
+
+    private async Task HandleArtistSelection(string CorrectArtistMusicBrainzId)
+    {
+        var success = await ReleaseViewService.UpdateArtistWithCorrectMusicBrainzId(releaseId, CorrectArtistMusicBrainzId);
+        if (success)
+        {
+            NavigationManager.NavigateTo($"/release/{releaseId}");
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"Error updating artist", "OK", "Cancel");
+        }
+    }
+
+    private async void HandleResult(ViewResult<List<CorrectArtistDataViewModel>> result)
+    {
+        if (result.Success)
+        {
+            _potentialArtists = result.Data;
+            StateHasChanged();
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
+    
+
+   
+}

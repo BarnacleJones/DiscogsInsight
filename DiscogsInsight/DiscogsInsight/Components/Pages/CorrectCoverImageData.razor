@@ -1,0 +1,50 @@
+﻿@page "/correctCoverImageData/{releaseId:int?}"
+
+@using DiscogsInsight.View.Services.Notifications
+@using DiscogsInsight.View.Services.Releases
+@using DiscogsInsight.ViewModels.DataCorrectionViewModels
+@using DiscogsInsight.ViewModels.Results
+@inject UserNotificationService UserNotificationService
+@inject ReleaseViewService ReleaseViewService
+
+@if (_potentialCovers is null)
+{
+    <LoadingComponent />
+}
+else
+{
+    //build up a list of possible covers with some general detail
+    //once one is chosen, correct the information and when that is success redirect to the release for that artist
+}
+
+@code
+{
+    [Parameter]
+    public int? releaseId { get; set; }
+    private CorrectImageDataViewModel? _potentialCovers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            HandleResult(await ReleaseViewService.GetPossibleImagesBasedOnDiscogsReleaseId(releaseId));
+        }
+        catch (Exception ex)
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{ex.Message}", "OK", "Cancel");
+        }
+    }
+
+    private async void HandleResult(ViewResult<CorrectImageDataViewModel> result)
+    {
+        if (result.Success)
+        {
+            _potentialCovers = result.Data;
+            StateHasChanged();
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
+    }
+}

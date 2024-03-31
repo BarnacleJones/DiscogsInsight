@@ -6,6 +6,13 @@
 @inject NavigationManager NavigationManager
 @inject ReleaseViewService ReleaseViewService
 @inject IBrowserViewportService ViewportService
+
+@if (_correctionButtonsShown)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectArtist" >Artist data is wrong</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectImage" >Cover image is wrong</MudButton>
+}
+
 <MudCard>
     <MudCardHeader>
         <CardHeaderAvatar>
@@ -34,12 +41,12 @@
                 </MudText>
             </MudLink>
         </CardHeaderContent>
-            <CardHeaderActions>
-                @if(ShowRefreshRelease == true)
-                {
-                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="RefreshCard" Color="Color.Default" />
-                }
-            </CardHeaderActions>
+        <CardHeaderActions>
+            @if(ShowRefreshRelease == true)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="RefreshCard" Color="Color.Default" />
+            }
+        </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudStack>
@@ -47,8 +54,7 @@
             <MudButton OnClick="OnInfoExpandCollapseClick">
                 @if (_infoExpanded)
                 {
-                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />
-                    
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" />                    
                 }
                 else
                 {
@@ -175,8 +181,11 @@
     </MudCardContent>
     <MudCardActions>        
         <MudIconButton Icon="@(IsFavourited ? Icons.Material.Filled.Favorite : Icons.Material.Outlined.FavoriteBorder )" Color="Color.Default" OnClick="SetFavourite" />
+        <MudIconButton Icon="@Icons.Material.Filled.QuestionMark" Color="Color.Default" OnClick="CorrectData" />
     </MudCardActions>
 </MudCard>
+
+
 
 @code
 {
@@ -189,6 +198,12 @@
     [Parameter]
     public EventCallback OnButtonClick { get; set; }
 
+    //data correction message box
+    [Inject] 
+    private IDialogService DialogService { get; set; }
+    MudMessageBox mbox { get; set; }
+
+    private bool _correctionButtonsShown = false;
     private bool _infoExpanded = false;
     private bool _genresExpanded = false;
     private bool _tracksExpanded = false;
@@ -205,6 +220,30 @@
         {
             await SetCoverImageStyle();
         }
+    }
+
+    private async Task CorrectData()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+           "Data Correction",
+           "Is there incorrect data for this release?",
+           yesText: "Yes, correct the data.", cancelText: "Cancel");
+
+        _correctionButtonsShown = result == null ? false : true;
+
+        StateHasChanged();
+    }
+
+    private void GoToCorrectArtist()
+    {
+        var releaseId = Release.DiscogsReleaseId;
+        NavigationManager.NavigateTo("/correctArtistData/" + releaseId);
+    }
+
+    private void GoToCorrectImage()
+    {
+        var releaseId = Release.DiscogsReleaseId;
+        NavigationManager.NavigateTo("/correctCoverImageData/" + releaseId);
     }
 
     private async Task RefreshCard()
