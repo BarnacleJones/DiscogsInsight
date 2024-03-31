@@ -39,11 +39,15 @@ namespace DiscogsInsight.View.Services.Insights
 
                 var releasesOverTimeLineChartSeriesData = GenerateDataForReleasesOverTimeGraph(releases);
 
+                var releasesByYearAndLabelsData = GenerateDataForReleasesByPressingCountry(releases);
+
                 var data = new ReleaseInsightsStatsModel
                 {
                     ReleasesOverTimeLineChartSeriesData = releasesOverTimeLineChartSeriesData,
                     EarliestReleaseYear = earliestReleaseText ?? "",
-                    AverageReleasePressingYear = averagePressingYearText
+                    AverageReleasePressingYear = averagePressingYearText,
+                    ReleasesPressedCountryLabels = releasesByYearAndLabelsData.Item1,
+                    ReleasesPressedCountryValues = releasesByYearAndLabelsData.Item2
                 };
 
                 return new ViewResult<ReleaseInsightsStatsModel>
@@ -62,6 +66,27 @@ namespace DiscogsInsight.View.Services.Insights
                     Success = false
                 };
             }
+        }
+
+        private (string[], double[]) GenerateDataForReleasesByPressingCountry(List<Release>? releases)
+        {
+            var releasesGroupedByCountryOfRelease = releases.GroupBy(x => x.ReleaseCountry).ToList();
+            var dataList = new List<(string, double)>();
+
+            foreach (var country in releasesGroupedByCountryOfRelease)
+            {
+                dataList.Add((country.Key ?? "Unknown", country.Count()));
+            }
+
+            var labels = new string[dataList.Count()];
+            var countryCounts = new double[dataList.Count()];
+            for (int i = 0; i < dataList.Count; i++)
+            {
+                labels[i] = dataList[i].Item1;
+                countryCounts[i] = dataList[i].Item2;
+            }
+           
+            return (labels, countryCounts);
         }
 
         private static List<(string, double)> GenerateDataForReleasesOverTimeGraph(List<Release> releases)

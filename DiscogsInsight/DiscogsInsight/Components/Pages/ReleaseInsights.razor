@@ -30,6 +30,9 @@
         </MudList>
 
         <MudChart ChartType="ChartType.Line" ChartSeries="@ReleasesOverTimeSeries" @bind-SelectedIndex="Index" XAxisLabels="@releasesOverTimeGraphLabels" Width="100%" Height="350px" ChartOptions="@Options" />
+
+        <MudChart ChartType="ChartType.Pie" InputData="@releasesPressedCountryValues" @bind-SelectedIndex="Index" InputLabels="@releasesPressedCountryLabels" Width="300px" Height="300px" />
+
     </MudStack>
 }
 else
@@ -43,12 +46,15 @@ else
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     public ChartOptions Options = new ChartOptions();
     public string[] releasesOverTimeGraphLabels;
-    
+    public double[] releasesPressedCountryValues;
+    public string[] releasesPressedCountryLabels;
+
 
     protected override async Task OnInitializedAsync()
     {        
         HandleStatisticsResult(await ReleaseInsightsViewService.GetReleaseStatistics());
         PassDataToReleasesOverTime();
+        PassDataToPressedCountriesPieChart();
     }
 
     private async void HandleStatisticsResult(ViewResult<ReleaseInsightsStatsModel> result)
@@ -76,5 +82,11 @@ else
         };
 
         releasesOverTimeGraphLabels = xAxisLabels;
+    }
+
+    private void PassDataToPressedCountriesPieChart()
+    {
+        releasesPressedCountryValues = _releaseInsightsStats.ReleasesPressedCountryValues;
+        releasesPressedCountryLabels = _releaseInsightsStats.ReleasesPressedCountryLabels;
     }
 }

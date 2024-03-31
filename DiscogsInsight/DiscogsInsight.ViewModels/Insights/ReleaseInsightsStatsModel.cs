@@ -6,7 +6,11 @@
 
         public string AverageReleasePressingYear { get; set; }
         public string EarliestReleaseYear { get; set; }
-        
+
+        public double[] ReleasesPressedCountryValues {get;set;}
+        public string[] ReleasesPressedCountryLabels { get; set; }
+
+
     }
 
 }
