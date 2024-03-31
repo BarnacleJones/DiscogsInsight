@@ -106,8 +106,8 @@ namespace DiscogsInsight.DataAccess.Services
                         foreach (var artist in artistsToSave)
                         {
                             var artistsTable = await _db.GetTable<Artist>();
-                            var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
-                            if (await existingArtist == null)
+                            var existingArtist = await artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
+                            if (existingArtist == null)
                             {
                                 await _db.InsertAsync(new Artist
                                 {

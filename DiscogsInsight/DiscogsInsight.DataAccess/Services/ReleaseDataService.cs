@@ -103,7 +103,7 @@ namespace DiscogsInsight.DataAccess.Services
                 throw new Exception("No release - try refreshing data ????");
 
             //this is the first time the fuzzy logic comes in to play, so skip this for data thats been manually corrected, as all that release data has been refetched
-            if (release.MusicBrainzReleaseId == null && !release.HasBeenManuallyCorrected)
+            if (release.MusicBrainzReleaseId == null && !release.ArtistHasBeenManuallyCorrected)
             {
                 if (release.MusicBrainzReleaseId == null) //get initial artist call
                     artist = await _artistDataService.GetArtist(artist.DiscogsArtistId, true);
@@ -113,7 +113,7 @@ namespace DiscogsInsight.DataAccess.Services
             //using the artist id need to get releases and figure out which one is the right release
             //potential here for the release not being right.
             //The release may not exist on that call, this is using Levenshtein algorithm which is not right every time.
-            if (!release.HasAllApiData || release.HasBeenManuallyCorrected)
+            if (!release.HasAllApiData || release.ArtistHasBeenManuallyCorrected)
             {
                 var mostLikelyRelease = await GetMusicBrainzReleaseIdFromDiscogsReleaseInformation(release.Title, release.DiscogsArtistId ?? 0);
             
@@ -126,7 +126,8 @@ namespace DiscogsInsight.DataAccess.Services
             }
             release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
 
-            if ((release.MusicBrainzReleaseId != null && !release.HasAllApiData) || release.HasBeenManuallyCorrected)
+            //releases having the image corrected should fall here
+            if ((release.MusicBrainzReleaseId != null && !release.HasAllApiData) || release.ArtistHasBeenManuallyCorrected)
             {
                 //now make the musicbrainz release call with the release id and get all the track lengths (if not a releasegroup) and original year
                 var savedMusicBrainzTrackLengths = await MakeMusicBrainzReleaseCallAndSaveTracks(release, release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
@@ -140,7 +141,8 @@ namespace DiscogsInsight.DataAccess.Services
                 if (coverImage == null) { coverImage = Array.Empty<byte>(); }
             }
             release.HasAllApiData = true;//all api data retrieved for release
-            release.HasBeenManuallyCorrected = false;//change back as all data is done until next correction
+            release.ArtistHasBeenManuallyCorrected = false;//change back as all data is done until next correction
+            release.ReleaseHasBeenManuallyCorrected = false;//change back as all data is done until next correction
             await _db.UpdateAsync(release);
 
             return (release, coverImage);
@@ -427,28 +429,67 @@ namespace DiscogsInsight.DataAccess.Services
 
         #region Release Data Correction
 
-        public async Task<TempPossibleImagesClass> GetPossibleImagesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
+        public async Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
         {
-            //get release from discogsreleaseid
-            //release.Title, release.DiscogsArtistId is passed to
-            //GetMusicBrainzReleaseIdFromDiscogsReleaseInformation
-            //so just pass down the possibilities
-            //and delete cover image here for this one, because it wont come up with the next call
-            //and whatever otehr data would be fetched on that call
-            //pass down title, release year, and id from the database for updating
+            var allReleasesKnownByArtistId = await GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(discogsReleaseId);
 
-            throw new NotImplementedException();
+            //remove existing cover image
+            var savedCoverImage = await _db.GetTable<MusicBrainzReleaseToCoverImage>();
+            var coverList = await savedCoverImage.ToListAsync();
+
+            var imagesToRemove = coverList.Where(x => x.MusicBrainzReleaseId == allReleasesKnownByArtistId.Item1).ToList();
+
+            foreach (var image in imagesToRemove)
+            {
+                await _db.DeleteAsync(image);
+            }
+
+            return allReleasesKnownByArtistId.Item2;
         }
-       
-        public async Task<bool> UpdateReleaseAndFetchNewCoverData(int musicBrainzArtistToMusicBrainzId)
+
+        private async Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId)
         {
-            //once one is chosen it will come up here
-            //only the id probably of the musicbrainsartisttorelease joining table
-            //get the 
-            //determine if its a release group
-            //save the release with the new id
-            //get the cover image and save it
-            
+            var releases = await _db.GetTable<Release>();
+            var releasesList = await releases.ToListAsync();
+
+            var incorrectReleases = releasesList.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();//could be multiples
+
+            var discogsArtistId = incorrectReleases.FirstOrDefault().DiscogsArtistId;
+            var badMusicBrainzReleaseId = incorrectReleases.FirstOrDefault().MusicBrainzReleaseId;
+
+            var artists = await _db.GetTable<Artist>();
+            var artistList = await artists.ToListAsync();
+            var musicBrainzArtistId = artistList.Where(x => x.DiscogsArtistId == discogsArtistId).FirstOrDefault().MusicBrainzArtistId;
+
+            var releaseJoiningTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
+            var releaseJoiningListByMusicBrainzArtist = releaseJoiningTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId).ToList();
+
+            var allReleasesKnownByArtistId = releaseJoiningListByMusicBrainzArtist.Select(x => new PossibleReleasesFromArtist
+            {
+                Date = x.ReleaseYear,
+                MusicBrainzReleaseId = x.MusicBrainzReleaseId,
+                Status = x.Status,
+                Title = x.MusicBrainzReleaseName
+            }).ToList();
+            return (badMusicBrainzReleaseId, allReleasesKnownByArtistId);
+        }
+
+        public async Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId)
+        {
+            var releaseTable = await GetAllReleasesAsList();
+            var releasesToChange = releaseTable.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();
+            var musicBrainzReleaseData = await _db.GetTable<MusicBrainzArtistToMusicBrainzRelease>();
+            var list = await musicBrainzReleaseData.ToListAsync();
+            var newRelease = list.Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).FirstOrDefault();
+            foreach (var release in releasesToChange)
+            {
+                release.MusicBrainzReleaseId = musicBrainzReleaseId;
+                release.ReleaseHasBeenManuallyCorrected = true;
+                release.HasAllApiData = false;
+                release.IsAReleaseGroupGroupId = newRelease.IsAReleaseGroupGroupId;
+                await _db.UpdateAsync(release);
+            }
+
             return true;
         }
 
@@ -456,8 +497,11 @@ namespace DiscogsInsight.DataAccess.Services
 
     }
 
-    public class TempPossibleImagesClass
+    public class PossibleReleasesFromArtist
     {
-        
+        public string Title { get; set; }
+        public string Date { get; set; }
+        public string Status { get; set; }
+        public string MusicBrainzReleaseId { get; set; }
     }
 }

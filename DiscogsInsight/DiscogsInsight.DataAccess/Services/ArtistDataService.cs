@@ -95,7 +95,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                _logger.LogError($"Exception at SaveDiscogsArtistResponse:{ex.Message} ");
                 throw;
             }
         }
@@ -410,7 +410,7 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 release.MusicBrainzReleaseId = null;
                 release.HasAllApiData = false;
-                release.HasBeenManuallyCorrected = true;
+                release.ArtistHasBeenManuallyCorrected = true;
                 await _db.UpdateAsync(release);
             }
 

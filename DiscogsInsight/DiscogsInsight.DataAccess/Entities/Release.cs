@@ -23,6 +23,7 @@ namespace DiscogsInsight.DataAccess.Entities
 
         public bool IsFavourited { get; set; }
         public bool HasAllApiData { get; set; }//When musicbrainz info is all fetched
-        public bool HasBeenManuallyCorrected { get; set; }
+        public bool ArtistHasBeenManuallyCorrected { get; set; }
+        public bool ReleaseHasBeenManuallyCorrected { get; set; }
     }
 }

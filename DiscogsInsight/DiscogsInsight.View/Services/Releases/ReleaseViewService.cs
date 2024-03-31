@@ -238,27 +238,35 @@ namespace DiscogsInsight.View.Services.Releases
                 };
             }
         }
-        public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseUrl, string musicBrainzId)
+        public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseId, string musicBrainzId)
         {
-            var  success = await _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseUrl, musicBrainzId);
+            var  success = await _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, musicBrainzId);
             return success;
         }
-        public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleImagesBasedOnDiscogsReleaseId(int? discogsReleaseId)
+        public async Task<ViewResult<List<CorrectReleaseDataViewModel>>> GetPossibleReleasesBasedOnDiscogsReleaseId(int? discogsReleaseId)
         {
             try
             {
-                var data = _releaseDataService.GetPossibleImagesForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+                var data = await _releaseDataService.GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
 
-                return new ViewResult<CorrectImageDataViewModel>
+                var viewModel = data.Select(x => new CorrectReleaseDataViewModel
                 {
-                    Data = null,
+                    Date = x.Date,
+                    MusicBrainzReleaseId = x.MusicBrainzReleaseId,
+                    Status = x.Status,
+                    Title = x.Title
+                }).ToList();
+
+                return new ViewResult<List<CorrectReleaseDataViewModel>>
+                {
+                    Data = viewModel,
                     ErrorMessage = "",
                     Success = true
                 };
             }
             catch (Exception ex)
             {
-                return new ViewResult<CorrectImageDataViewModel>
+                return new ViewResult<List<CorrectReleaseDataViewModel>>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -267,6 +275,11 @@ namespace DiscogsInsight.View.Services.Releases
             }
         }
 
+        public async Task<bool> UpdateReleaseWithCorrectMusicBrainzId(int? discogsReleaseId, string musicBrainzReleaseId)
+        {
+            var success = await _releaseDataService.UpdateReleaseToBeNewMusicBrainzReleaseId(discogsReleaseId, musicBrainzReleaseId);
+            return success;
+        }
         #endregion
 
         private async Task<ReleaseViewModel> GetReleaseViewModel(Release release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
