@@ -1,6 +1,7 @@
 ﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -43,7 +44,10 @@ namespace DiscogsInsight.ApiIntegration.Services
             {
                 var responseData = new MusicBrainzInitialArtist();
 
-                var fullArtistRequestUrl = InitialArtistRequest + $"'{artistName}'";
+                //get really bad data when artist has discogs (number) (eg conflict(2))
+                var strippedArtistName = RemoveParenthesesAndContents(artistName);
+
+                var fullArtistRequestUrl = InitialArtistRequest + $"'{strippedArtistName}'";
                 
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
@@ -60,7 +64,12 @@ namespace DiscogsInsight.ApiIntegration.Services
                 _logger.LogError(ex, "Failed to get data from API");
                 throw;
             }
-        }        
+        }
+
+        public string RemoveParenthesesAndContents(string input)
+        {
+            return Regex.Replace(input, @"\(.*?\)", "").Trim();
+        }
         public async Task<MusicBrainzArtist> GetArtistFromMusicBrainzApiUsingArtistId(string musicBrainzArtistId)
         {
             try

@@ -80,7 +80,9 @@ namespace DiscogsInsight.DataAccess.Services
                 release = releases.FirstOrDefault(x => x.DiscogsReleaseId == discogsReleaseId);
 
             }
-            if (!release.HasAllApiData)
+            //release may have been updated from bad data so doesnt have all data, but dont want the discogs data
+            //so doing a check on one of the additional release data fields (Release DiscogsReleaseUrl - which is likely to be populated)
+            if (!release.HasAllApiData && string.IsNullOrWhiteSpace(release.DiscogsReleaseUrl))
             {
                 var discogsReleaseResponse = await _discogsApiService.GetReleaseFromDiscogs((int)discogsReleaseId);
                 var success = await SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse(discogsReleaseResponse);
@@ -100,29 +102,33 @@ namespace DiscogsInsight.DataAccess.Services
             if (release == null)
                 throw new Exception("No release - try refreshing data ????");
 
-            if (release.MusicBrainzReleaseId == null)
+            //this is the first time the fuzzy logic comes in to play, so skip this for data thats been manually corrected, as all that release data has been refetched
+            if (release.MusicBrainzReleaseId == null && !release.HasBeenManuallyCorrected)
             {
                 if (release.MusicBrainzReleaseId == null) //get initial artist call
                     artist = await _artistDataService.GetArtist(artist.DiscogsArtistId, true);
 
-                //using the artist id need to get releases and figure out which one is the right release
-                //potential here for the release not being right.
-                //The release may not exist on that call, this is using Levenshtein algorithm which is not right every time.
-
-                var savedRelease = await SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(artist, release);
-                if (savedRelease != null)
+                await SaveReleasesFromMusicBrainzArtistCall(artist, release);
+            }
+            //using the artist id need to get releases and figure out which one is the right release
+            //potential here for the release not being right.
+            //The release may not exist on that call, this is using Levenshtein algorithm which is not right every time.
+            if (!release.HasAllApiData || release.HasBeenManuallyCorrected)
+            {
+                var mostLikelyRelease = await GetMusicBrainzReleaseIdFromDiscogsReleaseInformation(release.Title, release.DiscogsArtistId ?? 0);
+            
+                if (mostLikelyRelease != null)
                 {
-                    release.IsAReleaseGroupGroupId = savedRelease.IsAReleaseGroupGroupId;
-                    release.MusicBrainzReleaseId = savedRelease.MusicBrainzReleaseId;
+                    release.IsAReleaseGroupGroupId = mostLikelyRelease.IsAReleaseGroupGroupId;
+                    release.MusicBrainzReleaseId = mostLikelyRelease.MusicBrainzReleaseId;
                     await _db.UpdateAsync(release);
-
                 }
             }
             release = await GetReleaseFromDbByDiscogsReleaseId(discogsReleaseId.Value);
 
-            if (release.MusicBrainzReleaseId != null)
+            if ((release.MusicBrainzReleaseId != null && !release.HasAllApiData) || release.HasBeenManuallyCorrected)
             {
-                //now make the musicbrainz relese call with the release id and get all the track lengths (if not a releasegroup) and original year
+                //now make the musicbrainz release call with the release id and get all the track lengths (if not a releasegroup) and original year
                 var savedMusicBrainzTrackLengths = await MakeMusicBrainzReleaseCallAndSaveTracks(release, release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
 
             }
@@ -134,6 +140,7 @@ namespace DiscogsInsight.DataAccess.Services
                 if (coverImage == null) { coverImage = Array.Empty<byte>(); }
             }
             release.HasAllApiData = true;//all api data retrieved for release
+            release.HasBeenManuallyCorrected = false;//change back as all data is done until next correction
             await _db.UpdateAsync(release);
 
             return (release, coverImage);
@@ -189,8 +196,6 @@ namespace DiscogsInsight.DataAccess.Services
             }
             return returnedReleases;
         }
-
-       
 
         #region Private Methods
         private async Task<bool> MakeMusicBrainzReleaseCallAndSaveTracks(Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
@@ -325,13 +330,13 @@ namespace DiscogsInsight.DataAccess.Services
             }
             return null;
         }
-        private async Task<MusicBrainzArtistToMusicBrainzRelease> SaveReleasesFromMusicBrainzArtistCallAndReturnTheMusicBrainzReleaseInfo(Artist artist, Release release)
+        private async Task SaveReleasesFromMusicBrainzArtistCall(Artist artist, Release release)
         {
             try
             {
                 if (artist.MusicBrainzArtistId == null)
                 {
-                    return null;
+                    return;
                 }
                 var artistCallResponse = await _musicBrainzApiService.GetArtistFromMusicBrainzApiUsingArtistId(artist.MusicBrainzArtistId);
 
@@ -383,10 +388,6 @@ namespace DiscogsInsight.DataAccess.Services
                         await _db.InsertAsync(artistIdToReleaseId);
                     }
                 }
-
-                var mostLikelyRelease = await GetMusicBrainzReleaseIdFromDiscogsReleaseInformation(release.Title, release.DiscogsArtistId ?? 0);
-                return mostLikelyRelease;
-
             }
             catch (Exception ex)
             {

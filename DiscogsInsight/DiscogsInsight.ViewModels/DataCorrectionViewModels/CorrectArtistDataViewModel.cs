@@ -4,11 +4,12 @@
     {
         public string CorrectArtistMusicBrainzId { get; set; }
         public string ArtistName { get; set; }
-        public string Tags { get; set; }
+        public string Country { get; set; }
+        public string Disambiguation { get; set; }
 
         public override string ToString()
         {
-            return $"{ArtistName} - {Tags}";
+            return $"{ArtistName} - {Country} - {Disambiguation}";
         }
     }
 }

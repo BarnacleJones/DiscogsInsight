@@ -206,23 +206,31 @@ namespace DiscogsInsight.View.Services.Releases
 
         #region DataCorrection
 
-        public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleArtistsBasedOnDiscogsReleaseId(int? discogsReleaseId)
+        public async Task<ViewResult<List<CorrectArtistDataViewModel>>> GetPossibleArtistsBasedOnDiscogsReleaseId(int? discogsReleaseId)
         {
             try
             {
 
-            var data = _artistDataService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+            var data = await _artistDataService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
             
-            return new ViewResult<CorrectImageDataViewModel>
+            var viewModel = data.Select(x => new CorrectArtistDataViewModel
             {
-                Data = null,
+                ArtistName = x.ArtistName,
+                CorrectArtistMusicBrainzId = x.CorrectArtistMusicBrainzId,
+                Country = x.Country,
+                Disambiguation = x.Disambiguation,
+            }).ToList();
+
+            return new ViewResult<List<CorrectArtistDataViewModel>>
+            {
+                Data = viewModel,
                 ErrorMessage = "",
                 Success = true
             };
             }
             catch (Exception ex)
             {
-                return new ViewResult<CorrectImageDataViewModel>
+                return new ViewResult<List<CorrectArtistDataViewModel>>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -230,11 +238,10 @@ namespace DiscogsInsight.View.Services.Releases
                 };
             }
         }
-
         public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseUrl, string musicBrainzId)
         {
-            var a = _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseUrl, musicBrainzId);
-            return true;
+            var  success = await _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseUrl, musicBrainzId);
+            return success;
         }
         public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleImagesBasedOnDiscogsReleaseId(int? discogsReleaseId)
         {
@@ -261,9 +268,6 @@ namespace DiscogsInsight.View.Services.Releases
         }
 
         #endregion
-
-
-
 
         private async Task<ReleaseViewModel> GetReleaseViewModel(Release release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
         {
