@@ -190,6 +190,7 @@ namespace DiscogsInsight.DataAccess.Services
             return returnedReleases;
         }
 
+       
 
         #region Private Methods
         private async Task<bool> MakeMusicBrainzReleaseCallAndSaveTracks(Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
@@ -420,7 +421,42 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
+
         #endregion
 
+        #region Release Data Correction
+
+        public async Task<TempPossibleImagesClass> GetPossibleImagesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
+        {
+            //get release from discogsreleaseid
+            //release.Title, release.DiscogsArtistId is passed to
+            //GetMusicBrainzReleaseIdFromDiscogsReleaseInformation
+            //so just pass down the possibilities
+            //and delete cover image here for this one, because it wont come up with the next call
+            //and whatever otehr data would be fetched on that call
+            //pass down title, release year, and id from the database for updating
+
+            throw new NotImplementedException();
+        }
+       
+        public async Task<bool> UpdateReleaseAndFetchNewCoverData(int musicBrainzArtistToMusicBrainzId)
+        {
+            //once one is chosen it will come up here
+            //only the id probably of the musicbrainsartisttorelease joining table
+            //get the 
+            //determine if its a release group
+            //save the release with the new id
+            //get the cover image and save it
+            
+            return true;
+        }
+
+        #endregion
+
+    }
+
+    public class TempPossibleImagesClass
+    {
+        
     }
 }

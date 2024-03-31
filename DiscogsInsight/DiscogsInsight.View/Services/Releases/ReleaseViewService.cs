@@ -3,6 +3,7 @@ using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 using DiscogsInsight.ViewModels.Collection;
+using DiscogsInsight.ViewModels.DataCorrectionViewModels;
 
 namespace DiscogsInsight.View.Services.Releases
 {
@@ -205,7 +206,59 @@ namespace DiscogsInsight.View.Services.Releases
 
         #region DataCorrection
 
-        
+        public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleArtistsBasedOnDiscogsReleaseId(int? discogsReleaseId)
+        {
+            try
+            {
+
+            var data = _artistDataService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+            
+            return new ViewResult<CorrectImageDataViewModel>
+            {
+                Data = null,
+                ErrorMessage = "",
+                Success = true
+            };
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<CorrectImageDataViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+        }
+
+        public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseUrl, string musicBrainzId)
+        {
+            var a = _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseUrl, musicBrainzId);
+            return true;
+        }
+        public async Task<ViewResult<CorrectImageDataViewModel>> GetPossibleImagesBasedOnDiscogsReleaseId(int? discogsReleaseId)
+        {
+            try
+            {
+                var data = _releaseDataService.GetPossibleImagesForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+
+                return new ViewResult<CorrectImageDataViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = "",
+                    Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<CorrectImageDataViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+        }
 
         #endregion
 

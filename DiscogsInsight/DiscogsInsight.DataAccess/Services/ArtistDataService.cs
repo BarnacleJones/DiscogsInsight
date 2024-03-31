@@ -239,6 +239,39 @@ namespace DiscogsInsight.DataAccess.Services
             }
         }
 
+
         #endregion
+
+        #region Artist Data Correction
+        public async Task<TempPossibleArtistsClass> GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
+        {
+            //get artist name from release id
+
+            //GetInitialArtistFromMusicBrainzApi
+
+            //look at the structure of the artist
+            //grab the list of artists
+             //each has a name, country, and set of tags (string.join them), and the id (its the musicbrainzid)
+             //send those back for display
+
+            throw new NotImplementedException();
+        }
+        public async Task<bool> DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(int? discogsReleaseId, string newAritstMusicBrainzId)
+        {
+            //once one is chosen it will come up here
+            //delete all data thats come from musicbrainz that is related to this artist
+            //update with new id
+            //get new image
+            //return true
+
+            return true;
+        }
+
+        #endregion
+    }
+
+    public class TempPossibleArtistsClass
+    {
+
     }
 }
