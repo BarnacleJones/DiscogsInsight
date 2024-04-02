@@ -7,12 +7,6 @@
 @inject ReleaseViewService ReleaseViewService
 @inject IBrowserViewportService ViewportService
 
-@if (_correctionButtonsShown)
-{
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectArtist" >Artist data is wrong</MudButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectImage" >Cover image is wrong</MudButton>
-}
-
 <MudCard>
     <MudCardHeader>
         <CardHeaderAvatar>
@@ -185,6 +179,13 @@
     </MudCardActions>
 </MudCard>
 
+@if (_correctionButtonsShown)
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectArtist">Artist data is wrong</MudButton>
+    <MudSpacer />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectImage">Cover image is wrong</MudButton>
+}
+
 
 
 @code
@@ -279,7 +280,10 @@
 
     private void OpenDiscogsReleaseLink(string url)
     {
-        NavigationManager.NavigateTo(url);
+        if (!string.IsNullOrWhiteSpace(url))
+        {
+            NavigationManager.NavigateTo(url);            
+        }
     }
 
     private void OnTracksExpandCollapseClick()
