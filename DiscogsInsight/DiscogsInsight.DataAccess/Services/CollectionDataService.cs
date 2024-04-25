@@ -162,19 +162,20 @@ namespace DiscogsInsight.DataAccess.Services
                                 DateAdded = release.date_added
                             });
                         }
-                        else
-                        {
-                            _ = await _db.UpdateAsync(new Release
-                            {
-                                Id = existingRelease.Id,
-                                DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
-                                DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
-                                DiscogsMasterId = release.basic_information.master_id,
-                                Title = release.basic_information.title,
-                                Year = release.basic_information.year,
-                                DateAdded = release.date_added
-                            });
-                        }
+                        //else //should not need to update every release? its just basic information at this point, and a collection update or first pull from api
+                        //{
+                                //here needs to not be instantiating a new release potentially
+                        //    _ = await _db.UpdateAsync(new Release()
+                        //    {
+                        //        Id = existingRelease.Id,
+                        //        DiscogsArtistId = artistIdForThisRelease == artistIdFromDb ? artistIdForThisRelease : artistIdFromDb,
+                        //        DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
+                        //        DiscogsMasterId = release.basic_information.master_id,
+                        //        Title = release.basic_information.title,
+                        //        Year = release.basic_information.year,
+                        //        DateAdded = release.date_added
+                        //    });
+                        //}
 
                         //save genres
                         var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
