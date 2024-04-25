@@ -248,7 +248,8 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var releaseTable = await _db.GetTable<Release>();
-                var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefaultAsync();
+                var releaseTableList = await releaseTable.ToListAsync();
+                var existingRelease = releaseTableList.Where(x => x.DiscogsReleaseId == releaseResponse.id).FirstOrDefault();
                 var tracksTable = await _db.GetTable<Track>();
                 var existingTracks = await tracksTable.Where(x => x.DiscogsReleaseId == releaseResponse.id).ToListAsync();
                 if (existingRelease == null || existingRelease.DiscogsArtistId == null || existingRelease.DiscogsReleaseId == null)
@@ -260,9 +261,9 @@ namespace DiscogsInsight.DataAccess.Services
                 await SaveTracksFromDiscogsReleaseResponse(releaseResponse, existingRelease, existingTracks);
 
                 //save genres (styles) from release
-                var success = await _discogsGenresAndTagsDataService.SaveStylesFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
+                await _discogsGenresAndTagsDataService.SaveStylesFromDiscogsRelease(releaseResponse, existingRelease.DiscogsReleaseId.Value, existingRelease.DiscogsArtistId.Value);
 
-                return success;
+                return true;
             }
             catch (Exception ex)
             {
