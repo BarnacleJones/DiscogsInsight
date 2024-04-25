@@ -7,7 +7,7 @@
 @inject ReleaseViewService ReleaseViewService
 @inject NavigationManager NavigationManager
 
-@if (_releasesThisYear != null)
+@if (_releasesOfThisGenre != null)
 {
     <MudStack AlignItems="MudBlazor.AlignItems.Center">
         <MudText Typo="Typo.h6">@_thisGenre Releases</MudText>
@@ -22,7 +22,7 @@
             EnableSwipeGesture="true" 
             AutoCycle="false" 
             TData="List<ReleaseViewModel>">
-                @foreach (var item in _releasesThisYear)
+            @foreach (var item in _releasesOfThisGenre)
                 {
                     <MudCarouselItem 
                         Transition="Transition.Slide" 
@@ -45,19 +45,36 @@ else
     [Parameter]
     public int genreId { get; set; }
 
-    public List<ReleaseViewModel>? _releasesThisYear;
+    private int internalGenreId { get; set; }
+
+    public List<ReleaseViewModel>? _releasesOfThisGenre;
     public string _thisGenre { get;set;}
 
     protected override async Task OnInitializedAsync()
     {
-        HandleReleaseByYearResult(await ReleaseViewService.GetReleasesByGenreId(genreId));
+        internalGenreId = genreId;
+        HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));
+    }
+
+    /// <summary>
+    /// This override checks if the value set when page first initialises is the same as the changing parameter.
+    /// It will refresh the page if they do not match.
+    /// https://stackoverflow.com/questions/64008372/c-sharp-blazor-onparameterssetasync-is-being-called-even-though-params-has-not-b
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnParametersSetAsync()
+    {
+       if (internalGenreId != genreId)
+       {
+            HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));            
+       }
     }
     
-    private async void HandleReleaseByYearResult(ViewResult<List<ReleaseViewModel>> result)
+    private async void HandleReleaseByGenreResult(ViewResult<List<ReleaseViewModel>> result)
     {
         if (result.Success)
         {
-            _releasesThisYear = result.Data;
+            _releasesOfThisGenre = result.Data;
             _thisGenre = result.ErrorMessage;//hack!
         }
         else
