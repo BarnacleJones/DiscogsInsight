@@ -22,7 +22,11 @@ else{
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <Columns>            
-            <PropertyColumn Property="x => x.Artist" Hidden="true" SortBy="@_sortBy" Grouping GroupBy="@_groupBy" />            
+            <PropertyColumn Property="x => x.Artist" SortBy="@_sortBy" Grouping GroupBy="@_groupBy">
+                <CellTemplate>
+                    <MudText onclick="@(() => GoToArtist(context.Item.DiscogsArtistId))">@context.Item.Artist</MudText>
+                </CellTemplate>
+            </PropertyColumn>            
             <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy">
                 <CellTemplate>
                     <MudText onclick="@(() => GoToRelease(context.Item.DiscogsReleaseId))">@context.Item.Title</MudText>
