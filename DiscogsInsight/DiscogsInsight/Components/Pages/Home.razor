@@ -30,8 +30,11 @@
                     <TrackComponent Track="@_randomTrack" ShowRefreshTrack="true" OnButtonClick="RefreshRandomTrack" />
                 </MudCollapse>
                 <MudContainer>
-                    <ReleasesWithoutTracksComponent ReleaseWithAndWithoutTotals=@(CalculateDonutValues()) />
-                    <TimelineBarGraphComponent CollectionStats="@_collectionStats"/>
+                @if (_collectionStats.AlbumsInCollectionWithoutTracksInfo > 0)
+                {
+                    <ReleasesWithoutTracksComponent ReleaseWithAndWithoutTotals=@(CalculateDonutValues()) />            
+                }
+                <TimelineBarGraphComponent CollectionStats="@_collectionStats"/>
                 </MudContainer>
             </MudStack>
         }
