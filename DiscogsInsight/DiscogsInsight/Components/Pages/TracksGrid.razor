@@ -17,7 +17,11 @@ else{
                  Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50">
         <ToolBarContent>
             <MudSpacer />
-            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            <MudTextField @bind-Value="_searchString" Placeholder="Search artist/title" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField> 
+                          
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchRatingString" Placeholder="Search Ratings" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <Columns>
@@ -50,6 +54,7 @@ else{
     public static TracksGridViewModel? _trackGridViewModel;
     private IEnumerable<TracksItemViewModel> Elements = new List<TracksItemViewModel>();
     private string _searchString;
+    private string _searchRatingString;
     protected override async Task OnInitializedAsync()
     {
         try
@@ -86,18 +91,29 @@ else{
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<TracksItemViewModel, bool> _quickFilter => x =>
-    {
-        if (string.IsNullOrWhiteSpace(_searchString))
-            return true;
+     {
+         if (!string.IsNullOrWhiteSpace(_searchString) || !string.IsNullOrWhiteSpace(_searchRatingString))
+         {
+             // Check if Artist or Title contains the search string
+             if (!string.IsNullOrWhiteSpace(_searchString) &&
+                 (x.Artist.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                  x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase)))
+             {
+                 return true;
+             }
 
-        if (x.Artist.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+             // Check if Rating contains the search rating string
+            if (!string.IsNullOrWhiteSpace(_searchRatingString) && x.Rating.ToString().Contains(_searchRatingString, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
 
-        if (x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+             return false;
+         }
 
-        return false;
-    };
+         // If both search strings are empty, return true to show all items
+         return true;
+     };
 
 }
 
