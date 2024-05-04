@@ -70,12 +70,15 @@ namespace DiscogsInsight.View.Services.Insights
 
         private (string[], double[]) GenerateDataForReleasesByPressingCountry(List<Release>? releases)
         {
-            var releasesGroupedByCountryOfRelease = releases.GroupBy(x => x.ReleaseCountry).ToList();
+            var releasesGroupedByCountryOfRelease = releases
+                .GroupBy(x => x.ReleaseCountry)
+                .Where(x => x.Key != null)
+                .ToList();
             var dataList = new List<(string, double)>();
 
             foreach (var country in releasesGroupedByCountryOfRelease)
             {
-                dataList.Add((country.Key ?? "Unknown", country.Count()));
+                dataList.Add((country.Key ?? "Unknown", country.Count()));//should no longer get unknown
             }
 
             var labels = new string[dataList.Count()];

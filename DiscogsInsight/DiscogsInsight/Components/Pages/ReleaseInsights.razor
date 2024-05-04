@@ -33,6 +33,7 @@
         <MudChart ChartType="ChartType.Line" ChartSeries="@ReleasesOverTimeSeries" @bind-SelectedIndex="Index" XAxisLabels="@releasesOverTimeGraphLabels" Width="100%" Height="350px" ChartOptions="@Options" />
         <MudSpacer />
         <MudChart ChartType="ChartType.Pie" InputData="@releasesPressedCountryValues" @bind-SelectedIndex="Index" InputLabels="@releasesPressedCountryLabels" Width="300px" Height="300px" />
+        <MudText Typo="Typo.body2">*Not including "Unknown"</MudText>
     </MudStack>
 }
 else
