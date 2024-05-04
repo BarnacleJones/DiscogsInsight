@@ -16,7 +16,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         public string GetDiscogsUsername()
         {
-            var username = Preferences.Default.Get("discogsUsername", "");
+            var username = Preferences.Default.Get(Constants.DiscogsUsername, "");
             return username;
         }
 
@@ -24,11 +24,11 @@ namespace DiscogsInsight.DataAccess.Services
         {
             if (string.IsNullOrEmpty(userName))
             {
-                Preferences.Default.Remove("discogsUsername");
+                Preferences.Default.Remove(Constants.DiscogsUsername);
             }
             else
             {
-                Preferences.Default.Set("discogsUsername", userName);
+                Preferences.Default.Set(Constants.DiscogsUsername, userName);
             }
             await _collectionDataService.PurgeEntireCollection();
             return true;
@@ -40,5 +40,54 @@ namespace DiscogsInsight.DataAccess.Services
             return true;
         }
 
+        public async Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
+        {
+            if (string.IsNullOrEmpty(lastFmUsername))
+            {
+                Preferences.Default.Remove(Constants.LastFmUserName);
+            }
+            else
+            {
+                Preferences.Default.Set(Constants.LastFmUserName, lastFmUsername);
+            }
+
+            if (string.IsNullOrEmpty(lastFmPassword))
+            {
+                Preferences.Default.Remove(Constants.LastFmPassword);
+            }
+            else
+            {
+                Preferences.Default.Set(Constants.LastFmPassword, lastFmPassword);
+            }
+
+            if (string.IsNullOrEmpty(lastFmApiKey))
+            {
+                Preferences.Default.Remove(Constants.LastFmApiKey);
+            }
+            else
+            {
+                Preferences.Default.Set(Constants.LastFmApiKey, lastFmApiKey);
+            }
+
+            return true;
+        }
+
+        public string GetLastFmApiKey()
+        {
+            var key = Preferences.Default.Get(Constants.LastFmApiKey, "");
+            return key;
+        }
+
+        public string GetLastFmUsername()
+        {
+            var username = Preferences.Default.Get(Constants.LastFmUserName, "");
+            return username;
+        }
+
+        public string GetLastFmPassword()
+        {
+            var pass = Preferences.Default.Get(Constants.LastFmPassword, "");
+            return pass;
+        }
     }
 }

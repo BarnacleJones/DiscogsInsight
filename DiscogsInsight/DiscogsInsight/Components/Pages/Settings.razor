@@ -22,11 +22,31 @@
         <MudText Typo="Typo.caption">WARNING: Purges All Data</MudText>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Warning" OnClick="@PurgeDatabase" Size="Size.Small">Purge Database</MudButton>
     </MudStack>
+    <MudSpacer />
+    @*LAST FM SETTINGS*@
+    <MudText Typo="Typo.h6">Last Fm Settings <MudIcon Icon="@Icons.Material.Filled.QueueMusic"></MudIcon></MudText>
+    <MudForm @ref="form" @bind-IsValid="@success" Style="width:max-content">
+        <MudTextField T="string" @bind-Value="lastFmApiKey" Label="Last Fm API Key" Required="true" RequiredError="API Key is required!" />
+        <MudTextField T="string" @bind-Value="lastFmUsername" Label="Username" Required="true" RequiredError="Username is required!" />
+        <MudTextField T="string" @bind-Value="lastFmPassword" Label="Password" InputType="InputType.Password" />
+        <div class="d-flex align-center justify-space-between">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto" OnClick="@SaveLastFmSettings">Save</MudButton>
+        </div>
+    </MudForm>
 </MudStack>
 
 
 @code {
     private string discogsUsername = string.Empty;
+
+    //last fm
+    bool success;
+    MudForm form;
+    private string lastFmApiKey = string.Empty;
+    private string lastFmUsername = string.Empty;
+    private string lastFmPassword = string.Empty;
+
+
 
     public async void SaveUsername()
     {
@@ -42,9 +62,20 @@
         HandleResult(await SettingsViewService.PurgeEntireDatabase(), "Purged Database");
     }
 
+    public async void SaveLastFmSettings()
+    {
+        HandleResult(await SettingsViewService.SaveUpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey), "Saved Username");
+    }
+
+
+
     protected override void OnInitialized()
     {
         discogsUsername = SettingsViewService.GetDiscogsUsername();
+        lastFmApiKey = SettingsViewService.GetLastFmApiKey();
+        lastFmUsername = SettingsViewService.GetLastFmUsername();
+        lastFmPassword = SettingsViewService.GetLastFmPassword();
+
     }
 
     private async void HandleResult(ViewResult<bool> result, string successMessage)
