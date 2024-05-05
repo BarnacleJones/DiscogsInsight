@@ -61,6 +61,7 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<DiscogsApiService>();
             builder.Services.AddSingleton<MusicBrainzApiService>();
             builder.Services.AddSingleton<CoverArtArchiveApiService>();
+            builder.Services.AddSingleton<LastFmApiService>();
 
             //rest of data layer
             builder.Services.AddSingleton<CollectionDataService>();
