@@ -1,17 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.DataAccess.Contract;
 
 namespace DiscogsInsight.DataAccess.Services
 {
-    public class TracksDataService
+    public class TracksDataService : ITracksDataService
     {
-        private readonly DiscogsInsightDb _db;
+        private readonly IDiscogsInsightDb _db;
         private readonly ILogger<TracksDataService> _logger;
-        private ReleaseDataService _releaseDataService;
+        private IReleaseDataService _releaseDataService;
 
-        public TracksDataService(DiscogsInsightDb db, ILogger<TracksDataService> logger,ReleaseDataService releaseDataService)
+        public TracksDataService(IDiscogsInsightDb db, ILogger<TracksDataService> logger,IReleaseDataService releaseDataService)
         {
             _db = db;
             _logger = logger;
@@ -36,11 +35,12 @@ namespace DiscogsInsight.DataAccess.Services
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
         }
+        
         public async Task<List<Track>> GetAllTracks()
         {
             var tracks = await _db.GetAllEntitiesAsListAsync<Track>();
@@ -73,7 +73,7 @@ namespace DiscogsInsight.DataAccess.Services
 
                 return tracksForListRelease;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

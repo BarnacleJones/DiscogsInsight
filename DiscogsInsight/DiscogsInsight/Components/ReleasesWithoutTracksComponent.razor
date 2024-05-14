@@ -12,10 +12,10 @@
 
 @code {
 	[Parameter]
-	public double[] ReleaseWithAndWithoutTotals { get; set; }
+	public double[]? ReleaseWithAndWithoutTotals { get; set; }
 
 	public static string[] labels { get; set; }
 
-	protected override async Task OnInitializedAsync() => labels = new string[] { $"All API Information Gathered - {ReleaseWithAndWithoutTotals[0].ToString()}", $"Not yet - {ReleaseWithAndWithoutTotals[1].ToString()}" };
+	protected override async Task OnInitializedAsync() => await Task.FromResult(labels = new string[] { $"All API Information Gathered - {ReleaseWithAndWithoutTotals[0].ToString()}", $"Not yet - {ReleaseWithAndWithoutTotals[1].ToString()}" });
 
 }

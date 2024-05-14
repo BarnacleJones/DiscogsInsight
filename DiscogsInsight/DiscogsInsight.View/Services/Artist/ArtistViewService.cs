@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
@@ -7,10 +7,10 @@ namespace DiscogsInsight.View.Services.Artist
 {
     public class ArtistViewService
     {
-        private readonly ArtistDataService _artistDataService;
-        private readonly TagsDataService _tagsDataService;
+        private readonly IArtistDataService _artistDataService;
+        private readonly ITagsDataService _tagsDataService;
         private readonly ReleaseViewService _releaseViewService;
-        public ArtistViewService(ArtistDataService artistDataService, TagsDataService tagsDataService, ReleaseViewService releaseViewService)
+        public ArtistViewService(IArtistDataService artistDataService, ITagsDataService tagsDataService, ReleaseViewService releaseViewService)
         {
             _artistDataService = artistDataService;
             _tagsDataService = tagsDataService; 

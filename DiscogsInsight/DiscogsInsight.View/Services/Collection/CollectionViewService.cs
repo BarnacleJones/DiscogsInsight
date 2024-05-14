@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.Collection;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
@@ -7,9 +7,9 @@ namespace DiscogsInsight.View.Services.Collection
 {
     public class CollectionViewService
     {
-        private readonly CollectionDataService _collectionDataService;
+        private readonly ICollectionDataService _collectionDataService;
 
-        public CollectionViewService(CollectionDataService collectionDataService)
+        public CollectionViewService(ICollectionDataService collectionDataService)
         {
             _collectionDataService = collectionDataService;
         }

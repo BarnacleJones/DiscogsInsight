@@ -1,20 +1,20 @@
 using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.DataAccess.Interfaces;
 using DiscogsInsight.DataAccess.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.DataAccess.Services
 {
-    public class CollectionDataService
+    public class CollectionDataService : ICollectionDataService
     {
-        private readonly DiscogsInsightDb _db;
+        private readonly IDiscogsInsightDb _db;
         private readonly DiscogsApiService _discogsApiService;
-        private readonly DiscogsGenresAndTagsDataService _genresAndTagsDataService;
+        private readonly IDiscogsGenresAndTagsDataService _genresAndTagsDataService;
         private readonly ILogger<CollectionDataService> _logger;
 
-        public CollectionDataService(DiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, DiscogsGenresAndTagsDataService genresAndTagsDataService)
+        public CollectionDataService(IDiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, IDiscogsGenresAndTagsDataService genresAndTagsDataService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
@@ -105,8 +105,8 @@ namespace DiscogsInsight.DataAccess.Services
                         var artistsToSave = release.basic_information?.artists?.ToList();
                         foreach (var artist in artistsToSave)
                         {
-                            var artistsTable = await _db.GetTable<Artist>();
-                            var existingArtist = await artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefaultAsync();
+                            var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
+                            var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefault();
                             if (existingArtist == null)
                             {
                                 await _db.InsertAsync(new Artist
@@ -139,17 +139,16 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                var artistsTable = await _db.GetTable<Artist>();
-                var artistsFromDb = await artistsTable.ToListAsync();
+                var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
                 if (collectionResponse.releases != null)
                 {
                     foreach (var release in collectionResponse.releases)
                     {
                         var artistIdForThisRelease = release.basic_information?.artists?.Select(x => x.id).FirstOrDefault();//only will save first artist for release, even though there may be many
-                        var artistIdFromDb = artistsFromDb.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
+                        var artistIdFromDb = artistsTable.Where(x => x.DiscogsArtistId == artistIdForThisRelease).Select(x => x.DiscogsArtistId).FirstOrDefault();
 
-                        var releaseTable = await _db.GetTable<Release>();
-                        var existingRelease = await releaseTable.Where(x => x.DiscogsReleaseId == release.id).FirstOrDefaultAsync();
+                        var releaseTable = await _db.GetAllEntitiesAsListAsync<Release>();
+                        var existingRelease = releaseTable.Where(x => x.DiscogsReleaseId == release.id).FirstOrDefault();
                         if (existingRelease == null)
                         {
                             _ = await _db.InsertAsync(new Release
@@ -192,13 +191,12 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                var releaseTable = await _db.GetTable<Release>();
-                var existingReleases = await releaseTable.ToListAsync();
+                var releaseTable = await _db.GetAllEntitiesAsListAsync<Release>();
                 // Get the DiscogsReleaseId values from the response
                 var releasesInResponse = collectionResponse.releases.Select(r => r.id).ToList();
 
                 // Identify releases in the database that are not in the response
-                var releasesToRemove = existingReleases.Where(r => !releasesInResponse.Contains(r.DiscogsReleaseId)).ToList();
+                var releasesToRemove = releaseTable.Where(r => !releasesInResponse.Contains(r.DiscogsReleaseId)).ToList();
 
                 // Remove the identified releases from the database
                 foreach (var releaseToRemove in releasesToRemove)
@@ -221,9 +219,9 @@ namespace DiscogsInsight.DataAccess.Services
                     .SelectMany(r => r.basic_information.artists.Select(a => a.id))
                     .ToList();
 
-                var artistsTable = await _db.GetTable<Artist>();
+                var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
                 // Identify artists in the database that are not in the response
-                var artistsToRemove = await artistsTable.Where(a => !artistsInResponse.Contains(a.DiscogsArtistId)).ToListAsync();
+                var artistsToRemove = artistsTable.Where(a => !artistsInResponse.Contains(a.DiscogsArtistId)).ToList();
 
                 foreach (var artistToRemove in artistsToRemove)
                 {

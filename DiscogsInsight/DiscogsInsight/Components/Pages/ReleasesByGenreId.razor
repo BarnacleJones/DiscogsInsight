@@ -34,7 +34,7 @@ else
     private int internalGenreId { get; set; }
 
     public List<ReleaseViewModel>? _releasesOfThisGenre;
-    public string _thisGenre { get;set;}
+    public string? _thisGenre = "";
 
     protected override async Task OnInitializedAsync()
     {

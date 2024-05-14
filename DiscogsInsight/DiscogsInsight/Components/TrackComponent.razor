@@ -60,7 +60,7 @@
 @code
 {
     [Parameter]
-    public TracksItemViewModel Track { get; set; }
+    public TracksItemViewModel Track { get; set; } = new TracksItemViewModel();
 
     [Parameter]
     public bool? ShowRefreshTrack { get; set; } = false;

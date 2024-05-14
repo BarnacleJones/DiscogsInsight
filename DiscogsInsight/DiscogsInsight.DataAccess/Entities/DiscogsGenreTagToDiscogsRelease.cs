@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Interfaces;
+﻿using DiscogsInsight.DataAccess.Contract;
 using SQLite;
 
 namespace DiscogsInsight.DataAccess.Entities

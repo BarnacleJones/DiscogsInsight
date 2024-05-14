@@ -1,53 +1,26 @@
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.DataAccess.Interfaces;
 using Microsoft.Extensions.Logging;
-using SQLite;
 
 namespace DiscogsInsight.DataAccess
 {
-    public class DiscogsInsightDb
+    public class DiscogsInsightDb : IDiscogsInsightDb
     {
         private readonly ILogger<DiscogsInsightDb> _logger;
-        SQLiteAsyncConnection? Database;
+        ISQLiteAsyncConnection? _database;
 
-        public DiscogsInsightDb(ILogger<DiscogsInsightDb> logger)
+        public DiscogsInsightDb(ILogger<DiscogsInsightDb> logger, ISQLiteAsyncConnection database)
         {
             _logger = logger;
+            _database = database;
         }
+             
 
-        async Task Init()
+        public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : new()
         {
             try
             {
-                if (Database is not null)
-                    return;
-                var a = Constants.DatabasePath;//handy for debugging figuring out where the db is
-
-                Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
-                
-                await Database.CreateTableAsync<Artist>();
-                await Database.CreateTableAsync<Release>();
-                await Database.CreateTableAsync<Track>();
-                await Database.CreateTableAsync<MusicBrainzTags>();
-                await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzTags>();
-                await Database.CreateTableAsync<MusicBrainzArtistToMusicBrainzRelease>();
-                await Database.CreateTableAsync<MusicBrainzReleaseToCoverImage>();
-                await Database.CreateTableAsync<DiscogsGenreTagToDiscogsRelease>();
-                await Database.CreateTableAsync<DiscogsGenreTags>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at DiscogsInsightDb Init:{ex.Message} ");
-                throw;
-            }
-        }
-
-        public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : IDatabaseEntity, new()
-        {
-            try
-            {
-                await Init();
-                return await Database.Table<T>().ToListAsync();
+                return await _database.Table<T>();
             }
             catch (Exception ex)
             {
@@ -60,11 +33,10 @@ namespace DiscogsInsight.DataAccess
         {
             try
             {
-                await Init();
                 if (item.Id != 0)
-                    return await Database.UpdateAsync(item);
+                    return await _database.UpdateAsync(item);
 
-                return await Database.InsertAsync(item);
+                return await _database.InsertAsync(item);
             }
             catch (Exception ex)
             {
@@ -77,9 +49,8 @@ namespace DiscogsInsight.DataAccess
         {
             try
             {
-                await Init();
-                await Database.DeleteAllAsync<Artist>();
-                await Database.DeleteAllAsync<Release>();
+                await _database.DeleteAllAsync<Artist>();
+                await _database.DeleteAllAsync<Release>();
                 //intentionally leaving other data. Use PurgeEntireDb for the other
             }
             catch (Exception ex)
@@ -93,16 +64,15 @@ namespace DiscogsInsight.DataAccess
         {
             try
             {
-                await Init();
-                await Database.DeleteAllAsync<Artist>();
-                await Database.DeleteAllAsync<DiscogsGenreTags>();
-                await Database.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
-                await Database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
-                await Database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
-                await Database.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
-                await Database.DeleteAllAsync<MusicBrainzTags>();
-                await Database.DeleteAllAsync<Release>();
-                await Database.DeleteAllAsync<Track>();
+                await _database.DeleteAllAsync<Artist>();
+                await _database.DeleteAllAsync<DiscogsGenreTags>();
+                await _database.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
+                await _database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                await _database.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
+                await _database.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
+                await _database.DeleteAllAsync<MusicBrainzTags>();
+                await _database.DeleteAllAsync<Release>();
+                await _database.DeleteAllAsync<Track>();
             }
             catch (Exception ex)
             {
@@ -111,27 +81,12 @@ namespace DiscogsInsight.DataAccess
             }
         }
 
-        public async Task<AsyncTableQuery<T>> GetTable<T>() where T : IDatabaseEntity, new()
-        {
-            try
-            {
-                await Init();
-                return await Task.FromResult(Database.Table<T>());
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at DiscogsInsightDb GetTable:{ex.Message} ");
-                throw;
-            }
-        }
-
         public async Task<int> DeleteAsync<T>(T entity) where T : IDatabaseEntity, new()
         {
             try
             {
-                await Init();
-                var a = await Database.DeleteAsync<T>(entity.Id);
+                var entityToDelete = await _database.GetAsync<T>(pk: entity.Id);
+                var a = await _database.DeleteAsync(entityToDelete);
                 return a;
             }
             catch (Exception ex)
@@ -145,8 +100,7 @@ namespace DiscogsInsight.DataAccess
         {
             try
             {
-                await Init();
-                var a = await Database.InsertAsync(entity);
+                var a = await _database.InsertAsync(entity);
                 
                 return a;
             }
@@ -160,8 +114,7 @@ namespace DiscogsInsight.DataAccess
         {
             try
             {
-                await Init();
-                var a = await Database.UpdateAsync(entity);
+                var a = await _database.UpdateAsync(entity);
                 return a;
             }
             catch (Exception ex)

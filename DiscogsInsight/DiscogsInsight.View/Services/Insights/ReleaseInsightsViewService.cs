@@ -1,5 +1,5 @@
-﻿using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
+using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
@@ -7,9 +7,9 @@ namespace DiscogsInsight.View.Services.Insights
 {
     public class ReleaseInsightsViewService
     {
-        private readonly ReleaseDataService _releaseDataService;
+        private readonly IReleaseDataService _releaseDataService;
 
-        public ReleaseInsightsViewService(ReleaseDataService releaseDataService)
+        public ReleaseInsightsViewService(IReleaseDataService releaseDataService)
         {
             _releaseDataService = releaseDataService;
         }

@@ -1,20 +1,20 @@
-﻿using DiscogsInsight.DataAccess.Services;
-using DiscogsInsight.DataAccess.Entities;
+﻿using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 using DiscogsInsight.ViewModels.Collection;
 using DiscogsInsight.ViewModels.DataCorrectionViewModels;
+using DiscogsInsight.DataAccess.Contract;
 
 namespace DiscogsInsight.View.Services.Releases
 {
     public class ReleaseViewService
     {
-        private readonly ReleaseDataService _releaseDataService;
-        private readonly ArtistDataService _artistDataService;
-        private readonly TracksDataService _tracksDataService;
-        private readonly DiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
+        private readonly IReleaseDataService _releaseDataService;
+        private readonly IArtistDataService _artistDataService;
+        private readonly ITracksDataService _tracksDataService;
+        private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseViewService(ReleaseDataService releaseDataService, ArtistDataService artistDataService, TracksDataService tracksDataService, DiscogsGenresAndTagsDataService discogsGenresAndTagsDataService)
+        public ReleaseViewService(IReleaseDataService releaseDataService, IArtistDataService artistDataService, ITracksDataService tracksDataService, IDiscogsGenresAndTagsDataService discogsGenresAndTagsDataService)
         {
             _releaseDataService = releaseDataService;
             _artistDataService = artistDataService;
@@ -33,7 +33,7 @@ namespace DiscogsInsight.View.Services.Releases
                 if (release.Item1 == null)
                     throw new Exception("No release");
 
-                var artist = await _artistDataService.GetArtist(release.Item1.DiscogsArtistId);
+                var artist = await _artistDataService.GetArtist(release.Item1.DiscogsArtistId, false);
 
                 var releaseTrackList = await _tracksDataService.GetTracksForRelease(release.Item1.DiscogsReleaseId);
                 
@@ -312,7 +312,7 @@ namespace DiscogsInsight.View.Services.Releases
                 DateAdded = release.DateAdded,
                 DiscogsArtistId = release.DiscogsArtistId,
                 DiscogsReleaseId = release.DiscogsReleaseId,
-                CoverImage = imageAsBytes, //null is ok there is a default image for null,
+                CoverImage = imageAsBytes ?? [],
                 IsFavourited = release.IsFavourited,
             };
         }

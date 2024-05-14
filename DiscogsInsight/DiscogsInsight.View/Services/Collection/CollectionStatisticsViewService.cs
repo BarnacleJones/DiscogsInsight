@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels;
 using DiscogsInsight.ViewModels.Results;
 
@@ -6,10 +6,10 @@ namespace DiscogsInsight.View.Services.Collection
 {
     public class CollectionStatisticsViewService
     {
-        private readonly CollectionDataService _collectionDataService;
-        private readonly TracksDataService _tracksDataService;
+        private readonly ICollectionDataService _collectionDataService;
+        private readonly ITracksDataService _tracksDataService;
 
-        public CollectionStatisticsViewService(CollectionDataService collectionDataService, TracksDataService tracksDataService)
+        public CollectionStatisticsViewService(ICollectionDataService collectionDataService, ITracksDataService tracksDataService)
         {
             _collectionDataService = collectionDataService;
             _tracksDataService = tracksDataService;
