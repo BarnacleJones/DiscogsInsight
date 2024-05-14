@@ -10,6 +10,8 @@ using DiscogsInsight.View.Services.Releases;
 using DiscogsInsight.View.Services.Notifications;
 using MudBlazor.Services;
 using DiscogsInsight.View.Services.Insights;
+using DiscogsInsight.DataAccess.Contract;
+using SQLite;
 
 namespace DiscogsInsight
 {
@@ -53,9 +55,11 @@ namespace DiscogsInsight
                 hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
+    
 
             //Data layer
-            builder.Services.AddSingleton<DiscogsInsightDb>();
+            builder.Services.AddSingleton<ISQLiteAsyncConnection, SQLiteAsyncConnectionAdapter>();
+            builder.Services.AddSingleton<IDiscogsInsightDb, DiscogsInsightDb>();
 
             //Api layer
             builder.Services.AddSingleton<DiscogsApiService>();
@@ -64,13 +68,13 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<LastFmApiService>();
 
             //rest of data layer
-            builder.Services.AddSingleton<CollectionDataService>();
-            builder.Services.AddSingleton<ReleaseDataService>();
+            builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
+            builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
             builder.Services.AddSingleton<SettingsDataService>();
-            builder.Services.AddSingleton<TagsDataService>();
-            builder.Services.AddSingleton<TracksDataService>();
-            builder.Services.AddSingleton<ArtistDataService>();
-            builder.Services.AddSingleton<DiscogsGenresAndTagsDataService>();
+            builder.Services.AddSingleton<ITagsDataService,TagsDataService>();
+            builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
+            builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
+            builder.Services.AddSingleton<IDiscogsGenresAndTagsDataService, DiscogsGenresAndTagsDataService>();
 
             //view layer
             builder.Services.AddSingleton<UserNotificationService>();

@@ -1,20 +1,19 @@
 ﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace DiscogsInsight.DataAccess.Services
 {
-    public class DiscogsGenresAndTagsDataService
+    public class DiscogsGenresAndTagsDataService : IDiscogsGenresAndTagsDataService
     {
-        private readonly DiscogsInsightDb _db;
+        private readonly IDiscogsInsightDb _db;
         private readonly ILogger<DiscogsGenresAndTagsDataService> _logger;
-        private readonly TagsDataService _tagsDataService;
+        private readonly ITagsDataService _tagsDataService;
 
-        public DiscogsGenresAndTagsDataService(DiscogsInsightDb db, 
+        public DiscogsGenresAndTagsDataService(IDiscogsInsightDb db, 
             ILogger<DiscogsGenresAndTagsDataService> logger, 
-            TagsDataService tagsDataService)
+            ITagsDataService tagsDataService)
         {
             _db = db;
             _logger = logger;
@@ -23,14 +22,12 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<List<DiscogsGenreTags>> GetAllGenreTagsAsList()
         {
-            var discogsGenreTags = await _db.GetTable<DiscogsGenreTags>();
-            return await discogsGenreTags.ToListAsync();
+            return await _db.GetAllEntitiesAsListAsync<DiscogsGenreTags>();
 
         }
         public async Task<List<DiscogsGenreTagToDiscogsRelease>> GetDiscogsGenreTagToDiscogsReleaseAsList()
         {
-            var discogsGenreTagToDiscogsRelease = await _db.GetTable<DiscogsGenreTagToDiscogsRelease>();
-            return await discogsGenreTagToDiscogsRelease.ToListAsync();
+            return await _db.GetAllEntitiesAsListAsync<DiscogsGenreTagToDiscogsRelease>();
         }
 
         public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)

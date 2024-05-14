@@ -25,7 +25,7 @@ else
 }
 
 @code{
-    private ArtistInsightsStatsModel _artistInsightsStats;
+    private ArtistInsightsStatsModel? _artistInsightsStats;
 
 
     protected override async Task OnInitializedAsync()
@@ -47,7 +47,7 @@ else
         // var totalInCollectionWithoutTracks = _collectionStats.AlbumsInCollectionWithoutTracksInfo;
         // var totalInCollectionWithTracks = _collectionStats.AlbumsInCollection - _collectionStats.AlbumsInCollectionWithoutTracksInfo;
         // return new double[] { totalInCollectionWithTracks, totalInCollectionWithoutTracks };
-        return null;
+        return [];
 
     }
 

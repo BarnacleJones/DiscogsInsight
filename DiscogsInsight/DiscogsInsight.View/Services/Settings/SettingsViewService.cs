@@ -69,7 +69,7 @@ namespace DiscogsInsight.View.Services.Settings
         {
             try
             {
-                var success = await _settingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey);
+                var success = await SettingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey);
 
                 if (success)
                 {

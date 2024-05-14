@@ -42,13 +42,13 @@ else
 }
 
 @code{
-    private ReleaseInsightsStatsModel _releaseInsightsStats;
-    private List<ChartSeries> ReleasesOverTimeSeries;
+    private ReleaseInsightsStatsModel? _releaseInsightsStats;
+    private List<ChartSeries>? ReleasesOverTimeSeries;
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
     public ChartOptions Options = new ChartOptions();
-    public string[] releasesOverTimeGraphLabels;
-    public double[] releasesPressedCountryValues;
-    public string[] releasesPressedCountryLabels;
+    public string[]? releasesOverTimeGraphLabels;
+    public double[]? releasesPressedCountryValues;
+    public string[]? releasesPressedCountryLabels;
 
 
     protected override async Task OnInitializedAsync()
@@ -68,8 +68,8 @@ else
 
     private void PassDataToReleasesOverTime()
     {
-        var series = new double[_releaseInsightsStats.ReleasesOverTimeLineChartSeriesData.Count];
-        var xAxisLabels = new string[_releaseInsightsStats.ReleasesOverTimeLineChartSeriesData.Count];
+        var series = new double[_releaseInsightsStats?.ReleasesOverTimeLineChartSeriesData.Count ?? 0];
+        var xAxisLabels = new string[_releaseInsightsStats?.ReleasesOverTimeLineChartSeriesData.Count ?? 0];
 
         for (int i = 0; i < series.Length; i++)
         {

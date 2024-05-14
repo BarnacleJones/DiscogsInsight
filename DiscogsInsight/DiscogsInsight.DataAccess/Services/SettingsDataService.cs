@@ -1,10 +1,12 @@
+using DiscogsInsight.DataAccess.Contract;
+
 namespace DiscogsInsight.DataAccess.Services
 {
     public class SettingsDataService
     {
-        private readonly CollectionDataService _collectionDataService;
+        private readonly ICollectionDataService _collectionDataService;
 
-        public SettingsDataService(CollectionDataService collectionDataService)
+        public SettingsDataService(ICollectionDataService collectionDataService)
         {
             _collectionDataService = collectionDataService;
         }
@@ -40,7 +42,7 @@ namespace DiscogsInsight.DataAccess.Services
             return true;
         }
 
-        public async Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
+        public static Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
         {
             if (string.IsNullOrEmpty(lastFmUsername))
             {
@@ -69,7 +71,7 @@ namespace DiscogsInsight.DataAccess.Services
                 Preferences.Default.Set(Constants.LastFmApiKey, lastFmApiKey);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         public string GetLastFmApiKey()

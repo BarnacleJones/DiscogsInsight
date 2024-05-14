@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.DataAccess.Interfaces
+﻿namespace DiscogsInsight.DataAccess.Contract
 {
     public interface IDatabaseEntity
     {
