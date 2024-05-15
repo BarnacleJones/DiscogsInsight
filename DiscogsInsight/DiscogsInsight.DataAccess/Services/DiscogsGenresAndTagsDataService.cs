@@ -23,7 +23,6 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<DiscogsGenreTags>> GetAllGenreTagsAsList()
         {
             return await _db.GetAllEntitiesAsListAsync<DiscogsGenreTags>();
-
         }
         public async Task<List<DiscogsGenreTagToDiscogsRelease>> GetDiscogsGenreTagToDiscogsReleaseAsList()
         {

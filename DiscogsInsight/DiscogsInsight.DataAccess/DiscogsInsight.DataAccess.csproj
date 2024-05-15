@@ -19,6 +19,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="Interfaces\**" />
+	  <Compile Remove="Interfaces\**" />
+	  <EmbeddedResource Remove="Interfaces\**" />
+	  <MauiCss Remove="Interfaces\**" />
+	  <MauiXaml Remove="Interfaces\**" />
+	  <None Remove="Interfaces\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Fastenshtein" Version="1.0.0.8" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
@@ -28,10 +37,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration\DiscogsInsight.ApiIntegration.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Interfaces\" />
 	</ItemGroup>
 
 </Project>
