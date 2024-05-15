@@ -13,10 +13,10 @@
     <LoadingComponent />
 }
 else{  
-    <MudText Typo="Typo.h6">Collection Missing API Data - @_collectionViewModel.Releases.Count() to go</MudText>
+    <MudText Typo="Typo.h6">Collection Missing API Data - @_collectionViewModel?.Releases?.Count() to go</MudText>
     <MudText Typo="Typo.subtitle2" Class="px-4 mud-text-secondary">Navigate to the release to fetch and save API data, then it will dissapear from this list</MudText>
 
-    <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel?.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
                  Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50" FixedHeader="true">
         <ToolBarContent>
             <MudSpacer />
@@ -72,9 +72,9 @@ else{
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
        
-    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist;
+    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist ?? "";
 
-    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist;
+    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist ?? "";
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<ReleaseViewModel, bool> _quickFilter => x =>

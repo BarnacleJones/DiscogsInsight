@@ -18,7 +18,7 @@
         
     @if (_hasKey)
     {
-        @if (_randomRelease != null)
+        @if (_randomRelease != null && _collectionStats != null)
         {
             <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
                 <MudButton OnClick="OnRandomExpandCollapseClick" Color="Color.Secondary">@(_randomExpanded ? "Hide Random Release" : "Show Random Release")</MudButton>
@@ -102,9 +102,13 @@ else
 
     private double[] CalculateDonutValues()
     {
-        var totalInCollectionWithoutTracks = _collectionStats.AlbumsInCollectionWithoutTracksInfo;
-        var totalInCollectionWithTracks = _collectionStats.AlbumsInCollection - _collectionStats.AlbumsInCollectionWithoutTracksInfo;
-        return new double[] { totalInCollectionWithTracks, totalInCollectionWithoutTracks };
+        var totalInCollectionWithoutTracks = _collectionStats?.AlbumsInCollectionWithoutTracksInfo;
+        var totalInCollectionWithTracks = _collectionStats?.AlbumsInCollection - _collectionStats?.AlbumsInCollectionWithoutTracksInfo;
+        if (totalInCollectionWithoutTracks != null && totalInCollectionWithTracks != null)
+        {
+            return new double[] { totalInCollectionWithTracks.Value, totalInCollectionWithoutTracks.Value };            
+        }
+        return new double[0];
 
     }
 

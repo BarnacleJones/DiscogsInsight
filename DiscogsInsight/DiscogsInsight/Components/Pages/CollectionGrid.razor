@@ -43,7 +43,7 @@ else{
 @code {
     public static DiscogsCollectionViewModel? _collectionViewModel;
     private IEnumerable<ReleaseViewModel> Elements = new List<ReleaseViewModel>();
-    private string _searchString;
+    private string? _searchString;
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,9 +75,9 @@ else{
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
        
-    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist;
+    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist ?? "";
 
-    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist;
+    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist ?? "";
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<ReleaseViewModel, bool> _quickFilter => x =>

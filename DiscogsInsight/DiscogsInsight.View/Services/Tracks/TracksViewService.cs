@@ -1,5 +1,5 @@
 ﻿using DiscogsInsight.DataAccess;
-using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.Collection;
 using DiscogsInsight.ViewModels.Results;
 using Microsoft.Extensions.Logging;
@@ -8,11 +8,11 @@ namespace DiscogsInsight.View.Services.Tracks
 {
     public class TracksViewService
     {
-        private readonly TracksDataService _tracksDataService;
-        private readonly ReleaseDataService _releaseDataService;
-        private readonly ArtistDataService _artistDataService;
+        private readonly ITracksDataService _tracksDataService;
+        private readonly IReleaseDataService _releaseDataService;
+        private readonly IArtistDataService _artistDataService;
         private readonly ILogger<TracksViewService> _logger;
-        public TracksViewService(TracksDataService tracksDataService, ILogger<TracksViewService> logger, ReleaseDataService releaseDataService, ArtistDataService artistDataService)
+        public TracksViewService(ITracksDataService tracksDataService, ILogger<TracksViewService> logger, IReleaseDataService releaseDataService, IArtistDataService artistDataService)
         {
             _tracksDataService = tracksDataService;
             _logger = logger;

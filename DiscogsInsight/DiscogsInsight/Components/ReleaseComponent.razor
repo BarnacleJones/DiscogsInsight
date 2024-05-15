@@ -10,7 +10,7 @@
 <MudCard>
     <MudCardHeader>
         <CardHeaderAvatar>
-            @if (Release.CoverImage != null)
+            @if (Release.CoverImage != null && Release.CoverImage.Length > 0)
             {
                 <MudAvatar Color="Color.Secondary">
                     <MudImage Src="@ConvertByteArrayToImage()"  />
@@ -213,7 +213,7 @@
     //favourite release
     private bool IsFavourited { get; set; }
 
-    protected override async Task OnInitializedAsync() => IsFavourited = Release.IsFavourited;
+    protected override async Task OnInitializedAsync() => await Task.FromResult(IsFavourited = Release.IsFavourited);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -278,7 +278,7 @@
         NavigationManager.NavigateTo($"/release/{releaseId}");
     }
 
-    private void OpenDiscogsReleaseLink(string url)
+    private void OpenDiscogsReleaseLink(string? url)
     {
         if (!string.IsNullOrWhiteSpace(url))
         {

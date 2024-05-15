@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
@@ -6,9 +6,9 @@ namespace DiscogsInsight.View.Services.Insights
 {
     public class ArtistInsightsViewService
     {
-        private readonly ArtistDataService _artistDataService;
+        private readonly IArtistDataService _artistDataService;
 
-        public ArtistInsightsViewService(ArtistDataService artistDataService)
+        public ArtistInsightsViewService(IArtistDataService artistDataService)
         {
             _artistDataService = artistDataService;
         }

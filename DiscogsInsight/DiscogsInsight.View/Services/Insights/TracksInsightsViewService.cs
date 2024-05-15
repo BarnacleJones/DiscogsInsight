@@ -1,5 +1,5 @@
 ﻿using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
@@ -7,9 +7,9 @@ namespace DiscogsInsight.View.Services.Insights
 {
     public class TracksInsightsViewService
     {
-        private readonly TracksDataService _trackDataService;
+        private readonly ITracksDataService _trackDataService;
 
-        public TracksInsightsViewService(TracksDataService trackDataService)
+        public TracksInsightsViewService(ITracksDataService trackDataService)
         {
             _trackDataService = trackDataService;
         }

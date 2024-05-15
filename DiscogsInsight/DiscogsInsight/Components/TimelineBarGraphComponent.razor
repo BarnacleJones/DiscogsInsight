@@ -12,7 +12,7 @@
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
 
     [Parameter]
-    public CollectionStatsViewModel CollectionStats { get; set; }
+    public CollectionStatsViewModel? CollectionStats { get; set; }
 
     public List<ChartSeries> GetSeries()
     {

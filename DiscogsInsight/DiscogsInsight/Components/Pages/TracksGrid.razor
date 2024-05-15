@@ -53,8 +53,8 @@ else{
 @code {
     public static TracksGridViewModel? _trackGridViewModel;
     private IEnumerable<TracksItemViewModel> Elements = new List<TracksItemViewModel>();
-    private string _searchString;
-    private string _searchRatingString;
+    private string? _searchString;
+    private string? _searchRatingString;
     protected override async Task OnInitializedAsync()
     {
         try

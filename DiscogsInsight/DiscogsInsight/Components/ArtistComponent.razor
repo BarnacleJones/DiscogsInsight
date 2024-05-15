@@ -13,12 +13,12 @@
         </CardHeaderAvatar>
         <CardHeaderContent>            
                 <MudText Typo="Typo.body1">
-                    @(Artist.Artist)
+                    @(Artist?.Artist)
                 </MudText>
-                @if (!string.IsNullOrEmpty(Artist.StartYear))
+                @if (!string.IsNullOrEmpty(Artist?.StartYear))
                 {
                     <MudText Typo="Typo.body2">
-                    @(Artist.StartYear) - @(Artist.EndYear ?? "")
+                    @(Artist?.StartYear) - @(Artist?.EndYear ?? "")
                     </MudText>
                 }
         </CardHeaderContent>
@@ -194,7 +194,7 @@
 @code
 {
     [Parameter]
-    public ArtistViewModel Artist { get; set; }
+    public ArtistViewModel? Artist { get; set; }
     [Parameter]
     public bool? ShowRefreshArtist { get; set; } = false;
     [Parameter]
