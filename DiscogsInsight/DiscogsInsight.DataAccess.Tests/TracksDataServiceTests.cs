@@ -35,7 +35,7 @@ namespace DiscogsInsight.DataAccess.Tests
             var discogsReleaseId = 1;
             var title = "Track 1";
 
-            var mockTracks = DummyDataGenerator.GetUniqueSampleTracks();
+            var mockTracks = DummyDatabaseDataGenerator.GetUniqueSampleTracks();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Track>()).ReturnsAsync(mockTracks);
 
             // Act
@@ -51,11 +51,11 @@ namespace DiscogsInsight.DataAccess.Tests
             // Arrange
             var discogsReleaseId = 1;
 
-            var mockTracks = DummyDataGenerator.GetUniqueSampleTracks();
+            var mockTracks = DummyDatabaseDataGenerator.GetUniqueSampleTracks();
             var trackForRelease = new List<Track> { mockTracks[1] };
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Track>()).ReturnsAsync(mockTracks);
 
-            var mockReleases = DummyDataGenerator.GetSampleReleases();
+            var mockReleases = DummyDatabaseDataGenerator.GetSampleReleases();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Release>()).ReturnsAsync(mockReleases);
 
             // Act
@@ -70,7 +70,7 @@ namespace DiscogsInsight.DataAccess.Tests
         {
             // Arrange
            
-            var mockTracks = DummyDataGenerator.GetUniqueSampleTracks();
+            var mockTracks = DummyDatabaseDataGenerator.GetUniqueSampleTracks();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Track>()).ReturnsAsync(mockTracks);
 
             // Act

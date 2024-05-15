@@ -31,16 +31,16 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task SaveTagsByMusicBrainzArtistId_SuccessfullySavesTags()
         {
             // Arrange
-            var artistResponse = DummyDataGenerator.GetSampleMusicBrainzInitialArtistResponse();
-            var tagsResponse = DummyDataGenerator.GetSampleMusicBrainzTags();
+            var artistApiResponse = DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse();
+            var tagsEntity = DummyDatabaseDataGenerator.GetSampleMusicBrainzTags();
             var musicBrainzArtistId = "1"; // Example artist ID
 
-            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsResponse);
+            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsEntity);
             _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzTags>())).Returns(Task.FromResult(1));
             _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzArtistToMusicBrainzTags>())).Returns(Task.FromResult(1));
 
             // Act
-            var result = await _service.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainzArtistId);
+            var result = await _service.SaveTagsByMusicBrainzArtistId(artistApiResponse, musicBrainzArtistId);
 
             // Assert
             Assert.IsTrue(result);
