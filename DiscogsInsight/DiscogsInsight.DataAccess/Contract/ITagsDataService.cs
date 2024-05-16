@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
+﻿using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
 using DiscogsInsight.DataAccess.Entities;
 
 namespace DiscogsInsight.DataAccess.Contract

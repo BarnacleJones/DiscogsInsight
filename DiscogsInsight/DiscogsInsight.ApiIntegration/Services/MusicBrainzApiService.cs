@@ -1,11 +1,12 @@
-﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
+﻿using DiscogsInsight.ApiIntegration.Contract.Services;
+using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
-    public class MusicBrainzApiService
+    public class MusicBrainzApiService : IMusicBrainzApiService
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<MusicBrainzApiService> _logger;
@@ -66,7 +67,7 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
         }
 
-        public string RemoveParenthesesAndContents(string input)
+        private string RemoveParenthesesAndContents(string input)
         {
             return Regex.Replace(input, @"\(.*?\)", "").Trim();
         }

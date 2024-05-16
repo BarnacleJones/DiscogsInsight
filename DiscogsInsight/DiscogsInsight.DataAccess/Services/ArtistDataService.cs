@@ -1,6 +1,6 @@
-﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+﻿using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
+using DiscogsInsight.ApiIntegration.Contract.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.DataAccess.Models;
@@ -12,15 +12,15 @@ namespace DiscogsInsight.DataAccess.Services
     public class ArtistDataService : IArtistDataService
     {
         private readonly IDiscogsInsightDb _db;
-        private readonly DiscogsApiService _discogsApiService;
-        private readonly MusicBrainzApiService _musicBrainzApiService;
+        private readonly IDiscogsApiService _discogsApiService;
+        private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly ILogger<ArtistDataService> _logger;
         private readonly ITagsDataService _tagsDataService;
 
         public ArtistDataService(IDiscogsInsightDb db, 
-            DiscogsApiService discogsApiService, 
+            IDiscogsApiService discogsApiService, 
             ILogger<ArtistDataService> logger, 
-            MusicBrainzApiService musicBrainzApiService,
+            IMusicBrainzApiService musicBrainzApiService,
             ITagsDataService tagsDataService)
         {
             _db = db;

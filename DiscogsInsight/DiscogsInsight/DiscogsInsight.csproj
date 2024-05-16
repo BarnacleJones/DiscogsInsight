@@ -82,8 +82,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Contract\DiscogsInsight.ApiIntegration.Contract.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.ApiIntegration\DiscogsInsight.ApiIntegration.csproj" />
       <ProjectReference Include="..\DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj" />
-      <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.View.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.Service.csproj" />
       <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.ViewModels.csproj" />
     </ItemGroup>
 

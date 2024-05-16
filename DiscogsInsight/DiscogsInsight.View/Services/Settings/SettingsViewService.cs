@@ -1,7 +1,7 @@
 ﻿using DiscogsInsight.DataAccess.Services;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Settings
+namespace DiscogsInsight.Service.Services.Settings
 {
     public class SettingsViewService
     {
@@ -16,11 +16,11 @@ namespace DiscogsInsight.View.Services.Settings
         {
             try
             {
-             var success = await _settingsDataService.UpdateCollection();
+                var success = await _settingsDataService.UpdateCollection();
 
                 if (success)
                 {
-                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                    return new ViewResult<bool> { Success = true, ErrorMessage = "" };
                 }
 
                 return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Collection. " };
@@ -34,15 +34,15 @@ namespace DiscogsInsight.View.Services.Settings
         public string GetDiscogsUsername()
         {
             return _settingsDataService.GetDiscogsUsername();
-        } 
+        }
         public string GetLastFmApiKey()
         {
             return _settingsDataService.GetLastFmApiKey();
-        } 
+        }
         public string GetLastFmUsername()
         {
             return _settingsDataService.GetLastFmUsername();
-        } 
+        }
         public string GetLastFmPassword()
         {
             return _settingsDataService.GetLastFmPassword();
@@ -55,7 +55,7 @@ namespace DiscogsInsight.View.Services.Settings
 
                 if (success)
                 {
-                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                    return new ViewResult<bool> { Success = true, ErrorMessage = "" };
                 }
 
                 return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Discogs Username. " };
@@ -64,7 +64,7 @@ namespace DiscogsInsight.View.Services.Settings
             {
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
-        } 
+        }
         public async Task<ViewResult<bool>> SaveUpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
         {
             try
@@ -73,7 +73,7 @@ namespace DiscogsInsight.View.Services.Settings
 
                 if (success)
                 {
-                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                    return new ViewResult<bool> { Success = true, ErrorMessage = "" };
                 }
 
                 return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Last Fm Details. " };
@@ -83,7 +83,7 @@ namespace DiscogsInsight.View.Services.Settings
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
-        
+
         public async Task<ViewResult<bool>> PurgeEntireDatabase()
         {
             try
@@ -92,7 +92,7 @@ namespace DiscogsInsight.View.Services.Settings
 
                 if (success)
                 {
-                    return new ViewResult<bool> { Success = true, ErrorMessage="" };
+                    return new ViewResult<bool> { Success = true, ErrorMessage = "" };
                 }
 
                 return new ViewResult<bool> { Success = false, ErrorMessage = "Error PurgingDatabase. " };
