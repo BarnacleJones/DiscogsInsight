@@ -1,10 +1,11 @@
-﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
+﻿using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
+using DiscogsInsight.ApiIntegration.Contract.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
-    public class CoverArtArchiveApiService
+    public class CoverArtArchiveApiService  : ICoverArtArchiveApiService
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<CoverArtArchiveApiService> _logger;

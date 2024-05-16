@@ -25,4 +25,8 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Contract\DiscogsInsight.ApiIntegration.Contract.csproj" />
+	</ItemGroup>
+
 </Project>

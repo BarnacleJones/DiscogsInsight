@@ -3,7 +3,7 @@ using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Insights
+namespace DiscogsInsight.Service.Services.Insights
 {
     public class TracksInsightsViewService
     {

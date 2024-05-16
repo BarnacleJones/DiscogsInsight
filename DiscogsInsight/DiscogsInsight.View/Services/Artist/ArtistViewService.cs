@@ -1,9 +1,9 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.View.Services.Releases;
+using DiscogsInsight.Service.Services.Releases;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Artist
+namespace DiscogsInsight.Service.Services.Artist
 {
     public class ArtistViewService
     {
@@ -13,7 +13,7 @@ namespace DiscogsInsight.View.Services.Artist
         public ArtistViewService(IArtistDataService artistDataService, ITagsDataService tagsDataService, ReleaseViewService releaseViewService)
         {
             _artistDataService = artistDataService;
-            _tagsDataService = tagsDataService; 
+            _tagsDataService = tagsDataService;
             _releaseViewService = releaseViewService;
         }
 
@@ -34,7 +34,7 @@ namespace DiscogsInsight.View.Services.Artist
 
                 var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
                 var tagsList = tags.Select(x => x.Tag).ToList();
-                
+
                 var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
 
                 var releasesViewModel = releasesByThisArtist.GroupBy(x => x.Status)
@@ -58,7 +58,7 @@ namespace DiscogsInsight.View.Services.Artist
                     ArtistDescription = artist.Profile,
                     DiscogsArtistId = artist.DiscogsArtistId,
                     City = artist.City,
-                    Country = artist.Country,  
+                    Country = artist.Country,
                     StartYear = artist.StartYear,
                     EndYear = artist.EndYear,
                     MusicBrainzArtistId = artist.MusicBrainzArtistId,

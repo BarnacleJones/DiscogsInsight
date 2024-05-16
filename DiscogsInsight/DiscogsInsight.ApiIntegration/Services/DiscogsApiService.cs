@@ -1,10 +1,11 @@
-﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using DiscogsInsight.ApiIntegration.Contract.Services;
+using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
-    public class DiscogsApiService
+    public class DiscogsApiService : IDiscogsApiService
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<DiscogsApiService> _logger;

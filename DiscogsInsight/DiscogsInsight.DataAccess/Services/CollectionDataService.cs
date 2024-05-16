@@ -1,5 +1,5 @@
-using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Contract.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.DataAccess.Models;
@@ -10,11 +10,11 @@ namespace DiscogsInsight.DataAccess.Services
     public class CollectionDataService : ICollectionDataService
     {
         private readonly IDiscogsInsightDb _db;
-        private readonly DiscogsApiService _discogsApiService;
+        private readonly IDiscogsApiService _discogsApiService;
         private readonly IDiscogsGenresAndTagsDataService _genresAndTagsDataService;
         private readonly ILogger<CollectionDataService> _logger;
 
-        public CollectionDataService(IDiscogsInsightDb db, DiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, IDiscogsGenresAndTagsDataService genresAndTagsDataService)
+        public CollectionDataService(IDiscogsInsightDb db, IDiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, IDiscogsGenresAndTagsDataService genresAndTagsDataService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
