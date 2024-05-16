@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
+﻿using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;

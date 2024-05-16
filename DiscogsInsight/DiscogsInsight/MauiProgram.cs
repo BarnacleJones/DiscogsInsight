@@ -1,17 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using DiscogsInsight.DataAccess;
 using DiscogsInsight.DataAccess.Services;
-using DiscogsInsight.ApiIntegration.Services;
-using DiscogsInsight.View.Services.Tracks;
-using DiscogsInsight.View.Services.Collection;
-using DiscogsInsight.View.Services.Settings;
-using DiscogsInsight.View.Services.Artist;
-using DiscogsInsight.View.Services.Releases;
-using DiscogsInsight.View.Services.Notifications;
+using DiscogsInsight.ApiIntegration.Contract.Services;
 using MudBlazor.Services;
-using DiscogsInsight.View.Services.Insights;
 using DiscogsInsight.DataAccess.Contract;
 using SQLite;
+using DiscogsInsight.Service.Services.Artist;
+using DiscogsInsight.Service.Services.Settings;
+using DiscogsInsight.Service.Services.Tracks;
+using DiscogsInsight.Service.Services.Notifications;
+using DiscogsInsight.Service.Services.Releases;
+using DiscogsInsight.Service.Services.Insights;
+using DiscogsInsight.Service.Services.Collection;
+using DiscogsInsight.ApiIntegration.Services;
 
 namespace DiscogsInsight
 {
@@ -62,10 +63,10 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<IDiscogsInsightDb, DiscogsInsightDb>();
 
             //Api layer
-            builder.Services.AddSingleton<DiscogsApiService>();
-            builder.Services.AddSingleton<MusicBrainzApiService>();
-            builder.Services.AddSingleton<CoverArtArchiveApiService>();
-            builder.Services.AddSingleton<LastFmApiService>();
+            builder.Services.AddSingleton<IDiscogsApiService, DiscogsApiService>();
+            builder.Services.AddSingleton<IMusicBrainzApiService, MusicBrainzApiService>();
+            builder.Services.AddSingleton<ICoverArtArchiveApiService, CoverArtArchiveApiService>();
+            builder.Services.AddSingleton<ILastFmApiService, LastFmApiService>();
 
             //rest of data layer
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();

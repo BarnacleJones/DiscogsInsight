@@ -36,7 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration\DiscogsInsight.ApiIntegration.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Contract\DiscogsInsight.ApiIntegration.Contract.csproj" />
 	</ItemGroup>
 
 </Project>

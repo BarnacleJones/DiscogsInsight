@@ -2,7 +2,7 @@
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Insights
+namespace DiscogsInsight.Service.Services.Insights
 {
     public class ArtistInsightsViewService
     {
@@ -17,7 +17,7 @@ namespace DiscogsInsight.View.Services.Insights
         public async Task<ViewResult<ArtistInsightsStatsModel>> GetArtistStatistics()
         {
             try
-            {                
+            {
                 return new ViewResult<ArtistInsightsStatsModel>
                 {
                     Data = null,

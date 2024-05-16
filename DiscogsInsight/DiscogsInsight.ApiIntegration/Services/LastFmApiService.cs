@@ -1,10 +1,11 @@
-﻿using IF.Lastfm.Core.Api;
+﻿using DiscogsInsight.ApiIntegration.Contract.Services;
+using IF.Lastfm.Core.Api;
 using Microsoft.Extensions.Logging;
 namespace DiscogsInsight.ApiIntegration.Services
 {
 
 
-    public class LastFmApiService
+    public class LastFmApiService : ILastFmApiService
     {
         private readonly LastfmClient _lastFmClient;
         private readonly ILogger<LastFmApiService> _logger;

@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.View
+﻿namespace DiscogsInsight.Service.Platforms.iOS
 {
     // All the code in this file is only included on iOS.
     public class PlatformClass1

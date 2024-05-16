@@ -3,7 +3,7 @@ using DiscogsInsight.ViewModels.Collection;
 using DiscogsInsight.ViewModels.EntityViewModels;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Collection
+namespace DiscogsInsight.Service.Services.Collection
 {
     public class CollectionViewService
     {
@@ -20,7 +20,7 @@ namespace DiscogsInsight.View.Services.Collection
             {
                 var releases = await _collectionDataService.GetReleases();
                 var releaseList = releases.ToList();
-                       
+
                 var artistIdsList = await _collectionDataService.GetArtistsIdsAndNames();
 
                 var viewModel = releaseList.Select(x => new ReleaseViewModel

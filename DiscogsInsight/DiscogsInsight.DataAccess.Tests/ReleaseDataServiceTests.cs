@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.Services;
+﻿using DiscogsInsight.ApiIntegration.Contract.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Services;
 using Microsoft.Extensions.Logging;
@@ -12,9 +12,9 @@ namespace DiscogsInsight.DataAccess.Tests
         private Mock<ILogger<ReleaseDataService>> _loggerMock;
         private ReleaseDataService _service;
 
-        private Mock<MusicBrainzApiService>_musicBrainzApiServiceMock;
-        private Mock<DiscogsApiService>_discogsApiServiceMock;
-        private Mock<CoverArtArchiveApiService>_coverArchiveApiServiceMock;
+        private Mock<IMusicBrainzApiService>_musicBrainzApiServiceMock;
+        private Mock<IDiscogsApiService>_discogsApiServiceMock;
+        private Mock<ICoverArtArchiveApiService>_coverArchiveApiServiceMock;
         private Mock<ICollectionDataService>_collectionDataServiceMock;
         private Mock<IArtistDataService>_artistDataServiceMock;
         private Mock<IDiscogsGenresAndTagsDataService>_discogsGenresAndTagsDataServiceMock;
@@ -25,7 +25,7 @@ namespace DiscogsInsight.DataAccess.Tests
         {
             _dbMock = new Mock<IDiscogsInsightDb>();
             _loggerMock = new Mock<ILogger<ReleaseDataService>>();
-            _service = new ReleaseDataService(_dbMock.Object, _musicBrainzApiServiceMock.Object, _discogsGenresAndTagsDataServiceMock.Object, _artistDataServiceMock.Object, _discogsGenresAndTagsDataServiceMock.Object, _collectionDataServiceMock.Object, _coverArchiveApiServiceMock.Object, _loggerMock.Object);
+            _service = new ReleaseDataService(_dbMock.Object, _musicBrainzApiServiceMock.Object, _discogsGenresAndTagsDataServiceMock.Object, _artistDataServiceMock.Object, _discogsApiServiceMock.Object, _collectionDataServiceMock.Object, _coverArchiveApiServiceMock.Object, _loggerMock.Object);
         }
 
         [TearDown]

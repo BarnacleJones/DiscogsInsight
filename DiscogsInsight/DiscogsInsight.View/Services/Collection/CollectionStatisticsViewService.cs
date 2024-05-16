@@ -2,7 +2,7 @@
 using DiscogsInsight.ViewModels;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Collection
+namespace DiscogsInsight.Service.Services.Collection
 {
     public class CollectionStatisticsViewService
     {
@@ -20,7 +20,7 @@ namespace DiscogsInsight.View.Services.Collection
             try
             {
                 var data = await GetCollectionStatsViewModel();
-                
+
                 return new ViewResult<CollectionStatsViewModel>
                 {
                     Data = data,

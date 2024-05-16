@@ -1,5 +1,5 @@
-using DiscogsInsight.ApiIntegration.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Contract.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using Microsoft.Extensions.Logging;
@@ -9,15 +9,15 @@ namespace DiscogsInsight.DataAccess.Services
     public class ReleaseDataService : IReleaseDataService
     {
         private readonly IDiscogsInsightDb _db;
-        private readonly MusicBrainzApiService _musicBrainzApiService;
-        private readonly DiscogsApiService _discogsApiService;
-        private readonly CoverArtArchiveApiService _coverArchiveApiService;
+        private readonly IMusicBrainzApiService _musicBrainzApiService;
+        private readonly IDiscogsApiService _discogsApiService;
+        private readonly ICoverArtArchiveApiService _coverArchiveApiService;
         private readonly ICollectionDataService _collectionDataService;
         private readonly IArtistDataService _artistDataService;
         private readonly ILogger<ReleaseDataService> _logger;
         private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseDataService(IDiscogsInsightDb db, MusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, DiscogsApiService discogsApiService, ICollectionDataService collectionDataService, CoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(IDiscogsInsightDb db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;

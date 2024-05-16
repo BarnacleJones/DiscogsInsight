@@ -4,7 +4,7 @@ using DiscogsInsight.ViewModels.Collection;
 using DiscogsInsight.ViewModels.Results;
 using Microsoft.Extensions.Logging;
 
-namespace DiscogsInsight.View.Services.Tracks
+namespace DiscogsInsight.Service.Services.Tracks
 {
     public class TracksViewService
     {
@@ -27,7 +27,7 @@ namespace DiscogsInsight.View.Services.Tracks
             return success;
         }
 
-        public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack() 
+        public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack()
         {
             try
             {
@@ -36,7 +36,7 @@ namespace DiscogsInsight.View.Services.Tracks
                 var random = new Random();
                 var randomTrack = tracks.OrderBy(x => random.Next()).FirstOrDefault();
 
-                if (randomTrack != null) 
+                if (randomTrack != null)
                 {
                     var releases = await _releaseDataService.GetAllReleasesAsList();
                     var artists = await _artistDataService.GetArtists();
@@ -103,8 +103,8 @@ namespace DiscogsInsight.View.Services.Tracks
 
                 var releases = await _releaseDataService.GetAllReleasesAsList();
                 var artists = await _artistDataService.GetArtists();
-                       
-                foreach ( var tracksItems in tracksAsGridItems) 
+
+                foreach (var tracksItems in tracksAsGridItems)
                 {
                     var releaseTitle = releases.Where(x => x.DiscogsReleaseId == tracksItems.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
                     tracksItems.Release = releaseTitle;

@@ -1,4 +1,5 @@
-﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
+﻿using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
+using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -15,7 +16,7 @@ namespace DiscogsInsight.DataAccess.Tests
                 Created = DateTime.Now.AddDays(-1 * 10),
                 Count = 1,
                 Offset = 0,
-                Artists = new List<ApiIntegration.MusicBrainzResponseModels.Artist>()
+                Artists = new List<ApiIntegration.Contract.MusicBrainzResponseModels.Artist>()
             };
 
             for (int i = 0; i <= 3; i++)

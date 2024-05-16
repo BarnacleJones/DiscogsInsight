@@ -3,7 +3,7 @@ using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.ViewModels.Insights;
 using DiscogsInsight.ViewModels.Results;
 
-namespace DiscogsInsight.View.Services.Insights
+namespace DiscogsInsight.Service.Services.Insights
 {
     public class ReleaseInsightsViewService
     {
@@ -88,7 +88,7 @@ namespace DiscogsInsight.View.Services.Insights
                 labels[i] = dataList[i].Item1;
                 countryCounts[i] = dataList[i].Item2;
             }
-           
+
             return (labels, countryCounts);
         }
 
@@ -98,7 +98,7 @@ namespace DiscogsInsight.View.Services.Insights
 
             var groupedByYearReleases = releases.GroupBy(x => x.DateAdded.Value.Year).ToList().OrderBy(x => x.Key);
 
-            
+
             foreach (var year in groupedByYearReleases)
             {
                 var yearGroupedByMonth = year.GroupBy(x => x.DateAdded.Value.Month).ToList();
