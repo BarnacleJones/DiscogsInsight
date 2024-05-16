@@ -1,5 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.MusicBrainzResponseModels;
-using DiscogsInsight.DataAccess.Contract;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.DataAccess.Services;
 using Microsoft.Extensions.Logging;

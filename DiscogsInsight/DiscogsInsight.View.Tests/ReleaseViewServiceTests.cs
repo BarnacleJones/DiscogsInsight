@@ -1,6 +1,5 @@
-using DiscogsInsight.DataAccess.Services;
 using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.View.Services.Releases;
+using DiscogsInsight.Service.Services.Releases;
 using Moq;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ViewModels.EntityViewModels;
