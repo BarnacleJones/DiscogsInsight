@@ -47,12 +47,11 @@ namespace DiscogsInsight.Service.Tests
         {
             discogsReleaseId = 123;
             expectedRelease = new ReleaseViewModel() { DiscogsArtistId = 1 };
-            var expectedReleaseData = new Release() { DiscogsArtistId = 1, DiscogsReleaseId = 123 }; // Set your expected release here
+            var expectedReleaseData = new Release() { DiscogsArtistId = 1, DiscogsReleaseId = 123 };
             var expectedArtistData = new DiscogsInsight.Database.Entities.Artist() { DiscogsArtistId = 1, Name = "Cindy Lee" };
             var expectedTracksData = new List<Track>() { new Track() { DiscogsArtistId = 1, Title = "Stone Faces" } };
             expectedCoverImage = new byte[10];
 
-            //arrange data services
             _releaseDataServiceMock.Setup(x => x.GetReleaseAndImageAndRetrieveAllApiDataForRelease(123))
                 .ReturnsAsync((expectedReleaseData, expectedCoverImage));
 
