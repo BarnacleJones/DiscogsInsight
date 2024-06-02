@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.ViewModels.EntityViewModels
+﻿namespace DiscogsInsight.Service.Models.EntityViewModels
 {
     public class ArtistViewModel
     {

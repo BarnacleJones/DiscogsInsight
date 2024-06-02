@@ -1,6 +1,6 @@
-using DiscogsInsight.ViewModels.Collection;
+using DiscogsInsight.Service.Models.Collection;
 
-namespace DiscogsInsight.ViewModels.EntityViewModels
+namespace DiscogsInsight.Service.Models.EntityViewModels
 {
     public class ReleaseViewModel
     {

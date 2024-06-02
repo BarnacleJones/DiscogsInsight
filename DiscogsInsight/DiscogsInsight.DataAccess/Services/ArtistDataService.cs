@@ -1,11 +1,12 @@
-﻿using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
-using DiscogsInsight.ApiIntegration.Contract.Services;
+﻿using DiscogsInsight.ApiIntegration.Contract;
+using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.DataAccess.Entities;
 using DiscogsInsight.DataAccess.Models;
+using DiscogsInsight.Database.Contract;
+using DiscogsInsight.Database.Entities;
 using Microsoft.Extensions.Logging;
-using Artist = DiscogsInsight.DataAccess.Entities.Artist;
+using Artist = DiscogsInsight.Database.Entities.Artist;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -247,11 +248,11 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<PossibleArtistsFromMusicBrainzApi>> GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
         {
             //get artist name from release id
-            var allReleases = await _db.GetAllEntitiesAsListAsync<Entities.Release>();
+            var allReleases = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
             var thisRelease = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault();//there could be more than one
             
 
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Entities.Artist>();
+            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
             var recordForThisArtist = allArtists.Where(x => x.DiscogsArtistId == thisRelease.DiscogsArtistId).FirstOrDefault();//could be more than one
             
             
@@ -275,7 +276,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             await DeleteAllBadArtistAndReleaseData(discogsReleaseId, newAritstMusicBrainzId);
 
-            var releaseTableList = await _db.GetAllEntitiesAsListAsync<Entities.Release>();
+            var releaseTableList = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
             var discogsArtistFromReleaseId = releaseTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault().DiscogsArtistId;
           
             if (newAritstMusicBrainzId == null)
@@ -346,7 +347,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task UpdateArtistTableWithCorrectedData(string newAritstMusicBrainzId, MusicBrainzArtist artistCallResponse)
         {
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Entities.Artist>();
+            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
             var recordForThisArtist = allArtists.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).ToList();//could be more than one
 
             var artistBeginArea = artistCallResponse.BeginArea;
@@ -400,7 +401,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task DeleteAllBadArtistAndReleaseData(int? discogsReleaseId, string newAritstMusicBrainzId)
         {
-            var allReleases = await _db.GetAllEntitiesAsListAsync<Entities.Release>();
+            var allReleases = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
             var thisReleaseList = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();//there could be more than one
 
             foreach (var release in thisReleaseList)
@@ -411,7 +412,7 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(release);
             }
 
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Entities.Artist>();
+            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
             var artistId = thisReleaseList.FirstOrDefault().DiscogsArtistId;
             var recordsForThisArtist = allArtists.Where(x => x.DiscogsArtistId == artistId).ToList();//could be more than one
 

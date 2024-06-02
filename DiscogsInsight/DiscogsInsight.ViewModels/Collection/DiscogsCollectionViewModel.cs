@@ -1,6 +1,6 @@
-﻿using DiscogsInsight.ViewModels.EntityViewModels;
+﻿using DiscogsInsight.Service.Models.EntityViewModels;
 
-namespace DiscogsInsight.ViewModels.Collection
+namespace DiscogsInsight.Service.Models.Collection
 {
     public class DiscogsCollectionViewModel
     {

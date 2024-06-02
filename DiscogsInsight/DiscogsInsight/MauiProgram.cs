@@ -1,18 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
-using DiscogsInsight.DataAccess;
 using DiscogsInsight.DataAccess.Services;
-using DiscogsInsight.ApiIntegration.Contract.Services;
 using MudBlazor.Services;
 using DiscogsInsight.DataAccess.Contract;
-using SQLite;
-using DiscogsInsight.Service.Services.Artist;
-using DiscogsInsight.Service.Services.Settings;
-using DiscogsInsight.Service.Services.Tracks;
-using DiscogsInsight.Service.Services.Notifications;
-using DiscogsInsight.Service.Services.Releases;
-using DiscogsInsight.Service.Services.Insights;
-using DiscogsInsight.Service.Services.Collection;
 using DiscogsInsight.ApiIntegration.Services;
+using DiscogsInsight.ApiIntegration.Contract;
+using DiscogsInsight.Service.Tracks;
+using DiscogsInsight.Service.Collection;
+using DiscogsInsight.Service.Notifications;
+using DiscogsInsight.Service.Artist;
+using DiscogsInsight.Service.Insights;
+using DiscogsInsight.Service.Settings;
+using DiscogsInsight.Service.Releases;
+using DiscogsInsight.Database.Contract;
+using DiscogsInsight.Database.Services;
 
 namespace DiscogsInsight
 {

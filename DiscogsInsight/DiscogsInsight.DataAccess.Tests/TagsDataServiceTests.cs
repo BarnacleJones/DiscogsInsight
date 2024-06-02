@@ -1,6 +1,6 @@
-﻿using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.DataAccess.Entities;
+﻿using DiscogsInsight.Database.Entities;
 using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.Database.Contract;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -42,7 +42,7 @@ namespace DiscogsInsight.DataAccess.Tests
             var result = await _service.SaveTagsByMusicBrainzArtistId(artistApiResponse, musicBrainzArtistId);
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace DiscogsInsight.DataAccess.Tests
             var result = await _service.GetTagsByMusicBrainzArtistId(musicBrainzArtistId);
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.That(result, !Is.Null);
             // Add more assertions based on your test case
         }
     }

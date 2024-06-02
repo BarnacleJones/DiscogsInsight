@@ -1,5 +1,5 @@
-﻿using DiscogsInsight.ApiIntegration.Contract.MusicBrainzResponseModels;
-using DiscogsInsight.ApiIntegration.Contract.Services;
+﻿using DiscogsInsight.ApiIntegration.Contract;
+using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
