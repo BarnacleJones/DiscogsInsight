@@ -3,6 +3,7 @@
     public interface ISettingsDataService
     {
         Task<bool> UpdateCollection();
+        bool ContainsKey(string key);
         string GetDiscogsUsername();
         Task<bool> UpdateDiscogsUsername(string userName);
         Task<bool> PurgeEntireDb();

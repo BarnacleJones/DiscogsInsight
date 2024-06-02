@@ -24,6 +24,11 @@ namespace DiscogsInsight.DataAccess.Services
             return username;
         }
 
+        public bool ContainsKey(string key)
+        {
+            return _preferencesService.ContainsKey(key);
+        }
+
         public async Task<bool> UpdateDiscogsUsername(string userName)
         {
             if (string.IsNullOrEmpty(userName))

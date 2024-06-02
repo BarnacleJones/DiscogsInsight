@@ -18,5 +18,10 @@ namespace DiscogsInsight.DataAccess.Services
         {
             Preferences.Default.Remove(key);
         }
+
+        public bool ContainsKey(string key)
+        {
+            return Preferences.Default.ContainsKey(key);
+        }
     }
 }

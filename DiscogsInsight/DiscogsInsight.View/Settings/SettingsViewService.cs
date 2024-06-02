@@ -35,6 +35,11 @@ namespace DiscogsInsight.Service.Settings
         {
             return _settingsDataService.GetDiscogsUsername();
         }
+
+        public bool HasSavedDiscogsUsername()
+        {
+            return _settingsDataService.ContainsKey(PreferencesConstant.DiscogsUsername);
+        }
         public string GetLastFmApiKey()
         {
             return _settingsDataService.GetLastFmApiKey();
