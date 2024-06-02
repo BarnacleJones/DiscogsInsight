@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.ViewModels.Collection
+﻿namespace DiscogsInsight.Service.Models.Collection
 {
     public class TracksItemViewModel
     {

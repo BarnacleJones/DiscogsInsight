@@ -1,7 +1,8 @@
-using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
-using DiscogsInsight.ApiIntegration.Contract.Services;
+using DiscogsInsight.ApiIntegration.Contract;
+using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.Database.Entities;
+using DiscogsInsight.Database.Contract;
 using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.DataAccess.Services

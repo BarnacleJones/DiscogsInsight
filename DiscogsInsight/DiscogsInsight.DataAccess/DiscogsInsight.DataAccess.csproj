@@ -28,15 +28,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fastenshtein" Version="1.0.0.8" />
+		<PackageReference Include="Fastenshtein" Version="1.0.0.9" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Contract\DiscogsInsight.ApiIntegration.Contract.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Models\DiscogsInsight.ApiIntegration.Models.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Models\DiscogsInsight.DataAccess.Models.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.Database\DiscogsInsight.Database.csproj" />
 	</ItemGroup>
 
 </Project>

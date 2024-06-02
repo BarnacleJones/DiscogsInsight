@@ -1,8 +1,8 @@
-using DiscogsInsight.DataAccess.Entities;
-using DiscogsInsight.Service.Services.Releases;
+using DiscogsInsight.Database.Entities;
+using DiscogsInsight.Service.Releases;
 using Moq;
 using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.ViewModels.EntityViewModels;
+using DiscogsInsight.Service.Models.EntityViewModels;
 
 namespace DiscogsInsight.Service.Tests
 {
@@ -48,7 +48,7 @@ namespace DiscogsInsight.Service.Tests
             discogsReleaseId = 123;
             expectedRelease = new ReleaseViewModel() { DiscogsArtistId = 1 };
             var expectedReleaseData = new Release() { DiscogsArtistId = 1, DiscogsReleaseId = 123 }; // Set your expected release here
-            var expectedArtistData = new Artist() { DiscogsArtistId = 1, Name = "Cindy Lee" };
+            var expectedArtistData = new DiscogsInsight.Database.Entities.Artist() { DiscogsArtistId = 1, Name = "Cindy Lee" };
             var expectedTracksData = new List<Track>() { new Track() { DiscogsArtistId = 1, Title = "Stone Faces" } };
             expectedCoverImage = new byte[10];
 

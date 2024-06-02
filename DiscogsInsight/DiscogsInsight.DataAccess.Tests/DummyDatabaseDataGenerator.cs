@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.DataAccess.Entities;
+﻿using DiscogsInsight.Database.Entities;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -62,11 +62,11 @@ namespace DiscogsInsight.DataAccess.Tests
 
         public static List<Release> GetSampleReleases()
         {
-            var releases = new List<Entities.Release>();
+            var releases = new List<Release>();
 
             for (int i = 1; i <= 5; i++)
             {
-                var release = new Entities.Release
+                var release = new Release
                 {
                     Id = i,
                     DiscogsArtistId = i * 100,

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.Database.Entities;
 using DiscogsInsight.DataAccess.Contract;
+using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.DataAccess.Services
 {

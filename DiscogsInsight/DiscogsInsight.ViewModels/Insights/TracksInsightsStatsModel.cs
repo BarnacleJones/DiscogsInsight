@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.ViewModels.Insights
+﻿namespace DiscogsInsight.Service.Models.Insights
 {
     public class TracksInsightsStatsModel
     {

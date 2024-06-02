@@ -1,4 +1,4 @@
-﻿using DiscogsInsight.ApiIntegration.Contract.Services;
+﻿using DiscogsInsight.ApiIntegration.Contract;
 using IF.Lastfm.Core.Api;
 using Microsoft.Extensions.Logging;
 namespace DiscogsInsight.ApiIntegration.Services

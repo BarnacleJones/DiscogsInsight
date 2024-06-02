@@ -24,8 +24,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj" />
-	  <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.ViewModels.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.Service.Models.csproj" />
 	</ItemGroup>
 
 </Project>
