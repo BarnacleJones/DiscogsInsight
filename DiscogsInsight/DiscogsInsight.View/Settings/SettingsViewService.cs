@@ -1,13 +1,13 @@
-﻿using DiscogsInsight.DataAccess.Services;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Results;
 
 namespace DiscogsInsight.Service.Settings
 {
     public class SettingsViewService
     {
-        private readonly SettingsDataService _settingsDataService;
+        private readonly ISettingsDataService _settingsDataService;
 
-        public SettingsViewService(SettingsDataService settingsDataService)
+        public SettingsViewService(ISettingsDataService settingsDataService)
         {
             _settingsDataService = settingsDataService;
         }
@@ -69,7 +69,7 @@ namespace DiscogsInsight.Service.Settings
         {
             try
             {
-                var success = await SettingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey);
+                var success = await _settingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey);
 
                 if (success)
                 {

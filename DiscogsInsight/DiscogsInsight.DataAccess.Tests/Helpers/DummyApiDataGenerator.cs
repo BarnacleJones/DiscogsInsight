@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 
-namespace DiscogsInsight.DataAccess.Tests
+namespace DiscogsInsight.DataAccess.Tests.Helpers
 {
     public static class DummyApiDataGenerator
     {

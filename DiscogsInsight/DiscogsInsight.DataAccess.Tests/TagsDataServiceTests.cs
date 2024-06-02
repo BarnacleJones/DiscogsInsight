@@ -3,6 +3,7 @@ using DiscogsInsight.DataAccess.Services;
 using DiscogsInsight.Database.Contract;
 using Microsoft.Extensions.Logging;
 using Moq;
+using DiscogsInsight.DataAccess.Tests.Helpers;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -32,7 +33,7 @@ namespace DiscogsInsight.DataAccess.Tests
             // Arrange
             var artistApiResponse = DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse();
             var tagsEntity = DummyDatabaseDataGenerator.GetSampleMusicBrainzTags();
-            var musicBrainzArtistId = "1"; // Example artist ID
+            var musicBrainzArtistId = "1";
 
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsEntity);
             _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzTags>())).Returns(Task.FromResult(1));
@@ -49,10 +50,10 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetTagsByMusicBrainzArtistId_ReturnsCorrectTags()
         {
             // Arrange
-            var musicBrainzArtistId = "123"; // Example artist ID
+            var musicBrainzArtistId = "123";
 
-            var tagsList = new List<MusicBrainzTags>(); // Mock your tags list
-            var tagsToArtistsList = new List<MusicBrainzArtistToMusicBrainzTags>(); // Mock your tags to artists list
+            var tagsList = new List<MusicBrainzTags>();
+            var tagsToArtistsList = new List<MusicBrainzArtistToMusicBrainzTags>();
 
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsList);
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>()).ReturnsAsync(tagsToArtistsList);
@@ -62,7 +63,6 @@ namespace DiscogsInsight.DataAccess.Tests
 
             // Assert
             Assert.That(result, !Is.Null);
-            // Add more assertions based on your test case
         }
     }
 }
