@@ -1,4 +1,5 @@
 ﻿using DiscogsInsight.ApiIntegration.Contract;
+using DiscogsInsight.DataAccess.Contract;
 using IF.Lastfm.Core.Api;
 using Microsoft.Extensions.Logging;
 namespace DiscogsInsight.ApiIntegration.Services
@@ -9,6 +10,7 @@ namespace DiscogsInsight.ApiIntegration.Services
     {
         private readonly LastfmClient _lastFmClient;
         private readonly ILogger<LastFmApiService> _logger;
+        private readonly IPreferencesService _preferencesService;
         private string _lastFmUserName;        
         private string _lastFmPassword;        
         private string _lastFmApiKey;
@@ -20,15 +22,16 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         //-----------------------------------------------------------------------------
 
-        public LastFmApiService(LastfmClient lastFmClient, ILogger<LastFmApiService> logger)
+        public LastFmApiService(LastfmClient lastFmClient, ILogger<LastFmApiService> logger, IPreferencesService preferencesService)
         {
             _lastFmClient = lastFmClient;
             _logger = logger;
-            _lastFmUserName = Preferences.Default.Get("lastFmUsername", "Unknown");
-            _lastFmPassword = Preferences.Default.Get("lastFmPassword", "Unknown");
-            _lastFmApiKey = Preferences.Default.Get("lastFmApiKey", "Unknown");
+            _preferencesService = preferencesService;
         }
 
+        //_lastFmUserName = Preferences.Default.Get(PreferencesConstant.LastFmUserName, "Unknown");
+        //_lastFmPassword = Preferences.Default.Get(PreferencesConstant.LastFmPassword, "Unknown");
+        //_lastFmApiKey = Preferences.Default.Get(PreferencesConstant.LastFmApiKey, "Unknown");
     }
 }
 
