@@ -18,7 +18,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         public string GetDiscogsUsername()
         {
-            var username = Preferences.Default.Get(Constants.DiscogsUsername, "");
+            var username = Preferences.Default.Get(PreferencesConstant.DiscogsUsername, "");
             return username;
         }
 
@@ -26,11 +26,11 @@ namespace DiscogsInsight.DataAccess.Services
         {
             if (string.IsNullOrEmpty(userName))
             {
-                Preferences.Default.Remove(Constants.DiscogsUsername);
+                Preferences.Default.Remove(PreferencesConstant.DiscogsUsername);
             }
             else
             {
-                Preferences.Default.Set(Constants.DiscogsUsername, userName);
+                Preferences.Default.Set(PreferencesConstant.DiscogsUsername, userName);
             }
             await _collectionDataService.PurgeEntireCollection();
             return true;
@@ -46,29 +46,29 @@ namespace DiscogsInsight.DataAccess.Services
         {
             if (string.IsNullOrEmpty(lastFmUsername))
             {
-                Preferences.Default.Remove(Constants.LastFmUserName);
+                Preferences.Default.Remove(PreferencesConstant.LastFmUserName);
             }
             else
             {
-                Preferences.Default.Set(Constants.LastFmUserName, lastFmUsername);
+                Preferences.Default.Set(PreferencesConstant.LastFmUserName, lastFmUsername);
             }
 
             if (string.IsNullOrEmpty(lastFmPassword))
             {
-                Preferences.Default.Remove(Constants.LastFmPassword);
+                Preferences.Default.Remove(PreferencesConstant.LastFmPassword);
             }
             else
             {
-                Preferences.Default.Set(Constants.LastFmPassword, lastFmPassword);
+                Preferences.Default.Set(PreferencesConstant.LastFmPassword, lastFmPassword);
             }
 
             if (string.IsNullOrEmpty(lastFmApiKey))
             {
-                Preferences.Default.Remove(Constants.LastFmApiKey);
+                Preferences.Default.Remove(PreferencesConstant.LastFmApiKey);
             }
             else
             {
-                Preferences.Default.Set(Constants.LastFmApiKey, lastFmApiKey);
+                Preferences.Default.Set(PreferencesConstant.LastFmApiKey, lastFmApiKey);
             }
 
             return Task.FromResult(true);
@@ -76,19 +76,19 @@ namespace DiscogsInsight.DataAccess.Services
 
         public string GetLastFmApiKey()
         {
-            var key = Preferences.Default.Get(Constants.LastFmApiKey, "");
+            var key = Preferences.Default.Get(PreferencesConstant.LastFmApiKey, "");
             return key;
         }
 
         public string GetLastFmUsername()
         {
-            var username = Preferences.Default.Get(Constants.LastFmUserName, "");
+            var username = Preferences.Default.Get(PreferencesConstant.LastFmUserName, "");
             return username;
         }
 
         public string GetLastFmPassword()
         {
-            var pass = Preferences.Default.Get(Constants.LastFmPassword, "");
+            var pass = Preferences.Default.Get(PreferencesConstant.LastFmPassword, "");
             return pass;
         }
     }

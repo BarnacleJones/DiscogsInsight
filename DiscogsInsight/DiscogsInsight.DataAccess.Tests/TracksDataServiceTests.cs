@@ -1,8 +1,9 @@
 using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.DataAccess.Entities;
+using DiscogsInsight.Database.Entities;
 using DiscogsInsight.DataAccess.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
+using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -42,7 +43,7 @@ namespace DiscogsInsight.DataAccess.Tests
             var result = await _service.SetRatingOnTrack(rating, discogsReleaseId, title);
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         }
 
          [Test]

@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.ViewModels.Results
+﻿namespace DiscogsInsight.Service.Models.Results
 {
     public class ViewResult<T>
     {

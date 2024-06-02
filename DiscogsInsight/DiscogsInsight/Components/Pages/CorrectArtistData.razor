@@ -1,9 +1,9 @@
 ﻿@page "/correctArtistData/{releaseId:int?}"
 
-@using DiscogsInsight.Service.Services.Notifications
-@using DiscogsInsight.Service.Services.Releases
-@using DiscogsInsight.ViewModels.DataCorrectionViewModels
-@using DiscogsInsight.ViewModels.Results
+@using DiscogsInsight.Service.Notifications
+@using DiscogsInsight.Service.Releases
+@using DiscogsInsight.Service.Models.DataCorrection
+@using DiscogsInsight.Service.Models.Results
 @inject UserNotificationService UserNotificationService
 @inject NavigationManager NavigationManager
 @inject ReleaseViewService ReleaseViewService

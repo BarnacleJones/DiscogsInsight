@@ -73,28 +73,32 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.40" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-        <PackageReference Include="MudBlazor" Version="6.17.0" />
+        <PackageReference Include="MudBlazor" Version="6.19.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
         <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.8" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Contract\DiscogsInsight.ApiIntegration.Contract.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Models\DiscogsInsight.ApiIntegration.Models.csproj" />
       <ProjectReference Include="..\DiscogsInsight.ApiIntegration\DiscogsInsight.ApiIntegration.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.DataAccess.Models\DiscogsInsight.DataAccess.Models.csproj" />
       <ProjectReference Include="..\DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.Database\DiscogsInsight.Database.csproj" />
       <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.Service.csproj" />
-      <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.ViewModels.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.Service.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.10" />
+      <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.40" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.10" />
+      <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.40" />
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using DiscogsInsight.ApiIntegration.Contract.Services;
-using DiscogsInsight.ApiIntegration.Contract.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
+using DiscogsInsight.ApiIntegration.Contract;
+using Microsoft.Maui.Storage;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {

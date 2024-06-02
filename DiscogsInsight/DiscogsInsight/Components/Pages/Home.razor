@@ -1,13 +1,14 @@
 ﻿@page "/"
-@using DiscogsInsight.Service.Services.Collection
-@using DiscogsInsight.Service.Services.Releases
-@using DiscogsInsight.Service.Services.Tracks
-@using DiscogsInsight.ViewModels
-@using DiscogsInsight.ViewModels.Collection
-@using DiscogsInsight.ViewModels.EntityViewModels
+@using DiscogsInsight.Service.Collection
+@using DiscogsInsight.Service.Models.Insights
+@using DiscogsInsight.Service.Releases
+@using DiscogsInsight.Service.Tracks
+@using DiscogsInsight.Service.Models
+@using DiscogsInsight.Service.Models.Collection
+@using DiscogsInsight.Service.Notifications
+@using DiscogsInsight.Service.Models.EntityViewModels
 @using DiscogsInsight.DataAccess.Services
-@using DiscogsInsight.Service.Services.Notifications
-@using DiscogsInsight.ViewModels.Results
+@using DiscogsInsight.Service.Models.Results
 @inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 @inject TracksViewService TracksViewService

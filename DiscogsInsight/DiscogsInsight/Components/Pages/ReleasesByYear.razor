@@ -1,8 +1,8 @@
 ﻿@page "/releasesByYear/{releaseYear:int?}"
-@using DiscogsInsight.Service.Services.Releases
-@using DiscogsInsight.ViewModels.EntityViewModels
-@using DiscogsInsight.Service.Services.Notifications
-@using DiscogsInsight.ViewModels.Results
+@using DiscogsInsight.Service.Releases
+@using DiscogsInsight.Service.Notifications
+@using DiscogsInsight.Service.Models.EntityViewModels
+@using DiscogsInsight.Service.Models.Results
 @inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 @inject NavigationManager NavigationManager
