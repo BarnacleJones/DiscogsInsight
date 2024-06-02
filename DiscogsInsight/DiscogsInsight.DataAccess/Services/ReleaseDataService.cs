@@ -446,7 +446,7 @@ namespace DiscogsInsight.DataAccess.Services
             return allReleasesKnownByArtistId.Item2;
         }
 
-        private async Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId)
+        public async Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId)
         {
             var releasesList = await _db.GetAllEntitiesAsListAsync<Release>();
 

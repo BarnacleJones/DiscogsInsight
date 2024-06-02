@@ -16,8 +16,8 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
             {
                 var artist = new Artist()
                 {
-                    Id = i,
-                    DiscogsArtistId = i,
+                    Id = i * 100,
+                    DiscogsArtistId = i * 100,
                     Name = $"Artist {i}",
                     Profile = $"Profile {i}",
                     MusicBrainzArtistId = Guid.NewGuid().ToString(),
@@ -171,7 +171,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                 var item = new MusicBrainzReleaseToCoverImage()
                 {
                     Id = i,
-                    MusicBrainzReleaseId = $"MBRID_{i}",
+                    MusicBrainzReleaseId = $"mbid_{i * 100}",
                     MusicBrainzCoverImage = dummyImage
                 };
                 musicBrainzReleaseToCoverImages.Add(item);

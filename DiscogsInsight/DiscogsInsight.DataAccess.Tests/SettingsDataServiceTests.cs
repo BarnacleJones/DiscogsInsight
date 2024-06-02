@@ -53,7 +53,7 @@ namespace DiscogsInsight.DataAccess.Tests
         }
 
         [Test]
-        public async Task UpdateDiscogsUsername_RemovesUsername_WhenEmpty()
+        public async Task UpdateDiscogsUsername_RemovesUsernameAndPurgesCollection_WhenEmpty()
         {
             // Act
             var result = await _service.UpdateDiscogsUsername(string.Empty);
@@ -65,7 +65,7 @@ namespace DiscogsInsight.DataAccess.Tests
         }
 
         [Test]
-        public async Task UpdateDiscogsUsername_SetsUsername_WhenNotEmpty()
+        public async Task UpdateDiscogsUsername_SetsUsernameAndPurgesCollection_WhenNotEmpty()
         {
             // Arrange
             var newUsername = "newuser";

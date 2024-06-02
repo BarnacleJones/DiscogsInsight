@@ -13,6 +13,7 @@ namespace DiscogsInsight.DataAccess.Contract
         Task<(Release?, byte[]?)> GetRandomRelease();
         Task<List<Release>> GetNewestReleases(int howManyToReturn);
         Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
+        Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId);
     }
 }
