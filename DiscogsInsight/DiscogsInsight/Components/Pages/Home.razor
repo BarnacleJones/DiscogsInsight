@@ -1,16 +1,17 @@
 ﻿@page "/"
 @using DiscogsInsight.Service.Collection
-@using DiscogsInsight.Service.Models.Insights
+@using DiscogsInsight.Service.Notifications
 @using DiscogsInsight.Service.Releases
+@using DiscogsInsight.Service.Settings
 @using DiscogsInsight.Service.Tracks
 @using DiscogsInsight.Service.Models
 @using DiscogsInsight.Service.Models.Collection
-@using DiscogsInsight.Service.Notifications
 @using DiscogsInsight.Service.Models.EntityViewModels
-@using DiscogsInsight.DataAccess.Services
+@using DiscogsInsight.Service.Models.Insights
 @using DiscogsInsight.Service.Models.Results
 @inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
+@inject SettingsViewService SettingsViewService
 @inject TracksViewService TracksViewService
 @inject CollectionStatisticsViewService CollectionStatisticsViewService
 @inject CollectionViewService CollectionViewService
@@ -59,15 +60,15 @@ else
     private TracksItemViewModel? _randomTrack;
     private CollectionStatsViewModel? _collectionStats;
 
-    public void handleButtonClick()
+    public async void handleButtonClick()
     {
-        Preferences.Default.Set("discogsUsername", discogsUsername);
+        var a = await SettingsViewService.UpdateDiscogsUsername(discogsUsername);
         _hasKey = true;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        _hasKey = Preferences.Default.ContainsKey("discogsUsername");
+        _hasKey = SettingsViewService.HasSavedDiscogsUsername();
         if (_hasKey)
         {
             var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();

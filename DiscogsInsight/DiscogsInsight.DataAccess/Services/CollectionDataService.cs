@@ -64,10 +64,12 @@ namespace DiscogsInsight.DataAccess.Services
         {
             await _db.Purge();
         }
+
         public async Task PurgeEntireDatabase()
         {
             await _db.PurgeEntireDb();
         }
+
         public async Task<bool> CollectionSavedOrUpdatedFromDiscogs()
         {
             try
@@ -84,6 +86,7 @@ namespace DiscogsInsight.DataAccess.Services
                 throw;
             }
         }
+
         private async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {
             await SaveArtistsFromCollectionResponse(collectionResponse);
@@ -94,6 +97,7 @@ namespace DiscogsInsight.DataAccess.Services
             //musicbrainz images, track info, genre, etc
             return true;
         }
+
         private async Task SaveArtistsFromCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {
             try

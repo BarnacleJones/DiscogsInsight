@@ -2,13 +2,15 @@ using DiscogsInsight.DataAccess.Contract;
 
 namespace DiscogsInsight.DataAccess.Services
 {
-    public class SettingsDataService
+    public class SettingsDataService : ISettingsDataService
     {
         private readonly ICollectionDataService _collectionDataService;
+        private readonly IPreferencesService _preferencesService;
 
-        public SettingsDataService(ICollectionDataService collectionDataService)
+        public SettingsDataService(ICollectionDataService collectionDataService, IPreferencesService preferencesService)
         {
             _collectionDataService = collectionDataService;
+            _preferencesService = preferencesService;
         }
 
         public async Task<bool> UpdateCollection()
@@ -18,57 +20,62 @@ namespace DiscogsInsight.DataAccess.Services
 
         public string GetDiscogsUsername()
         {
-            var username = Preferences.Default.Get(PreferencesConstant.DiscogsUsername, "");
+            var username = _preferencesService.Get(PreferencesConstant.DiscogsUsername, "");
             return username;
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _preferencesService.ContainsKey(key);
         }
 
         public async Task<bool> UpdateDiscogsUsername(string userName)
         {
             if (string.IsNullOrEmpty(userName))
             {
-                Preferences.Default.Remove(PreferencesConstant.DiscogsUsername);
+                _preferencesService.Remove(PreferencesConstant.DiscogsUsername);
             }
             else
             {
-                Preferences.Default.Set(PreferencesConstant.DiscogsUsername, userName);
+                _preferencesService.Set(PreferencesConstant.DiscogsUsername, userName);
             }
             await _collectionDataService.PurgeEntireCollection();
             return true;
         }
-        
+
         public async Task<bool> PurgeEntireDb()
-        {            
+        {
             await _collectionDataService.PurgeEntireDatabase();
             return true;
         }
 
-        public static Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
+        public Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
         {
             if (string.IsNullOrEmpty(lastFmUsername))
             {
-                Preferences.Default.Remove(PreferencesConstant.LastFmUserName);
+                _preferencesService.Remove(PreferencesConstant.LastFmUserName);
             }
             else
             {
-                Preferences.Default.Set(PreferencesConstant.LastFmUserName, lastFmUsername);
+                _preferencesService.Set(PreferencesConstant.LastFmUserName, lastFmUsername);
             }
 
             if (string.IsNullOrEmpty(lastFmPassword))
             {
-                Preferences.Default.Remove(PreferencesConstant.LastFmPassword);
+                _preferencesService.Remove(PreferencesConstant.LastFmPassword);
             }
             else
             {
-                Preferences.Default.Set(PreferencesConstant.LastFmPassword, lastFmPassword);
+                _preferencesService.Set(PreferencesConstant.LastFmPassword, lastFmPassword);
             }
 
             if (string.IsNullOrEmpty(lastFmApiKey))
             {
-                Preferences.Default.Remove(PreferencesConstant.LastFmApiKey);
+                _preferencesService.Remove(PreferencesConstant.LastFmApiKey);
             }
             else
             {
-                Preferences.Default.Set(PreferencesConstant.LastFmApiKey, lastFmApiKey);
+                _preferencesService.Set(PreferencesConstant.LastFmApiKey, lastFmApiKey);
             }
 
             return Task.FromResult(true);
@@ -76,19 +83,19 @@ namespace DiscogsInsight.DataAccess.Services
 
         public string GetLastFmApiKey()
         {
-            var key = Preferences.Default.Get(PreferencesConstant.LastFmApiKey, "");
+            var key = _preferencesService.Get(PreferencesConstant.LastFmApiKey, "");
             return key;
         }
 
         public string GetLastFmUsername()
         {
-            var username = Preferences.Default.Get(PreferencesConstant.LastFmUserName, "");
+            var username = _preferencesService.Get(PreferencesConstant.LastFmUserName, "");
             return username;
         }
 
         public string GetLastFmPassword()
         {
-            var pass = Preferences.Default.Get(PreferencesConstant.LastFmPassword, "");
+            var pass = _preferencesService.Get(PreferencesConstant.LastFmPassword, "");
             return pass;
         }
     }

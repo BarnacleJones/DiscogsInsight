@@ -12,12 +12,4 @@ namespace DiscogsInsight.DataAccess.Contract
         Task<List<PossibleArtistsFromMusicBrainzApi>> GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(int? discogsReleaseId, string newAritstMusicBrainzId);
     }
-
-    public class PossibleArtistsFromMusicBrainzApi
-    {
-        public string CorrectArtistMusicBrainzId { get; set; }
-        public string ArtistName { get; set; }
-        public string Country { get; set; }
-        public string Disambiguation { get; set; }
-    }
 }

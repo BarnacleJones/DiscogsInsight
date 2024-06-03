@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.Database.Entities;
 
-namespace DiscogsInsight.DataAccess.Tests
+namespace DiscogsInsight.DataAccess.Tests.Helpers
 {
     /// <summary>
     /// Generates dummy data for mocking database entities in various unit tests
@@ -16,8 +16,8 @@ namespace DiscogsInsight.DataAccess.Tests
             {
                 var artist = new Artist()
                 {
-                    Id = i,
-                    DiscogsArtistId = i,
+                    Id = i * 100,
+                    DiscogsArtistId = i * 100,
                     Name = $"Artist {i}",
                     Profile = $"Profile {i}",
                     MusicBrainzArtistId = Guid.NewGuid().ToString(),
@@ -97,15 +97,15 @@ namespace DiscogsInsight.DataAccess.Tests
         #endregion
 
         #region MusicBrainzTags
-        public static List<MusicBrainzTags> GetSampleMusicBrainzTags() 
+        public static List<MusicBrainzTags> GetSampleMusicBrainzTags()
         {
             var list = new List<MusicBrainzTags>();
             for (int i = 0; i < 5; i++)
             {
                 var a = new MusicBrainzTags
-                { 
-                    Id = i, 
-                    Tag = $"Tag{i}" 
+                {
+                    Id = i,
+                    Tag = $"Tag{i}"
                 };
                 list.Add(a);
             }
@@ -171,7 +171,7 @@ namespace DiscogsInsight.DataAccess.Tests
                 var item = new MusicBrainzReleaseToCoverImage()
                 {
                     Id = i,
-                    MusicBrainzReleaseId = $"MBRID_{i}",
+                    MusicBrainzReleaseId = $"mbid_{i * 100}",
                     MusicBrainzCoverImage = dummyImage
                 };
                 musicBrainzReleaseToCoverImages.Add(item);
