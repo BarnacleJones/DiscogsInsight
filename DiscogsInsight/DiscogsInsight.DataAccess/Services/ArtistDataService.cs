@@ -1,5 +1,4 @@
 ﻿using DiscogsInsight.ApiIntegration.Contract;
-using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
@@ -46,177 +45,108 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<Artist?> GetArtistByDiscogsId(int? discogsArtistId, bool fetchAndSaveApiData = true)
         {
             if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }
-            bool saved = true;
+            
+            var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId.Value);
 
-            if (fetchAndSaveApiData && discogsArtistId.HasValue)
-            {
-                saved = await GetAndSaveDiscogsArtistData((int)discogsArtistId);
-                var musicBrainzId = await GetAndSaveInitialMusicBrainzArtistData((int)discogsArtistId);
-                saved = !string.IsNullOrWhiteSpace(musicBrainzId);
-            }
-
-            return saved 
-                ? await GetArtistByDiscogsIdFromDb((int)discogsArtistId)
-                : new Artist() { Name="Error saving artist"};
-        }
-
-        #region Private Discogs Artist Functions
-
-        private async Task<bool> GetAndSaveDiscogsArtistData(int discogsArtistId)
-        {
-            var artistsTable = await _db.GetAllEntitiesAsListAsync<Artist>();
-            var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == discogsArtistId).FirstOrDefault();
             if (existingArtist == null)
             {
-                //dont want to store the artist if not in db already
-                //it hasnt been in the main discogs collection call
+                //dont want to store the artist if not in db already, it hasnt been in the main discogs collection call
                 //i dont know how would one get here...
                 throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a 'various artist' issue, or refresh your database");
             }
-            var existingArtistNameIsVarious = existingArtist.Name?.ToLower() == "various";
-            
-            if (existingArtistNameIsVarious) { return true; } //discogs id of various artists doesnt go anywhere - causes 404s
-
-            if (string.IsNullOrWhiteSpace(existingArtist.Profile))
+            if (existingArtist.Name?.ToLower() == "various")
             {
-                var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
-                var saved = await SaveDiscogsArtistResponse(existingArtist, result);
-                return saved;
+                //dont fetch api data - 'Various' 404s for discogs, and causes bad data with MusicBrainz. 
+                return existingArtist;
             }
-            return true;
-        }
-
-        private async Task<bool> SaveDiscogsArtistResponse(Artist existingArtist, DiscogsArtistResponse artistResponse)
-        {
-            try
-            {               
-                //additional properties from discogs artist call that arent on the main collection call
-                existingArtist.Profile = artistResponse.profile;
-                await _db.UpdateAsync(existingArtist);                
-                return true;
-            }
-            catch (Exception ex)
+            if (fetchAndSaveApiData && !existingArtist.HasAllApiData)
             {
-                _logger.LogError($"Exception at SaveDiscogsArtistResponse:{ex.Message} ");
-                throw;
+                if (string.IsNullOrWhiteSpace(existingArtist.Profile))
+                {
+                    var discogsResult = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId.Value);
+                    //Add additional properties wanted from Artist Discogs call here...profile is really the only useful one here
+                    existingArtist.Profile = discogsResult.profile;
+                }
+                if (existingArtist.MusicBrainzArtistId == null && existingArtist.Name != null)
+                {
+                    var musicBrainzResult = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist.Name);
+                    var success = await SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(musicBrainzResult, existingArtist);
+                }
+
+                existingArtist.HasAllApiData = true;
+                await _db.UpdateAsync(existingArtist);
             }
+
+            return existingArtist;
         }
-        #endregion
 
         #region Private MusicBrainz Artist Functions
 
-        private async Task<string> GetAndSaveInitialMusicBrainzArtistData(int discogsArtistId)
-        {
-            try
-            {
-                var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId);
-                if (existingArtist == null)
-                {
-                    //dont want to store the artist if not in db already
-                    //it hasnt been in the main discogs collection call
-                    //i dont know how would one get here...
-                    throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
-                }
 
-                var existingArtistNameIsVarious = existingArtist.Name?.ToLower() == "various";
+        private async Task<bool> SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(MusicBrainzInitialArtist artistResponse, Artist existingArtist)
+        {               
+            //**this makes an assumption that can cause bad data**
+            //Artists in the response is a list, there are similar named artists in the list
+            //It looks like the first in the list is closest match
+            //Ability to correct this data is on the release card
 
-                if (existingArtistNameIsVarious) { return "Various"; } //trying to extrapolate the correct various artist is going to be very difficult
+            var musicBrainsArtistId = artistResponse.Artists.Select(x => x.Id).FirstOrDefault();
 
-                if (existingArtist.MusicBrainzArtistId == null && existingArtist.Name != null)
-                {
-                    var result = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist.Name);
-                    return await SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(result, discogsArtistId);
-                }
+            existingArtist.MusicBrainzArtistId = musicBrainsArtistId;
 
-                return existingArtist.MusicBrainzArtistId ?? "";
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private async Task<string> SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId(MusicBrainzInitialArtist artistResponse, int discogsArtistId)
-        {
-            try
-            {
-                var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId);
-                if (existingArtist == null)
-                {
-                    //How would this happen...
-                    throw new Exception($"Discogs Artist Id {discogsArtistId} does not return a artist from the database. In function SaveMusicBrainzInitialArtistResponseAndReturnMusicBrainzArtistId");
-                }
-                else
-                {
-                    //**this makes an assumption that can cause bad data**
-                    //Artists in the response is a list, there are similar named artists in the list
-                    //It looks like the first in the list is closest match
-                    //Ability to correct this data is on the release card
-
-                    var musicBrainsArtistId = artistResponse.Artists.Select(x => x.Id).FirstOrDefault();
-
-                    existingArtist.MusicBrainzArtistId = musicBrainsArtistId;
-
-                    var artistArea = artistResponse.Artists
-                                                           .Where(x => x.Id == musicBrainsArtistId)
-                                                           .Select(x => x.Area)
-                                                           .FirstOrDefault();
-                    var artistBeginArea = artistResponse.Artists
-                                                           .Where(x => x.Id == musicBrainsArtistId)
-                                                           .Select(x => x.BeginArea)
-                                                           .FirstOrDefault();
+            var artistArea = artistResponse.Artists
+                                                    .Where(x => x.Id == musicBrainsArtistId)
+                                                    .Select(x => x.Area)
+                                                    .FirstOrDefault();
+            var artistBeginArea = artistResponse.Artists
+                                                    .Where(x => x.Id == musicBrainsArtistId)
+                                                    .Select(x => x.BeginArea)
+                                                    .FirstOrDefault();
                     
-                    if (artistBeginArea != null)
-                    {
-                        var isACity = artistBeginArea.Type == "City";
-                        var isACountry = artistBeginArea.Type == "Country";
-                        if (isACity)
-                        {
-                            existingArtist.City = artistBeginArea.Name;
-                        }
-                        if (isACountry)
-                        {
-                            existingArtist.Country = artistBeginArea.Name;
-                        }
-                    }
-                    
-                    if (artistArea != null)
-                    {
-                        var isACity = artistArea.Type == "City";
-                        var isACountry = artistArea.Type == "Country";
-                        if (isACountry)
-                        {
-                            existingArtist.Country = artistArea.Name;
-                        }
-                        if (isACity)
-                        {
-                            existingArtist.City = artistArea.Name;
-                        }
-                    }
-
-                    existingArtist.StartYear = artistResponse.Artists
-                                                           .Where(x => x.Id == musicBrainsArtistId)
-                                                           .Select(x => x.LifeSpan?.Begin)
-                                                           .FirstOrDefault();
-
-                    existingArtist.EndYear = artistResponse.Artists
-                                                           .Where(x => x.Id == musicBrainsArtistId)
-                                                           .Select(x => x.LifeSpan?.End)
-                                                           .FirstOrDefault();
-
-                    await _db.UpdateAsync(existingArtist);
-
-                    //save tags
-                    var success = await _tagsDataService.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
-
-                    return musicBrainsArtistId ?? "";
+            if (artistBeginArea != null)
+            {
+                var isACity = artistBeginArea.Type == "City";
+                var isACountry = artistBeginArea.Type == "Country";
+                if (isACity)
+                {
+                    existingArtist.City = artistBeginArea.Name;
+                }
+                if (isACountry)
+                {
+                    existingArtist.Country = artistBeginArea.Name;
                 }
             }
-            catch (Exception ex)
+                    
+            if (artistArea != null)
             {
-                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
-                throw;
+                var isACity = artistArea.Type == "City";
+                var isACountry = artistArea.Type == "Country";
+                if (isACountry)
+                {
+                    existingArtist.Country = artistArea.Name;
+                }
+                if (isACity)
+                {
+                    existingArtist.City = artistArea.Name;
+                }
             }
+
+            existingArtist.StartYear = artistResponse.Artists
+                                                    .Where(x => x.Id == musicBrainsArtistId)
+                                                    .Select(x => x.LifeSpan?.Begin)
+                                                    .FirstOrDefault();
+
+            existingArtist.EndYear = artistResponse.Artists
+                                                    .Where(x => x.Id == musicBrainsArtistId)
+                                                    .Select(x => x.LifeSpan?.End)
+                                                    .FirstOrDefault();
+
+                   
+
+            //save tags - yes it is saving to joining table too before saving the actual artist table information, but its saving writes to the db....
+            var success = await _tagsDataService.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
+
+            return true;  
         }
 
         public async Task<List<MusicBrainzArtistRelease>> GetArtistsReleasesByMusicBrainzArtistId(string musicBrainzArtistId)

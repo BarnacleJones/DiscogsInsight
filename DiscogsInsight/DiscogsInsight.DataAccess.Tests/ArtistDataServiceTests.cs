@@ -76,7 +76,7 @@ namespace DiscogsInsight.DataAccess.Tests
             var result = await _service.GetArtistByDiscogsId(discogsArtistId);
 
             //Assert
-            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Exactly(2));
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Once);
             _discogsApiServiceMock.Verify(m => m.GetArtistFromDiscogs(It.IsAny<int>()), Times.Once);
             Assert.That(result.DiscogsArtistId, Is.EqualTo(discogsArtistId));
         }
@@ -128,7 +128,7 @@ namespace DiscogsInsight.DataAccess.Tests
 
 
             //Assert
-            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Exactly(2));
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Once);
             _musicBrainzApiServiceMock.Verify(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>()), Times.Once);
 
         }

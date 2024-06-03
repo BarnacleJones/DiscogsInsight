@@ -269,7 +269,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception at SaveArtistsFromCollectionResponse:{ex.Message} ");
+                _logger.LogError($"Exception at SaveTracksAndAdditionalInformationFromDiscogsReleaseResponse:{ex.Message} ");
                 throw;
             }
         }

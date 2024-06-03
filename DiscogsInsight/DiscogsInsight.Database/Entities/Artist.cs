@@ -17,5 +17,6 @@ namespace DiscogsInsight.Database.Entities
         public string? City { get; set; }
         public string? StartYear { get; set; }
         public string? EndYear { get; set; }
+        public bool HasAllApiData { get; set; }
     }
 }
