@@ -6,27 +6,20 @@ namespace DiscogsInsight.Database.Services
 {
     public class SQLiteAsyncConnectionAdapter : Contract.ISQLiteAsyncConnection
     {
-        private readonly SQLiteAsyncConnection _connection;
+        SQLiteAsyncConnection _connection;
         ILogger<SQLiteAsyncConnectionAdapter> _logger;
 
         public SQLiteAsyncConnectionAdapter(ILogger<SQLiteAsyncConnectionAdapter> logger)
-        {
-            _connection = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags); ;
+        {           
             _logger = logger;
-            InitializeAsync().Wait();
+            _connection = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
+            _ = InitializeAsync();
         }
 
         private async Task InitializeAsync()
         {
-            await Init();
-        }
-
-        async Task Init()
-        {
             try
             {
-                if (_connection is not null)
-                    return;
                 var a = Constants.DatabasePath;//handy for debugging figuring out where the db is
 
                 await _connection.CreateTableAsync<Artist>();

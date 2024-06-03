@@ -7,7 +7,7 @@ namespace DiscogsInsight.Database.Services
     public class DiscogsInsightDb : IDiscogsInsightDb
     {
         private readonly ILogger<DiscogsInsightDb> _logger;
-        ISQLiteAsyncConnection? _database;
+        private readonly ISQLiteAsyncConnection _database;
 
         public DiscogsInsightDb(ILogger<DiscogsInsightDb> logger, ISQLiteAsyncConnection database)
         {
