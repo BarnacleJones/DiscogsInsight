@@ -19,6 +19,15 @@ namespace DiscogsInsight.DataAccess.Tests
             _dbMock = new Mock<IDiscogsInsightDb>();
             _loggerMock = new Mock<ILogger<TagsDataService>>();
             _service = new TagsDataService(_dbMock.Object, _loggerMock.Object);
+
+            var tagsList = new List<MusicBrainzTags>();
+            var tagsToArtistsList = new List<MusicBrainzArtistToMusicBrainzTags>();
+
+            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsList);
+            _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzTags>())).Returns(Task.FromResult(1));
+            _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzArtistToMusicBrainzTags>())).Returns(Task.FromResult(1));
+            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>()).ReturnsAsync(tagsToArtistsList);
+
         }
 
         [TearDown]
@@ -35,10 +44,6 @@ namespace DiscogsInsight.DataAccess.Tests
             var tagsEntity = DummyDatabaseDataGenerator.GetSampleMusicBrainzTags();
             var musicBrainzArtistId = "1";
 
-            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsEntity);
-            _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzTags>())).Returns(Task.FromResult(1));
-            _dbMock.Setup(db => db.SaveItemAsync(It.IsAny<MusicBrainzArtistToMusicBrainzTags>())).Returns(Task.FromResult(1));
-
             // Act
             var result = await _service.SaveTagsByMusicBrainzArtistId(artistApiResponse, musicBrainzArtistId);
 
@@ -51,13 +56,7 @@ namespace DiscogsInsight.DataAccess.Tests
         {
             // Arrange
             var musicBrainzArtistId = "123";
-
-            var tagsList = new List<MusicBrainzTags>();
-            var tagsToArtistsList = new List<MusicBrainzArtistToMusicBrainzTags>();
-
-            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzTags>()).ReturnsAsync(tagsList);
-            _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>()).ReturnsAsync(tagsToArtistsList);
-
+                       
             // Act
             var result = await _service.GetTagsByMusicBrainzArtistId(musicBrainzArtistId);
 

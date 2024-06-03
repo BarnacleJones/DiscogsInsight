@@ -55,7 +55,7 @@ namespace DiscogsInsight.Service.Tests
             _releaseDataServiceMock.Setup(x => x.GetReleaseAndImageAndRetrieveAllApiDataForRelease(123))
                 .ReturnsAsync((expectedReleaseData, expectedCoverImage));
 
-            _artistDataServiceMock.Setup(x => x.GetArtist(1, false)).ReturnsAsync(expectedArtistData);
+            _artistDataServiceMock.Setup(x => x.GetArtistByDiscogsId(1, false)).ReturnsAsync(expectedArtistData);
 
             _tracksDataServiceMock.Setup(x => x.GetTracksForRelease(123)).ReturnsAsync(expectedTracksData);
         }

@@ -31,19 +31,19 @@ namespace DiscogsInsight.DataAccess.Services
             _tagsDataService = tagsDataService;
         }
 
-        public async Task<Artist?> GetArtistByDiscogsId(int discogsArtistId)
+        private async Task<Artist?> GetArtistByDiscogsIdFromDb(int discogsArtistId)
         {
             var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
             return artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
         }
 
-        public async Task<List<Artist>?> GetArtists()
+        public async Task<List<Artist>?> GetAllArtistsFromDatabase()
         {
             var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
             return artists.ToList();
         }
 
-        public async Task<Artist?> GetArtist(int? discogsArtistId, bool fetchAndSaveApiData = true)
+        public async Task<Artist?> GetArtistByDiscogsId(int? discogsArtistId, bool fetchAndSaveApiData = true)
         {
             if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }
             bool saved = true;
@@ -56,7 +56,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
 
             return saved 
-                ? await GetArtistByDiscogsId((int)discogsArtistId)
+                ? await GetArtistByDiscogsIdFromDb((int)discogsArtistId)
                 : new Artist() { Name="Error saving artist"};
         }
 
@@ -71,13 +71,13 @@ namespace DiscogsInsight.DataAccess.Services
                 //dont want to store the artist if not in db already
                 //it hasnt been in the main discogs collection call
                 //i dont know how would one get here...
-                throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a various artist issue, or refresh your database");
+                throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a 'various artist' issue, or refresh your database");
             }
             var existingArtistNameIsVarious = existingArtist.Name?.ToLower() == "various";
             
             if (existingArtistNameIsVarious) { return true; } //discogs id of various artists doesnt go anywhere - causes 404s
 
-            if (string.IsNullOrWhiteSpace(existingArtist.Profile) && !existingArtistNameIsVarious)
+            if (string.IsNullOrWhiteSpace(existingArtist.Profile))
             {
                 var result = await _discogsApiService.GetArtistFromDiscogs(discogsArtistId);
                 var saved = await SaveDiscogsArtistResponse(existingArtist, result);
@@ -109,7 +109,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                var existingArtist = await GetArtistByDiscogsId(discogsArtistId);
+                var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId);
                 if (existingArtist == null)
                 {
                     //dont want to store the artist if not in db already
@@ -140,7 +140,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                var existingArtist = await GetArtistByDiscogsId(discogsArtistId);
+                var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId);
                 if (existingArtist == null)
                 {
                     //How would this happen...

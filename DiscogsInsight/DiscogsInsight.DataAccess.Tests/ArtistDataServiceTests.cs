@@ -1,9 +1,12 @@
 ﻿using DiscogsInsight.ApiIntegration.Contract;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Services;
+using DiscogsInsight.DataAccess.Tests.Helpers;
 using DiscogsInsight.Database.Contract;
+using DiscogsInsight.Database.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Xml.Linq;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -32,12 +35,17 @@ namespace DiscogsInsight.DataAccess.Tests
                 _musicBrainzApiServiceMock.Object,
                 _tagsDataServiceMock.Object
             );
+
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtists());
+            _dbMock.Setup(db => db.UpdateAsync(It.IsAny<Artist>())).Returns(Task.FromResult(1));
+
         }
 
         [TearDown]
         public void Teardown()
         {
             _service = null;
+           
         }
 
 
@@ -45,97 +53,84 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_ReturnsCorrectArtist()
         {
             // Arrange
-            int discogsArtistId = 123;
-            var expectedArtist = new Database.Entities.Artist { DiscogsArtistId = discogsArtistId };
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(new List<Database.Entities.Artist> { expectedArtist });
-
+            var expectedArtist = DummyDatabaseDataGenerator.GetSampleArtists().First();
+            int discogsArtistId = expectedArtist.DiscogsArtistId.Value;
+           
             // Act
             var result = await _service.GetArtistByDiscogsId(discogsArtistId);
 
             // Assert
-            Assert.That(expectedArtist, Is.EqualTo(result));
+            Assert.That(expectedArtist.DiscogsArtistId, Is.EqualTo(result.DiscogsArtistId));
         }
 
         [Test]
-        public async Task GetArtistByDiscogsId_WithNoMatchingArtist_ReturnsNull()
+        public async Task GetArtistByDiscogsId_DiscogsDataIsFetchedAndArtistIsUpdated_WhenRequired()
         {
-            // Arrange
-            int discogsArtistId = 123;
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(new List<Database.Entities.Artist>());
+            //Arrange
+            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
+            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
 
-            // Act
+            //Act
             var result = await _service.GetArtistByDiscogsId(discogsArtistId);
 
-            // Assert
-            Assert.That(result, Is.Null);
+            //Assert
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Exactly(2));
+            _discogsApiServiceMock.Verify(m => m.GetArtistFromDiscogs(It.IsAny<int>()), Times.Once);
+            Assert.That(result.DiscogsArtistId, Is.EqualTo(discogsArtistId));
+        }
+        
+        [Test]
+        public async Task GetArtistByDiscogsId_DiscogsDataIsNotFetched_WhenNotRequired()
+        {
+            //Arrange
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
+            
+            //Act
+            var result = await _service.GetArtistByDiscogsId(discogsArtistId, false);
+
+            //Assert
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Never);
+            _discogsApiServiceMock.Verify(m => m.GetArtistFromDiscogs(It.IsAny<int>()), Times.Never);
+            Assert.That(result.DiscogsArtistId, Is.EqualTo(discogsArtistId));
         }
 
-        //[Test]
-        //public async Task GetArtist_WithValidData_ReturnsArtist()
-        //{
-        //    // Arrange
-        //    int discogsArtistId = 123;
-        //    var expectedArtist = new Database.Entities.Artist { DiscogsArtistId = discogsArtistId };
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(new List<Database.Entities.Artist> { expectedArtist });
+        [Test]
+        public async Task GetArtistByDiscogsId_ApiDataIsNotFetchedAndSaved_WhenArtistIsVarious()
+        {
+            //Arrange
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneIsVarious());
+            var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
+           
+            //Act
+            var result = await _service.GetArtistByDiscogsId(discogsArtistId);
 
-        //    // Act
-        //    var result = await _service.GetArtist(discogsArtistId, fetchAndSaveApiData: true);
+            //Assert
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Never);
+            _discogsApiServiceMock.Verify(m => m.GetArtistFromDiscogs(It.IsAny<int>()), Times.Never);
+            _musicBrainzApiServiceMock.Verify(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>()), Times.Never);
+            Assert.That(result.DiscogsArtistId, Is.EqualTo(discogsArtistId));
+        }
 
-        //    // Assert
-        //    Assert.That(expectedArtist, Is.EqualTo(result));
-        //}
+        [Test]
+        public async Task GetArtistByDiscogsId_MusicBrainzDataIsFetchedAndSaved_WhenRequired()
+        {
+            //Arrange
+            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            var discogsArtistId = 500; //the 500 one will return null profile and musicbrainzid (triggering data retrieval)
+            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
 
-        //[Test]
-        //public async Task GetArtistsReleasesByMusicBrainzArtistId_ReturnsListOfReleases()
-        //{
-        //    // Arrange
-        //    string musicBrainzArtistId = "123";
-        //    var expectedReleases = new List<MusicBrainzArtistRelease> { new MusicBrainzArtistRelease(), new MusicBrainzArtistRelease() };
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>()).ReturnsAsync(new List<MusicBrainzArtistToMusicBrainzRelease>());
-        //    _service = new ArtistDataService(_dbMock.Object, _discogsApiServiceMock.Object, _loggerMock.Object, _musicBrainzApiServiceMock.Object, _tagsDataServiceMock.Object);
-         
-        //    // Act
-        //    var result = await _service.GetArtistsReleasesByMusicBrainzArtistId(musicBrainzArtistId);
+            //Act
+            var result = await _service.GetArtistByDiscogsId(discogsArtistId);
 
-        //    // Assert
-        //    Assert.That(expectedReleases, Is.EqualTo(result));
-        //}
 
-        //[Test]
-        //public async Task GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId_ReturnsListOfPossibleArtists()
-        //{
-        //    // Arrange
-        //    int discogsReleaseId = 123;
-        //    var expectedPossibleArtists = new List<PossibleArtistsFromMusicBrainzApi> { new PossibleArtistsFromMusicBrainzApi(), new PossibleArtistsFromMusicBrainzApi() };
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Release>()).ReturnsAsync(new List<Database.Entities.Release>());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(new List<Database.Entities.Artist>());
-        //    _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).ReturnsAsync(new MusicBrainzInitialArtist());
+            //Assert
+            _dbMock.Verify(db => db.UpdateAsync(It.IsAny<Artist>()), Times.Exactly(2));
+            _musicBrainzApiServiceMock.Verify(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>()), Times.Once);
 
-        //    // Act
-        //    var result = await _service.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
-
-        //    // Assert
-        //    Assert.That(expectedPossibleArtists, Is.EqualTo(result));
-        //}
-
-        //[Test]
-        //public async Task DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId_ReturnsTrue()
-        //{
-        //    // Arrange
-        //    int discogsReleaseId = 123;
-        //    string newArtistMusicBrainzId = "456";
-        //    _musicBrainzApiServiceMock.Setup(m => m.GetArtistFromMusicBrainzApiUsingArtistId(newArtistMusicBrainzId)).ReturnsAsync(new MusicBrainzArtist());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Release>()).ReturnsAsync(new List<Database.Entities.Release>());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(new List<Database.Entities.Artist>());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>()).ReturnsAsync(new List<MusicBrainzArtistToMusicBrainzTags>());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>()).ReturnsAsync(new List<MusicBrainzArtistToMusicBrainzRelease>());
-        //    _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>()).ReturnsAsync(new List<MusicBrainzReleaseToCoverImage>());
-
-        //    // Act
-        //    var result = await _service.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, newArtistMusicBrainzId);
-
-        //    // Assert
-        //    Assert.That(result, Is.True);
-        //}
+        }
     }
 }

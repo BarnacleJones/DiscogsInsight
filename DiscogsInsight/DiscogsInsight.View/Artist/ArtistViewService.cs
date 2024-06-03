@@ -19,7 +19,7 @@ namespace DiscogsInsight.Service.Artist
 
         public async Task<ViewResult<ArtistViewModel>> GetRandomArtist()
         {
-            var allArtists = await _artistDataService.GetArtists();
+            var allArtists = await _artistDataService.GetAllArtistsFromDatabase();
 
             var randomArtistId = allArtists.Select(x => x.DiscogsArtistId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
 
@@ -30,7 +30,7 @@ namespace DiscogsInsight.Service.Artist
         {
             try
             {
-                var artist = await _artistDataService.GetArtist(discogsArtistId);
+                var artist = await _artistDataService.GetArtistByDiscogsId(discogsArtistId);
 
                 var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
                 var tagsList = tags.Select(x => x.Tag).ToList();

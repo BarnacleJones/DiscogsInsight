@@ -33,7 +33,7 @@ namespace DiscogsInsight.Service.Releases
                 if (release.Item1 == null)
                     throw new Exception("No release");
 
-                var artist = await _artistDataService.GetArtist(release.Item1.DiscogsArtistId, false);
+                var artist = await _artistDataService.GetArtistByDiscogsId(release.Item1.DiscogsArtistId, false);
 
                 var releaseTrackList = await _tracksDataService.GetTracksForRelease(release.Item1.DiscogsReleaseId);
 
@@ -70,7 +70,7 @@ namespace DiscogsInsight.Service.Releases
                     var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
                     var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
 
-                    var artist = await _artistDataService.GetArtist(item.DiscogsArtistId, true);
+                    var artist = await _artistDataService.GetArtistByDiscogsId(item.DiscogsArtistId, true);
                     var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
                     returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
                 }
@@ -100,7 +100,7 @@ namespace DiscogsInsight.Service.Releases
                 var release = await _releaseDataService.GetRandomRelease();
 
                 var tracks = await _tracksDataService.GetTracksForRelease(release.Item1.DiscogsReleaseId);
-                var artist = await _artistDataService.GetArtist(release.Item1.DiscogsArtistId, true);
+                var artist = await _artistDataService.GetArtistByDiscogsId(release.Item1.DiscogsArtistId, true);
 
                 var data = await GetReleaseViewModel(release.Item1, tracks, artist.Name, release.Item2);
 
@@ -140,7 +140,7 @@ namespace DiscogsInsight.Service.Releases
                     var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
                     var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
 
-                    var artist = await _artistDataService.GetArtist(item.DiscogsArtistId, true);
+                    var artist = await _artistDataService.GetArtistByDiscogsId(item.DiscogsArtistId, true);
                     var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
                     returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
                 }
@@ -176,7 +176,7 @@ namespace DiscogsInsight.Service.Releases
                     var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
                     var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
 
-                    var artist = await _artistDataService.GetArtist(item.DiscogsArtistId, true);
+                    var artist = await _artistDataService.GetArtistByDiscogsId(item.DiscogsArtistId, true);
                     var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
                     returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
                 }

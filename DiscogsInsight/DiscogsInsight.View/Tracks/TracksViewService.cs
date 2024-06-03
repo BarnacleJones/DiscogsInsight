@@ -38,7 +38,7 @@ namespace DiscogsInsight.Service.Tracks
                 if (randomTrack != null)
                 {
                     var releases = await _releaseDataService.GetAllReleasesAsList();
-                    var artists = await _artistDataService.GetArtists();
+                    var artists = await _artistDataService.GetAllArtistsFromDatabase();
                     var releaseTitle = releases.Where(x => x.DiscogsReleaseId == randomTrack.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
                     var releaseArtist = artists.Where(x => x.DiscogsArtistId == randomTrack.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
 
@@ -101,7 +101,7 @@ namespace DiscogsInsight.Service.Tracks
                 }).ToList();
 
                 var releases = await _releaseDataService.GetAllReleasesAsList();
-                var artists = await _artistDataService.GetArtists();
+                var artists = await _artistDataService.GetAllArtistsFromDatabase();
 
                 foreach (var tracksItems in tracksAsGridItems)
                 {

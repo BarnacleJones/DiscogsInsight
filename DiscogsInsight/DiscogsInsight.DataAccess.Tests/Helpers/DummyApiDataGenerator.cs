@@ -30,6 +30,8 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                     Name = $"Artist {i}",
                     SortName = $"Artist{i}",
                     Country = "US",
+                    LifeSpan = new LifeSpan { Begin = "here", End = "there"},
+                    Area = new Area { Type = "City", Name = "Tellyland" },
                     Tags = new List<Tag> { new Tag { Count = i, Name = $"Tag{i}" } }
                 };
 
@@ -109,6 +111,21 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
             }
 
             return release;
+        }
+
+        public static DiscogsArtistResponse GetSampleDiscogsArtistResponse(int discogsArtistIdToMatch)
+        {
+            return new DiscogsArtistResponse
+            {
+                id = discogsArtistIdToMatch,
+                namevariations = new List<string> { "a", "b" },
+                profile = "Fantastic",
+                releases_url = "asdf",
+                resource_url = "asdf",
+                uri = "asdf",
+                urls = new List<string> { "asdf" },
+                data_quality = "asdf",
+            };
         }
     }
 

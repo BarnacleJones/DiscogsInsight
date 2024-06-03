@@ -109,7 +109,7 @@ namespace DiscogsInsight.DataAccess.Services
             if (release.MusicBrainzReleaseId == null && !release.ArtistHasBeenManuallyCorrected)
             {
                 if (release.MusicBrainzReleaseId == null) //get initial artist call
-                    artist = await _artistDataService.GetArtist(artist.DiscogsArtistId, true);
+                    artist = await _artistDataService.GetArtistByDiscogsId(artist.DiscogsArtistId, true);
 
                 await SaveReleasesFromMusicBrainzArtistCall(artist, release);
             }

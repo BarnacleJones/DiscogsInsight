@@ -31,6 +31,50 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
             return artists;
         }
 
+        public static List<Artist> GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData()
+        {
+            var artists = new List<Artist>();
+            for (int i = 0; i < 6; i++)
+            {
+                var artist = new Artist()
+                {
+                    Id = i * 100,
+                    DiscogsArtistId = i * 100,
+                    Name = $"Artist {i}",
+                    Profile = i != 5 ? $"Profile {i}" : null,
+                    MusicBrainzArtistId = i != 5 ? Guid.NewGuid().ToString() : null,
+                    Country = "Country",
+                    City = "City",
+                    StartYear = "2000",
+                    EndYear = "2022"
+                };
+                artists.Add(artist);
+            }
+            return artists;
+        }
+
+        public static List<Artist> GetSampleArtistsButOneIsVarious()
+        {
+            var artists = new List<Artist>();
+            for (int i = 0; i < 6; i++)
+            {
+                var artist = new Artist()
+                {
+                    Id = i * 100,
+                    DiscogsArtistId = i * 100,
+                    Name = i != 5 ? $"Artist {i}" : "Various",
+                    Profile = i != 5 ? $"Profile {i}" : null,
+                    MusicBrainzArtistId = Guid.NewGuid().ToString(),
+                    Country = "Country",
+                    City = "City",
+                    StartYear = "2000",
+                    EndYear = "2022"
+                };
+                artists.Add(artist);
+            }
+            return artists;
+        }
+
         #endregion
         #region Track
         public static List<Track> GetUniqueSampleTracks()
