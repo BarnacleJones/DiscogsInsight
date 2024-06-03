@@ -2,7 +2,7 @@
 using System.Text.Json;
 using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Contract;
-using Microsoft.Maui.Storage;
+using DiscogsInsight.DataAccess.Contract;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -10,6 +10,7 @@ namespace DiscogsInsight.ApiIntegration.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<DiscogsApiService> _logger;
+        private readonly IPreferencesService _preferencesService;
         private string _discogsUserName;
 
         //-----------------------------------------------------------------------------
@@ -26,11 +27,11 @@ namespace DiscogsInsight.ApiIntegration.Services
         //-----------------------------------------------------------------------------
 
 
-        public DiscogsApiService(IHttpClientFactory httpClientFactory, ILogger<DiscogsApiService> logger)
+        public DiscogsApiService(IHttpClientFactory httpClientFactory, ILogger<DiscogsApiService> logger, IPreferencesService preferencesService)
         {
             _httpClient = httpClientFactory.CreateClient("DiscogsApiClient");
             _logger = logger;
-            _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
+            _preferencesService = preferencesService;
         }
 
         public async Task<DiscogsCollectionResponse> GetCollectionFromDiscogsApi()
@@ -42,7 +43,7 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var currentPage = 1;
                 var totalPages = 1;
                 var responseData = new DiscogsCollectionResponse();
-                _discogsUserName = Preferences.Default.Get("discogsUsername", "Unknown");
+                _discogsUserName = _preferencesService.Get(PreferencesConstant.DiscogsUsername, "Unknown");
                 if (string.IsNullOrEmpty(_discogsUserName))
                 {
                     _logger.LogError("Empty username");

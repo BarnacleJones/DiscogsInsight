@@ -47,7 +47,7 @@
             <MudDivider />
             <MudCollapse Expanded="_infoExpanded">                
                 <MudList Clickable="true">
-                    @if (!string.IsNullOrEmpty(Artist.Country))
+                    @if (!string.IsNullOrEmpty(Artist?.Country))
                     {
                         <MudListItem>
                             <MudText Typo="Typo.body2">Country</MudText>
@@ -55,7 +55,7 @@
                             <MudText Typo="Typo.body1">@Artist.Country</MudText>                                
                         </MudListItem>                            
                     }
-                    @if (!string.IsNullOrEmpty(Artist.City))
+                    @if (!string.IsNullOrEmpty(Artist?.City))
                     {
                         <MudListItem>
                             <MudText Typo="Typo.body2">City</MudText>
@@ -63,7 +63,7 @@
                             <MudText Typo="Typo.body1">@Artist.City</MudText>
                         </MudListItem>
                     }
-                    @if (!string.IsNullOrEmpty(Artist.StartYear))
+                    @if (!string.IsNullOrEmpty(Artist?.StartYear))
                     {
                         <MudListItem>
                             <MudText Typo="Typo.body2">Start Year</MudText>
@@ -75,7 +75,7 @@
                 </MudList>
             </MudCollapse>
         </MudStack>  
-        @if (!string.IsNullOrWhiteSpace(Artist.ArtistDescription))
+        @if (!string.IsNullOrWhiteSpace(Artist?.ArtistDescription))
         {
             <MudStack>
             <MudButton OnClick="OnDescriptionExpandCollapseClick">

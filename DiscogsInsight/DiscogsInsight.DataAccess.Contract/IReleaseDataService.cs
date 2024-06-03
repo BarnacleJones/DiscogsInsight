@@ -1,4 +1,5 @@
-﻿using DiscogsInsight.Database.Entities;
+﻿using DiscogsInsight.DataAccess.Models;
+using DiscogsInsight.Database.Entities;
 
 namespace DiscogsInsight.DataAccess.Contract
 {
@@ -12,14 +13,7 @@ namespace DiscogsInsight.DataAccess.Contract
         Task<(Release?, byte[]?)> GetRandomRelease();
         Task<List<Release>> GetNewestReleases(int howManyToReturn);
         Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
+        Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId);
-    }
-
-    public class PossibleReleasesFromArtist
-    {
-        public string Title { get; set; }
-        public string Date { get; set; }
-        public string Status { get; set; }
-        public string MusicBrainzReleaseId { get; set; }
     }
 }

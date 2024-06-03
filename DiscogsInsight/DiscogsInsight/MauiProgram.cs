@@ -58,7 +58,7 @@ namespace DiscogsInsight
             });
     
 
-            //Data layer
+            //Database layer
             builder.Services.AddSingleton<ISQLiteAsyncConnection, SQLiteAsyncConnectionAdapter>();
             builder.Services.AddSingleton<IDiscogsInsightDb, DiscogsInsightDb>();
 
@@ -68,10 +68,11 @@ namespace DiscogsInsight
             builder.Services.AddSingleton<ICoverArtArchiveApiService, CoverArtArchiveApiService>();
             builder.Services.AddSingleton<ILastFmApiService, LastFmApiService>();
 
-            //rest of data layer
+            //Data Access
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
+            builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
             builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
-            builder.Services.AddSingleton<SettingsDataService>();
+            builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
             builder.Services.AddSingleton<ITagsDataService,TagsDataService>();
             builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
             builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
