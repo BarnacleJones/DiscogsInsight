@@ -121,17 +121,24 @@ namespace DiscogsInsight.Service.Releases
                 };
             }
         }
+
         public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByGenreId(int genreId)
         {
             try
             {
+                //todo this can all be much simpler - condense the service maybe
                 var returnedReleases = new List<ReleaseViewModel>();
+                //get all the releases as a list - bad
                 var allReleases = await _releaseDataService.GetAllReleasesAsList();
+                //get the entire genre and tags table - bad
                 var releaseGenreJoiningTable = await _discogsGenresAndTagsDataService.GetDiscogsGenreTagToDiscogsReleaseAsList();
-
+                //get a list of release ids by the genre id passed into the function 
                 var releasesIdsWithThisGenre = releaseGenreJoiningTable.Where(x => x.DiscogsGenreTagId == genreId).Select(x => x.DiscogsReleaseId).ToList();
+                //then get the entire genretag table wtf
                 var genreTag = await _discogsGenresAndTagsDataService.GetAllGenreTagsAsList();
+                //finally get all the  tags by genre id
                 var thisSpecificGenre = genreTag.Where(x => x.Id == genreId).Select(x => x.DiscogsTag).FirstOrDefault();
+                //use that to get the releases of that genre
                 var releasesByGenre = allReleases.Where(x => releasesIdsWithThisGenre.Contains(x.DiscogsReleaseId)).ToList();
 
                 foreach (var item in releasesByGenre)
@@ -287,8 +294,8 @@ namespace DiscogsInsight.Service.Releases
             var trackListAsViewModel = trackList.Select(x => new TracksItemViewModel
             {
                 Duration = x.MusicBrainzTrackLength == null
-               ? x.Duration
-               : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
+                                ? x.Duration
+                                : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
                 Position = x.Position,
                 Title = x.Title,
                 Rating = x.Rating ?? 0,

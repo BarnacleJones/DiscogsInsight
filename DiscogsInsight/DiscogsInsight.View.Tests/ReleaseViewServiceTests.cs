@@ -3,6 +3,8 @@ using DiscogsInsight.Service.Releases;
 using Moq;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.EntityViewModels;
+using DiscogsInsight.Tests.Common;
+using DiscogsInsight.Service.Models.Collection;
 
 namespace DiscogsInsight.Service.Tests
 {
@@ -12,7 +14,7 @@ namespace DiscogsInsight.Service.Tests
         private Mock<IReleaseDataService> _releaseDataServiceMock;
         private Mock<IArtistDataService> _artistDataServiceMock;
         private Mock<ITracksDataService> _tracksDataServiceMock;
-        private Mock<IDiscogsGenresAndTagsDataService> _discogsGenresAndTagsDataService;
+        private Mock<IDiscogsGenresAndTagsDataService> _discogsGenresAndTagsDataServiceMock;
         private ReleaseViewService _service;
 
 
@@ -22,8 +24,33 @@ namespace DiscogsInsight.Service.Tests
             _releaseDataServiceMock = new Mock<IReleaseDataService>();
             _artistDataServiceMock = new Mock<IArtistDataService>();
             _tracksDataServiceMock = new Mock<ITracksDataService>();
-            _discogsGenresAndTagsDataService = new Mock<IDiscogsGenresAndTagsDataService>();
-            _service = new(_releaseDataServiceMock.Object, _artistDataServiceMock.Object, _tracksDataServiceMock.Object, _discogsGenresAndTagsDataService.Object);
+            _discogsGenresAndTagsDataServiceMock = new Mock<IDiscogsGenresAndTagsDataService>();
+
+            //Default Data Service List calls
+            StageDummyData();
+
+            _service = new ReleaseViewService(_releaseDataServiceMock.Object, _artistDataServiceMock.Object, _tracksDataServiceMock.Object, _discogsGenresAndTagsDataServiceMock.Object);
+        }
+
+        private void StageDummyData()
+        {
+            var releases = DatabaseDataGenerator.GetSampleReleases();
+            _releaseDataServiceMock.Setup(s => s.GetAllReleasesAsList())
+                .ReturnsAsync(releases);
+
+            var releaseGenreJoiningTable = DatabaseDataGenerator.GetSampleDiscogsGenreTagToDiscogsReleases();
+            var genreTagTable = DatabaseDataGenerator.GetSampleDiscogsGenreTags();
+            
+            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetDiscogsGenreTagToDiscogsReleaseAsList()).ReturnsAsync(releaseGenreJoiningTable);
+            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetAllGenreTagsAsList()).ReturnsAsync(genreTagTable);
+            var tracks = DatabaseDataGenerator.GetUniqueSampleTracks();
+            _tracksDataServiceMock.Setup(s => s.GetTracksForRelease(1)).ReturnsAsync(tracks);
+
+            var artist = DatabaseDataGenerator.GetSampleArtists().First();
+            _artistDataServiceMock.Setup(s => s.GetArtistByDiscogsId(1, true)).ReturnsAsync(artist);
+
+            var image = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0 };
+            _releaseDataServiceMock.Setup(s => s.GetImageForRelease("1")).ReturnsAsync(image);
         }
 
         [Test]
@@ -47,9 +74,25 @@ namespace DiscogsInsight.Service.Tests
         public async Task GetReleasesByGenreId_ReturnsValidData()
         {
             //Arrange
+            //I think that was pointless its all handled - nevermind the get release view model fnction needs data
+            var expectedDataList = ViewModelGenerator.GetSampleReleaseViewModelListBySharedGenre();
+            var genresAndIds = new List<(string? Name, int Id)>()
+                {
+                    new("Psych", 1),
+                    new("Rock", 2),
+                    new("Alternative", 3)
+                };
+
+            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetGenresForDiscogsRelease(1)).ReturnsAsync(genresAndIds);
+
+
+
             //Act
-            var result = _service.GetReleasesByGenreId(0).Result;
+            var result = _service.GetReleasesByGenreId(3).Result;
+
             //Assert
+            Assert.That(result.Data.Count, Is.EqualTo(2));
+            Assert.That(result.Data, Is.EquivalentTo(expectedDataList));//Is Equivalent to right here idunno
         }
 
         private void ArrangeGetReleaseData(out int discogsReleaseId, out ReleaseViewModel expectedRelease, out byte[] expectedCoverImage)
