@@ -3,7 +3,7 @@ using DiscogsInsight.DataAccess.Services;
 using DiscogsInsight.Database.Contract;
 using Microsoft.Extensions.Logging;
 using Moq;
-using DiscogsInsight.DataAccess.Tests.Helpers;
+using DiscogsInsight.Tests.Common;
 
 namespace DiscogsInsight.DataAccess.Tests
 {

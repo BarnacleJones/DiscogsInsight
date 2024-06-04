@@ -1,7 +1,7 @@
 ﻿using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 
-namespace DiscogsInsight.DataAccess.Tests.Helpers
+namespace DiscogsInsight.Tests.Common
 {
     public static class DummyApiDataGenerator
     {
@@ -30,7 +30,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                     Name = $"Artist {i}",
                     SortName = $"Artist{i}",
                     Country = "US",
-                    LifeSpan = new LifeSpan { Begin = "here", End = "there"},
+                    LifeSpan = new LifeSpan { Begin = "here", End = "there" },
                     Area = new Area { Type = "City", Name = "Tellyland" },
                     Tags = new List<Tag> { new Tag { Count = i, Name = $"Tag{i}" } }
                 };

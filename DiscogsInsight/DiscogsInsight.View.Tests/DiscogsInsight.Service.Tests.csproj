@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
+    <ProjectReference Include="..\DiscogsInsight.Tests.Common\DiscogsInsight.Tests.Common.csproj" />
     <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.Service.Models.csproj" />
     <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.Service.csproj" />
   </ItemGroup>

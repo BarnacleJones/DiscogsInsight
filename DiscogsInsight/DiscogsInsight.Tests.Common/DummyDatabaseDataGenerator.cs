@@ -1,6 +1,6 @@
 ﻿using DiscogsInsight.Database.Entities;
 
-namespace DiscogsInsight.DataAccess.Tests.Helpers
+namespace DiscogsInsight.Tests.Common
 {
     /// <summary>
     /// Generates dummy data for mocking database entities in various unit tests
@@ -76,6 +76,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region Track
         public static List<Track> GetUniqueSampleTracks()
         {
@@ -178,6 +179,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region MusicBrainzArtistToMusicBrainzRelease
 
 
@@ -203,6 +205,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region MusicBrainzReleaseToCoverImage
 
         public static List<MusicBrainzReleaseToCoverImage> GetSampleMusicBrainzReleaseToCoverImages()

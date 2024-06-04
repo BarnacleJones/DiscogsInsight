@@ -13,6 +13,7 @@ namespace DiscogsInsight.Service.Tests
         private Mock<IArtistDataService> _artistDataServiceMock;
         private Mock<ITracksDataService> _tracksDataServiceMock;
         private Mock<IDiscogsGenresAndTagsDataService> _discogsGenresAndTagsDataService;
+        private ReleaseViewService _service;
 
 
         [SetUp]
@@ -22,6 +23,7 @@ namespace DiscogsInsight.Service.Tests
             _artistDataServiceMock = new Mock<IArtistDataService>();
             _tracksDataServiceMock = new Mock<ITracksDataService>();
             _discogsGenresAndTagsDataService = new Mock<IDiscogsGenresAndTagsDataService>();
+            _service = new(_releaseDataServiceMock.Object, _artistDataServiceMock.Object, _tracksDataServiceMock.Object, _discogsGenresAndTagsDataService.Object);
         }
 
         [Test]
@@ -33,14 +35,21 @@ namespace DiscogsInsight.Service.Tests
             byte[] expectedCoverImage;
             ArrangeGetReleaseData(out discogsReleaseId, out expectedRelease, out expectedCoverImage);
 
-            var releaseViewService = new ReleaseViewService(_releaseDataServiceMock.Object, _artistDataServiceMock.Object, _tracksDataServiceMock.Object, _discogsGenresAndTagsDataService.Object);
-
             // Act
-            var result = await releaseViewService.GetRelease(discogsReleaseId);
+            var result = _service.GetRelease(discogsReleaseId).Result;
 
             // Assert
             Assert.That(result.Data.DiscogsArtistId, Is.EqualTo(expectedRelease.DiscogsArtistId));
             Assert.That(result.Data.CoverImage, Is.EqualTo(expectedCoverImage));
+        }
+
+        [Test]
+        public async Task GetReleasesByGenreId_ReturnsValidData()
+        {
+            //Arrange
+            //Act
+            var result = _service.GetReleasesByGenreId(0).Result;
+            //Assert
         }
 
         private void ArrangeGetReleaseData(out int discogsReleaseId, out ReleaseViewModel expectedRelease, out byte[] expectedCoverImage)

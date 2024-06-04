@@ -1,12 +1,11 @@
 ﻿using DiscogsInsight.ApiIntegration.Contract;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Services;
-using DiscogsInsight.DataAccess.Tests.Helpers;
+using DiscogsInsight.Tests.Common;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Xml.Linq;
 
 namespace DiscogsInsight.DataAccess.Tests
 {
@@ -44,8 +43,7 @@ namespace DiscogsInsight.DataAccess.Tests
         [TearDown]
         public void Teardown()
         {
-            _service = null;
-           
+            _service = null;           
         }
 
 
