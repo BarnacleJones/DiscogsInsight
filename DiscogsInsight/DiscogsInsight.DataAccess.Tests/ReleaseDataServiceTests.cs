@@ -49,7 +49,7 @@ namespace DiscogsInsight.DataAccess.Tests
         {
             // Arrange
             var discogsReleaseId = 1;
-            var releases = DummyDatabaseDataGenerator.GetSampleReleases();
+            var releases = DatabaseDataGenerator.GetSampleReleases();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Release>())
                 .ReturnsAsync(releases);
 
@@ -65,7 +65,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetAllReleasesAsList_ReturnsList()
         {
             // Arrange
-            var releases = DummyDatabaseDataGenerator.GetSampleReleases().ToList();
+            var releases = DatabaseDataGenerator.GetSampleReleases().ToList();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Release>())
                 .ReturnsAsync(releases);
 
@@ -110,10 +110,10 @@ namespace DiscogsInsight.DataAccess.Tests
         {
             // Arrange
             int discogsReleaseId = 1;
-            var release = DummyDatabaseDataGenerator.GetSampleReleases().Where(x => x.DiscogsReleaseId == 1).First();
-            var artists = DummyDatabaseDataGenerator.GetSampleArtists();
-            var musicBrainzReleaseToCoverImages = DummyDatabaseDataGenerator.GetSampleMusicBrainzReleaseToCoverImages();
-            var discogsReleaseResponse = DummyApiDataGenerator.GetSampleDiscogsReleaseResponse();
+            var release = DatabaseDataGenerator.GetSampleReleases().Where(x => x.DiscogsReleaseId == 1).First();
+            var artists = DatabaseDataGenerator.GetSampleArtists();
+            var musicBrainzReleaseToCoverImages = DatabaseDataGenerator.GetSampleMusicBrainzReleaseToCoverImages();
+            var discogsReleaseResponse = ApiDataGenerator.GetSampleDiscogsReleaseResponse();
             var coverImageBytes = new byte[] { 0,0,0,0 };
 
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Release>())

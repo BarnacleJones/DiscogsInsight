@@ -3,7 +3,8 @@ using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 
 namespace DiscogsInsight.Tests.Common
 {
-    public static class DummyApiDataGenerator
+    public static class ApiDataGenerator
+
     {
         /// <summary>
         /// Generates dummy data for mocking api responses in various unit tests

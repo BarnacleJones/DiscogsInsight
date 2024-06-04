@@ -5,7 +5,7 @@ namespace DiscogsInsight.Tests.Common
     /// <summary>
     /// Generates dummy data for mocking database entities in various unit tests
     /// </summary>
-    public static class DummyDatabaseDataGenerator
+    public static class DatabaseDataGenerator
     {
         #region Artist
 

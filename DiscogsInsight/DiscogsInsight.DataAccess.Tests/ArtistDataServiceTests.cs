@@ -35,7 +35,7 @@ namespace DiscogsInsight.DataAccess.Tests
                 _tagsDataServiceMock.Object
             );
 
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtists());
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DatabaseDataGenerator.GetSampleArtists());
             _dbMock.Setup(db => db.UpdateAsync(It.IsAny<Artist>())).Returns(Task.FromResult(1));
 
         }
@@ -51,7 +51,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_ReturnsCorrectArtist()
         {
             // Arrange
-            var expectedArtist = DummyDatabaseDataGenerator.GetSampleArtists().First();
+            var expectedArtist = DatabaseDataGenerator.GetSampleArtists().First();
             int discogsArtistId = expectedArtist.DiscogsArtistId.Value;
            
             // Act
@@ -65,10 +65,10 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_DiscogsDataIsFetchedAndArtistIsUpdated_WhenRequired()
         {
             //Arrange
-            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(ApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
             var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
-            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
+            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(ApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
 
             //Act
             var result = await _service.GetArtistByDiscogsId(discogsArtistId);
@@ -83,7 +83,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_DiscogsDataIsNotFetched_WhenNotRequired()
         {
             //Arrange
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
             var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
             
             //Act
@@ -99,7 +99,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_ApiDataIsNotFetchedAndSaved_WhenArtistIsVarious()
         {
             //Arrange
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneIsVarious());
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DatabaseDataGenerator.GetSampleArtistsButOneIsVarious());
             var discogsArtistId = 500; //the 500 one will return null profile (triggering data retrieval)
            
             //Act
@@ -116,10 +116,10 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetArtistByDiscogsId_MusicBrainzDataIsFetchedAndSaved_WhenRequired()
         {
             //Arrange
-            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
-            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DummyDatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
+            _musicBrainzApiServiceMock.Setup(m => m.GetInitialArtistFromMusicBrainzApi(It.IsAny<string>())).Returns(Task.FromResult(ApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse()));
+            _dbMock.Setup(m => m.GetAllEntitiesAsListAsync<Database.Entities.Artist>()).ReturnsAsync(DatabaseDataGenerator.GetSampleArtistsButOneNeedsDiscogsAndMusicBrainzData());
             var discogsArtistId = 500; //the 500 one will return null profile and musicbrainzid (triggering data retrieval)
-            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(DummyApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
+            _discogsApiServiceMock.Setup(m => m.GetArtistFromDiscogs(It.IsAny<int>())).Returns(Task.FromResult(ApiDataGenerator.GetSampleDiscogsArtistResponse(discogsArtistId)));
 
             //Act
             var result = await _service.GetArtistByDiscogsId(discogsArtistId);

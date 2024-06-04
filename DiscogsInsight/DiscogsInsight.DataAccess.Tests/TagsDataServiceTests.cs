@@ -40,8 +40,8 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task SaveTagsByMusicBrainzArtistId_SuccessfullySavesTags()
         {
             // Arrange
-            var artistApiResponse = DummyApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse();
-            var tagsEntity = DummyDatabaseDataGenerator.GetSampleMusicBrainzTags();
+            var artistApiResponse = ApiDataGenerator.GetSampleMusicBrainzInitialArtistResponse();
+            var tagsEntity = DatabaseDataGenerator.GetSampleMusicBrainzTags();
             var musicBrainzArtistId = "1";
 
             // Act
