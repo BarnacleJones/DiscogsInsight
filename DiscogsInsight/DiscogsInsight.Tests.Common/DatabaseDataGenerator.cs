@@ -86,9 +86,9 @@ namespace DiscogsInsight.Tests.Common
                 var a = new Track()
                 {
                     Id = i,
-                    DiscogsArtistId = i,
-                    DiscogsReleaseId = i,
-                    DiscogsMasterId = i,
+                    DiscogsArtistId = i * 100,
+                    DiscogsReleaseId = i * 100,
+                    DiscogsMasterId = i * 100,
                     Title = $"Track {i}",
                     Duration = "3:45",
                     MusicBrainzTrackLength = i,
@@ -115,7 +115,7 @@ namespace DiscogsInsight.Tests.Common
                 {
                     Id = i,
                     DiscogsArtistId = i * 100,
-                    DiscogsReleaseId = i,
+                    DiscogsReleaseId = i * 100,
                     DiscogsMasterId = i * 300,
                     Title = $"Release {i}",
                     DateAdded = DateTime.Now.AddDays(-i * 10),
@@ -247,10 +247,10 @@ namespace DiscogsInsight.Tests.Common
             {
                 var item = new DiscogsGenreTagToDiscogsRelease()
                 {
-                    Id = i,
-                    DiscogsGenreTagId = i,
-                    DiscogsArtistId = i,
-                    DiscogsReleaseId = i
+                    Id = i * 100,
+                    DiscogsGenreTagId = i * 100,
+                    DiscogsArtistId = i * 100,
+                    DiscogsReleaseId = i * 100
                 };
                 discogsGenreTagToDiscogsReleases.Add(item);
             }
@@ -268,7 +268,7 @@ namespace DiscogsInsight.Tests.Common
             {
                 var item = new DiscogsGenreTags()
                 {
-                    Id = i,
+                    Id = i * 100,
                     DiscogsTag = $"Tag {i}"
                 };
                 discogsGenreTags.Add(item);

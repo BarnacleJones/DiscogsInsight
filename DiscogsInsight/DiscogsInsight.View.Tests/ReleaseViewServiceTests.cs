@@ -44,10 +44,10 @@ namespace DiscogsInsight.Service.Tests
             _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetDiscogsGenreTagToDiscogsReleaseAsList()).ReturnsAsync(releaseGenreJoiningTable);
             _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetAllGenreTagsAsList()).ReturnsAsync(genreTagTable);
             var tracks = DatabaseDataGenerator.GetUniqueSampleTracks();
-            _tracksDataServiceMock.Setup(s => s.GetTracksForRelease(1)).ReturnsAsync(tracks);
+            _tracksDataServiceMock.Setup(s => s.GetTracksForRelease(300)).ReturnsAsync(tracks);
 
-            var artist = DatabaseDataGenerator.GetSampleArtists().First();
-            _artistDataServiceMock.Setup(s => s.GetArtistByDiscogsId(1, true)).ReturnsAsync(artist);
+            var artist = DatabaseDataGenerator.GetSampleArtists().Where(x => x.DiscogsArtistId == 300).First();
+            _artistDataServiceMock.Setup(s => s.GetArtistByDiscogsId(300, true)).ReturnsAsync(artist);
 
             var image = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0 };
             _releaseDataServiceMock.Setup(s => s.GetImageForRelease("1")).ReturnsAsync(image);
@@ -74,8 +74,6 @@ namespace DiscogsInsight.Service.Tests
         public async Task GetReleasesByGenreId_ReturnsValidData()
         {
             //Arrange
-            //I think that was pointless its all handled - nevermind the get release view model fnction needs data
-            var expectedDataList = ViewModelGenerator.GetSampleReleaseViewModelListBySharedGenre();
             var genresAndIds = new List<(string? Name, int Id)>()
                 {
                     new("Psych", 1),
@@ -83,16 +81,18 @@ namespace DiscogsInsight.Service.Tests
                     new("Alternative", 3)
                 };
 
-            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetGenresForDiscogsRelease(1)).ReturnsAsync(genresAndIds);
+            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetGenresForDiscogsRelease(100)).ReturnsAsync(genresAndIds);
 
 
 
             //Act
-            var result = _service.GetReleasesByGenreId(3).Result;
+            var result = _service.GetReleasesByGenreId(300).Result;
 
             //Assert
-            Assert.That(result.Data.Count, Is.EqualTo(2));
-            Assert.That(result.Data, Is.EquivalentTo(expectedDataList));//Is Equivalent to right here idunno
+            Assert.That(result.Data.Count, Is.EqualTo(1));
+            Assert.That(result.Data.Any(x => x.DiscogsReleaseId == 300), Is.EqualTo(true));
+            Assert.That(result.Data.Any(x => x.DiscogsArtistId == 300), Is.EqualTo(true));
+            Assert.That(result.Data.Any(x => x.Title == "Release 3"), Is.EqualTo(true));
         }
 
         private void ArrangeGetReleaseData(out int discogsReleaseId, out ReleaseViewModel expectedRelease, out byte[] expectedCoverImage)

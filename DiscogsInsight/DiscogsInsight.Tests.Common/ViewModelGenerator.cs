@@ -160,8 +160,8 @@ namespace DiscogsInsight.Tests.Common
                 Artist = "Karkara",
                 ReleaseNotes = "Exceltante",
                 ReleaseCountry = "France",
-                DiscogsArtistId = 1,
-                DiscogsReleaseId = 1,
+                DiscogsArtistId = 100,
+                DiscogsReleaseId = 100,
                 Genres = new List<(string? Name, int Id)>()
                 {
                     new("Psych", 1),
@@ -204,8 +204,8 @@ namespace DiscogsInsight.Tests.Common
                 Artist = "Katchafire",
                 ReleaseNotes = "Exceltante",
                 ReleaseCountry = "New Zealand",
-                DiscogsArtistId = 2,
-                DiscogsReleaseId = 3,
+                DiscogsArtistId = 300,
+                DiscogsReleaseId = 300,
                 Genres = new List<(string? Name, int Id)>()
                 {
                     new("Reggae", 3),
