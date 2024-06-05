@@ -126,36 +126,56 @@ namespace DiscogsInsight.Service.Releases
         {
             try
             {
-                //todo this can all be much simpler - condense the service maybe
                 var returnedReleases = new List<ReleaseViewModel>();
-                //get all the releases as a list - bad
-                var allReleases = await _releaseDataService.GetAllReleasesAsList();
-                //get the entire genre and tags table - bad
-                var releaseGenreJoiningTable = await _discogsGenresAndTagsDataService.GetDiscogsGenreTagToDiscogsReleaseAsList();
-                //get a list of release ids by the genre id passed into the function 
-                var releasesIdsWithThisGenre = releaseGenreJoiningTable.Where(x => x.DiscogsGenreTagId == genreId).Select(x => x.DiscogsReleaseId).ToList();
-                //then get the entire genretag table wtf
-                var genreTag = await _discogsGenresAndTagsDataService.GetAllGenreTagsAsList();
-                //finally get all the  tags by genre id
-                var thisSpecificGenre = genreTag.Where(x => x.Id == genreId).Select(x => x.DiscogsTag).FirstOrDefault();
-                //use that to get the releases of that genre
-                var releasesByGenre = allReleases.Where(x => releasesIdsWithThisGenre.Contains(x.DiscogsReleaseId)).ToList();
+                
+                var releaseData = await _releaseDataService.GetReleaseDataModelsByGenreId(genreId);
 
-                foreach (var item in releasesByGenre)
+                foreach (var release in releaseData)
                 {
-                    var thisItem = item;
-                    var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
-                    var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
+                    if (release is null) continue;
 
-                    var artist = await _artistDataService.GetArtistByDiscogsId(item.DiscogsArtistId, true);
-                    var image = await _releaseDataService.GetImageForRelease(item.MusicBrainzReleaseId);
-                    returnedReleases.Add(await GetReleaseViewModel(item, releaseTracks, artist.Name, image));
+                    var releaseViewModel = new ReleaseViewModel
+                    {
+                        ReleaseCountry = release.ReleaseCountry,
+                        Artist = release.Artist,
+                        CoverImage = release.CoverImage,
+
+                        DateAdded = release.DateAdded,
+                        DiscogsArtistId = release.DiscogsArtistId,
+                        DiscogsReleaseId = release.DiscogsReleaseId,
+                        DiscogsReleaseUrl = release.DiscogsReleaseUrl,
+                        Genres = release.Genres,
+                        IsFavourited = release.IsFavourited,
+                        OriginalReleaseYear = release.OriginalReleaseYear,
+                        ReleaseNotes = release.ReleaseNotes,
+                        Title = release.Title,
+                        Year = release.Year
+                    };
+
+                    releaseViewModel.Tracks = new List<TracksItemViewModel>();
+
+                    foreach (var trackDto in release.Tracks)
+                    {
+                        releaseViewModel.Tracks.Add(new TracksItemViewModel
+                        {
+                            Artist = trackDto.Artist,
+                            DiscogsArtistId = trackDto.DiscogsArtistId,
+                            DiscogsReleaseId = trackDto.DiscogsReleaseId,
+                            Duration = trackDto.Duration,
+                            Position = trackDto.Position,
+                            Rating = trackDto.Rating,
+                            Release = trackDto.Release,
+                            Title = trackDto.Title
+                        });
+                    }
+
+                    returnedReleases.Add(releaseViewModel);
                 }
 
                 return new ViewResult<List<ReleaseViewModel>>
                 {
                     Data = returnedReleases,
-                    ErrorMessage = thisSpecificGenre ?? "",//toDo: using this to get the genre name yes this is hacky, I will fix eventually
+                    //ErrorMessage = thisSpecificGenre ?? "",//toDo: using this to get the genre name yes this is hacky, I will fix eventually
                     Success = true
                 };
             }

@@ -15,5 +15,6 @@ namespace DiscogsInsight.DataAccess.Contract
         Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
         Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId);
+                Task<List<FullReleaseDataModel>> GetReleaseDataModelsByGenreId(int? genreId);
     }
 }

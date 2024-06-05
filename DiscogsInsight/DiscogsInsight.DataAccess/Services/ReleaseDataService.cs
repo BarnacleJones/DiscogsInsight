@@ -16,10 +16,11 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
         private readonly ICollectionDataService _collectionDataService;
         private readonly IArtistDataService _artistDataService;
+        private readonly ITracksDataService _tracksDataService;
         private readonly ILogger<ReleaseDataService> _logger;
         private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseDataService(IDiscogsInsightDb db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(IDiscogsInsightDb db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ITracksDataService tracksDataService ,ILogger<ReleaseDataService> logger)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
@@ -29,6 +30,7 @@ namespace DiscogsInsight.DataAccess.Services
             _discogsApiService = discogsApiService;
             _discogsGenresAndTagsDataService = discogsGenresAndTags;
             _logger = logger;
+            _tracksDataService = tracksDataService;
         }
 
         public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
@@ -487,6 +489,72 @@ namespace DiscogsInsight.DataAccess.Services
             }
 
             return true;
+        }
+
+        public async Task<List<FullReleaseDataModel>> GetReleaseDataModelsByGenreId(int? genreId)
+        {
+           var returnedReleases = new List<FullReleaseDataModel>();
+
+
+            var allReleases = await GetAllReleasesAsList();
+            //get the entire genre and tags table - bad
+            var releaseGenreJoiningTable = await _discogsGenresAndTagsDataService.GetDiscogsGenreTagToDiscogsReleaseAsList();
+            //get a list of release ids by the genre id passed into the function 
+            var releasesIdsWithThisGenre = releaseGenreJoiningTable.Where(x => x.DiscogsGenreTagId == genreId).Select(x => x.DiscogsReleaseId).ToList();
+            //then get the entire genretag table wtf
+            var genreTag = await _discogsGenresAndTagsDataService.GetAllGenreTagsAsList();
+            //finally get all the  tags by genre id
+            var thisSpecificGenre = genreTag.Where(x => x.Id == genreId).Select(x => x.DiscogsTag).FirstOrDefault();
+            //use that to get the releases of that genre
+            var releasesByGenre = allReleases.Where(x => releasesIdsWithThisGenre.Contains(x.DiscogsReleaseId)).ToList();
+
+            foreach (var item in releasesByGenre)
+            {
+                var thisItem = item;
+                var tracks = await _tracksDataService.GetTracksForRelease(item.DiscogsReleaseId);
+                var releaseTracks = tracks.Where(x => x.DiscogsReleaseId == thisItem.DiscogsReleaseId).ToList();
+
+                var artist = await _artistDataService.GetArtistByDiscogsId(item.DiscogsArtistId, true);
+                var image = await GetImageForRelease(item.MusicBrainzReleaseId);
+                returnedReleases.Add(await GetReleaseDataModel(item, releaseTracks, artist.Name, image));
+            }
+
+            return returnedReleases;
+        }
+
+        private async Task<FullReleaseDataModel> GetReleaseDataModel(Release release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
+        {
+            var trackListAsViewModel = trackList.Select(x => new TrackDto
+            {
+                Duration = x.MusicBrainzTrackLength == null
+                                ? x.Duration
+                                : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
+                Position = x.Position,
+                Title = x.Title,
+                Rating = x.Rating ?? 0,
+                DiscogsArtistId = x.DiscogsArtistId ?? 0,
+                DiscogsReleaseId = x.DiscogsReleaseId ?? 0
+            }).ToList();
+
+            var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
+
+            return new FullReleaseDataModel
+            {
+                Artist = releaseArtistName ?? "Missing Artist",
+                Year = release.Year.ToString(),
+                OriginalReleaseYear = release.OriginalReleaseYear,
+                ReleaseCountry = release.ReleaseCountry,
+                Title = release.Title ?? "Missing Title",
+                ReleaseNotes = release.ReleaseNotes ?? "",
+                Genres = genres,
+                DiscogsReleaseUrl = release.DiscogsReleaseUrl,
+                Tracks = trackListAsViewModel,
+                DateAdded = release.DateAdded,
+                DiscogsArtistId = release.DiscogsArtistId,
+                DiscogsReleaseId = release.DiscogsReleaseId,
+                CoverImage = imageAsBytes ?? [],
+                IsFavourited = release.IsFavourited,
+            };
         }
 
         #endregion
