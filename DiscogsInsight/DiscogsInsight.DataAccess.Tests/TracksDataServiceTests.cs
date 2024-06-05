@@ -51,7 +51,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetTracksForRelease_ReturnsCorrectTracks()
         {
             // Arrange
-            var discogsReleaseId = 1;
+            var discogsReleaseId = 100;
 
             var mockTracks = DatabaseDataGenerator.GetUniqueSampleTracks();
             var trackForRelease = new List<Track> { mockTracks[1] };

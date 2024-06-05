@@ -48,7 +48,7 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task SetFavouriteBooleanOnRelease_Success()
         {
             // Arrange
-            var discogsReleaseId = 1;
+            var discogsReleaseId = 100;
             var releases = DatabaseDataGenerator.GetSampleReleases();
             _dbMock.Setup(db => db.GetAllEntitiesAsListAsync<Release>())
                 .ReturnsAsync(releases);
@@ -109,8 +109,8 @@ namespace DiscogsInsight.DataAccess.Tests
         public async Task GetReleaseAndImageAndRetrieveAllApiDataForRelease_WithValidId_ReturnsReleaseAndCoverImage()
         {
             // Arrange
-            int discogsReleaseId = 1;
-            var release = DatabaseDataGenerator.GetSampleReleases().Where(x => x.DiscogsReleaseId == 1).First();
+            int discogsReleaseId = 100;
+            var release = DatabaseDataGenerator.GetSampleReleases().Where(x => x.DiscogsReleaseId == 100).First();
             var artists = DatabaseDataGenerator.GetSampleArtists();
             var musicBrainzReleaseToCoverImages = DatabaseDataGenerator.GetSampleMusicBrainzReleaseToCoverImages();
             var discogsReleaseResponse = ApiDataGenerator.GetSampleDiscogsReleaseResponse();
