@@ -10,7 +10,8 @@ namespace DiscogsInsight.DataAccess.Services
 {
     public class ReleaseDataService : IReleaseDataService
     {
-        private readonly IDiscogsInsightDb _db;
+        private readonly IDiscogsInsightDb _dbService;
+        private readonly ISQLiteAsyncConnection _db;
         private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly IDiscogsApiService _discogsApiService;
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
@@ -20,8 +21,9 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ILogger<ReleaseDataService> _logger;
         private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseDataService(IDiscogsInsightDb db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ITracksDataService tracksDataService ,ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(IDiscogsInsightDb dbService, ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags, IArtistDataService artistDataService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ITracksDataService tracksDataService ,ILogger<ReleaseDataService> logger)
         {
+            _dbService = dbService;
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
             _collectionDataService = collectionDataService;
@@ -494,6 +496,15 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<FullReleaseDataModel>> GetReleaseDataModelsByGenreId(int? genreId)
         {
            var returnedReleases = new List<FullReleaseDataModel>();
+
+            //i should really not need any services here but the database unless the service serves a specific function
+
+            //for this am i just joining data and returning the newly created data model
+            //probably can halve the number of services here 
+            //todo remove all the services from this service, just use db!?
+            var releaseData = _db.Table<Release>();
+            //was thinking i could load all the data and join but thats terrible too
+            //try writing a query with the joins and just send that
 
 
             var allReleases = await GetAllReleasesAsList();

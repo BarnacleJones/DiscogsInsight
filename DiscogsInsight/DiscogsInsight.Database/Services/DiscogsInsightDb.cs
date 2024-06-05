@@ -17,16 +17,8 @@ namespace DiscogsInsight.Database.Services
              
 
         public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : new()
-        {
-            try
-            {
+        { 
                 return await _database.Table<T>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at DiscogsInsightDb GetAllEntitiesAsync:{ex.Message} ");
-                throw;
-            }
         }
 
         public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity

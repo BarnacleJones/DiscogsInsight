@@ -2,8 +2,14 @@
 using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
 
+
 namespace DiscogsInsight.Database.Services
 {
+    /// <summary>
+    /// Created a connection adapter to abstract the DiscogsInsightDb class for testing.
+    /// I had to do that as the SQLiteAsyncConnection was a static service and was causing headaches mocking
+    /// But there has to be an implementation like this for it all to work
+    /// </summary>
     public class SQLiteAsyncConnectionAdapter : Contract.ISQLiteAsyncConnection
     {
         SQLiteAsyncConnection _connection;
@@ -79,9 +85,9 @@ namespace DiscogsInsight.Database.Services
             return _connection.QueryAsync<T>(query, args);
         }
 
-        public Task<List<T>> Table<T>() where T : new()
+        public AsyncTableQuery<T> Table<T>() where T : new()
         {
-            return _connection.Table<T>().ToListAsync();
+            return _connection.Table<T>();
         }
 
         public Task<int> UpdateAsync(object obj)
