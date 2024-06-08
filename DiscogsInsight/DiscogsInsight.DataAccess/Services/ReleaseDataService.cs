@@ -229,6 +229,7 @@ namespace DiscogsInsight.DataAccess.Services
             var releasesByGenreWithoutAllApiData = releasesInterimDataModels.Where(x => !x.HasAllApiData && x.DiscogsReleaseId.HasValue).Select(x => x.DiscogsReleaseId);
             if (releasesByGenreWithoutAllApiData.Any())
             {
+                var discogsArtistId = releasesInterimDataModels.Select(x => x.DiscogsArtistId).FirstOrDefault() ?? 0;
                 await GetAllApiDataForListOfDiscogsReleaseIds(releasesByGenreWithoutAllApiData);
                 //requery
                 releasesByYear = await _db.Table<Release>().Where(x => x.DiscogsArtistId == discogsArtistId).ToListAsync();

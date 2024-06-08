@@ -15,6 +15,11 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
+        public async Task<List<Track>> GetAllTracks()
+        {
+            return await _db.Table<Track>().ToListAsync();
+        }
+
         public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
         {
             var track = await _db.Table<Track>().Where(x => x.DiscogsReleaseId == discogsReleaseId).Where(x => x.Title == title).FirstOrDefaultAsync();

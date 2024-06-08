@@ -66,13 +66,13 @@ else
             HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByDiscogsGenreTagId(GenreId));            
         }
     }
-    
+
     private async void HandleReleaseByGenreResult(ViewResult<List<ReleaseViewModel>> result)
     {
         if (result.Success)
         {
             _releasesOfThisGenre = result.Data;
-            _thisGenre = ""
+            _thisGenre = "";
         }
         else
         {
