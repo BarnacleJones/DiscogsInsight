@@ -122,13 +122,13 @@ namespace DiscogsInsight.Service.Releases
             }
         }
 
-        public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByGenreId(int genreId)
+        public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByDiscogsGenreTagId(int discogsGenreTagId)
         {
             try
             {
                 var returnedReleases = new List<ReleaseViewModel>();
                 
-                var releaseData = await _releaseDataService.GetReleaseDataModelsByGenreId(genreId);
+                var releaseData = await _releaseDataService.GetReleaseDataModelsByDiscogsGenreTagId(discogsGenreTagId);
 
                 foreach (var release in releaseData)
                 {

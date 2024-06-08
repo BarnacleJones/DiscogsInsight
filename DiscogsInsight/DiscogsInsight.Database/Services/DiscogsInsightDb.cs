@@ -18,7 +18,7 @@ namespace DiscogsInsight.Database.Services
 
         public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : new()
         { 
-                return await _database.Table<T>();
+                return await _database.Table<T>().ToListAsync();
         }
 
         public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity

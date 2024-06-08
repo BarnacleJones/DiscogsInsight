@@ -86,7 +86,7 @@ namespace DiscogsInsight.Service.Tests
 
 
             //Act
-            var result = _service.GetReleasesByGenreId(300).Result;
+            var result = _service.GetReleasesByDiscogsGenreTagId(300).Result;
 
             //Assert
             Assert.That(result.Data.Count, Is.EqualTo(1));

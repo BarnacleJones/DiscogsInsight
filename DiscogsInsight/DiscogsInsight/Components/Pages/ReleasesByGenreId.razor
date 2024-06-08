@@ -29,7 +29,7 @@ else
 @code{
 
     [Parameter]
-    public int genreId { get; set; }
+    public int discogsGenreTagId { get; set; }
 
     private int internalGenreId { get; set; }
 
@@ -38,8 +38,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        internalGenreId = genreId;
-        HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));
+        internalGenreId = discogsGenreTagId;
+        HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByDiscogsGenreTagId(discogsGenreTagId));
     }
 
     /// <summary>
@@ -50,9 +50,9 @@ else
     /// <returns></returns>
     protected override async Task OnParametersSetAsync()
     {
-       if (internalGenreId != genreId)
+       if (internalGenreId != discogsGenreTagId)
        {
-            HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));            
+            HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByDiscogsGenreTagId(discogsGenreTagId));            
        }
     }
     
