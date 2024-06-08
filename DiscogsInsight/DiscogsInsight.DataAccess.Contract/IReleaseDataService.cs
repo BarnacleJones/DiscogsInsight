@@ -7,13 +7,8 @@ namespace DiscogsInsight.DataAccess.Contract
     {
         Task SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId);
         Task<List<Release>> GetAllReleasesAsList();
-
-        //data correction
         Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
-        Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId);
-
-        //new
         Task<List<ReleaseDataModel>> GetReleaseDataModelsByDiscogsGenreTagId(int discogsGenreTagId);
         Task<ReleaseDataModel> GetReleaseDataModelByDiscogsReleaseId(int discogsReleaseId);
         Task<List<ReleaseDataModel>> GetNewestReleases(int howManyToReturn);

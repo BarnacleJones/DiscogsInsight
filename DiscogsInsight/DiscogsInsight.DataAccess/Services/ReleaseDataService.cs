@@ -9,7 +9,6 @@ using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using Release = DiscogsInsight.Database.Entities.Release;
 using Track = DiscogsInsight.Database.Entities.Track;
 using Artist = DiscogsInsight.Database.Entities.Artist;
-using System.Linq;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -273,8 +272,23 @@ namespace DiscogsInsight.DataAccess.Services
 
             return allReleasesKnownByArtistId.Item2;
         }
+        public async Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId)
+        {
+            var releasesToChange = await _db.Table<Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
+            var newRelease = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).FirstOrDefaultAsync();
 
-        public async Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId)
+            foreach (var release in releasesToChange)
+            {
+                release.MusicBrainzReleaseId = musicBrainzReleaseId;
+                release.ReleaseHasBeenManuallyCorrected = true;
+                release.HasAllApiData = false;
+                release.IsAReleaseGroupGroupId = newRelease.IsAReleaseGroupGroupId;
+                await _db.UpdateAsync(release);
+            }
+
+            return true;
+        }
+        private async Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId)
         {
             var incorrectReleases = await _db.Table<Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
 
@@ -294,23 +308,6 @@ namespace DiscogsInsight.DataAccess.Services
                 Title = x.MusicBrainzReleaseName ?? ""
             }).ToList();
             return (badMusicBrainzReleaseId, allReleasesKnownByArtistId);
-        }
-
-        public async Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId)
-        {
-            var releasesToChange = await _db.Table<Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
-            var newRelease = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).FirstOrDefaultAsync();
-
-            foreach (var release in releasesToChange)
-            {
-                release.MusicBrainzReleaseId = musicBrainzReleaseId;
-                release.ReleaseHasBeenManuallyCorrected = true;
-                release.HasAllApiData = false;
-                release.IsAReleaseGroupGroupId = newRelease.IsAReleaseGroupGroupId;
-                await _db.UpdateAsync(release);
-            }
-
-            return true;
         }
 
         #endregion
@@ -382,8 +379,7 @@ namespace DiscogsInsight.DataAccess.Services
             return releasesByReleaseIds;
         }
 
-        #endregion
-         
+        #endregion         
 
         #region Api Fetching and subsequent saving updating of records
         private async Task RetrieveAllApiDataForReleaseAndReleasesArtist(int discogsReleaseId)
