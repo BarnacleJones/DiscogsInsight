@@ -1,6 +1,6 @@
 ﻿namespace DiscogsInsight.DataAccess.Models
 {
-    public class FullReleaseDataModel
+    public class ReleaseDataModel
     {
         public string? Year { get; set; }
         public string? OriginalReleaseYear { get; set; }
@@ -16,6 +16,7 @@
         public List<TrackDto>? Tracks { get; set; }
         public byte[] CoverImage { get; set; }
         public bool IsFavourited { get; set; }
+        public string ReleaseGenre { get; set; }
     }
 
     public class TrackDto

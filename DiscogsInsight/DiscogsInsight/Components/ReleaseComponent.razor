@@ -135,7 +135,7 @@
                             {
                                 if (genre.Name is not null)
                                 {
-                                    <MudListItem Text="@genre.Name" Icon="@Icons.Material.Filled.MusicNote" OnClick="@(() => OpenReleasesByGenre(genre.Id))" />
+                                    <MudListItem Text="@genre.Name" Icon="@Icons.Material.Filled.MusicNote" OnClick="@(() => OpenReleasesByGenre(genre.Id, genre.Name))" />
                                 }
                             }
                         </MudList>
@@ -269,9 +269,9 @@
             NavigationManager.NavigateTo($"/releasesByYear/{year}");            
         }
     }
-    private void OpenReleasesByGenre(int genreId)
+    private void OpenReleasesByGenre(int genreId, string name)
     {
-        NavigationManager.NavigateTo($"/releasesByGenreId/{genreId}");            
+        NavigationManager.NavigateTo($"/releasesByGenre?genreId={genreId}&name={name}");
     }
 
     private void GoToRelease(int? releaseId)

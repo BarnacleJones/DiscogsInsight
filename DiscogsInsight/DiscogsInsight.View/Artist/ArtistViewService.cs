@@ -50,7 +50,7 @@ namespace DiscogsInsight.Service.Artist
                                     }).ToList()
                     }).ToList();
 
-                var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId, artist.Name);
+                var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId);
 
                 var data = new ArtistViewModel
                 {

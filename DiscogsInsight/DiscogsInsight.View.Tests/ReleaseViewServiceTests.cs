@@ -3,8 +3,6 @@ using DiscogsInsight.Service.Releases;
 using Moq;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.EntityViewModels;
-using DiscogsInsight.Tests.Common;
-using DiscogsInsight.Service.Models.Collection;
 
 namespace DiscogsInsight.Service.Tests
 {
@@ -13,8 +11,6 @@ namespace DiscogsInsight.Service.Tests
     {
         private Mock<IReleaseDataService> _releaseDataServiceMock;
         private Mock<IArtistDataService> _artistDataServiceMock;
-        private Mock<ITracksDataService> _tracksDataServiceMock;
-        private Mock<IDiscogsGenresAndTagsDataService> _discogsGenresAndTagsDataServiceMock;
         private ReleaseViewService _service;
 
 
@@ -23,34 +19,24 @@ namespace DiscogsInsight.Service.Tests
         {
             _releaseDataServiceMock = new Mock<IReleaseDataService>();
             _artistDataServiceMock = new Mock<IArtistDataService>();
-            _tracksDataServiceMock = new Mock<ITracksDataService>();
-            _discogsGenresAndTagsDataServiceMock = new Mock<IDiscogsGenresAndTagsDataService>();
 
             //Default Data Service List calls
             StageDummyData();
 
-            _service = new ReleaseViewService(_releaseDataServiceMock.Object, _artistDataServiceMock.Object, _tracksDataServiceMock.Object, _discogsGenresAndTagsDataServiceMock.Object);
+            _service = new ReleaseViewService(_releaseDataServiceMock.Object, _artistDataServiceMock.Object);
         }
 
         private void StageDummyData()
         {
-            var releases = DatabaseDataGenerator.GetSampleReleases();
-            _releaseDataServiceMock.Setup(s => s.GetAllReleasesAsList())
-                .ReturnsAsync(releases);
+            //var releases = DatabaseDataGenerator.GetSampleReleases();
+            //_releaseDataServiceMock.Setup(s => s.GetAllReleasesAsList())
+            //    .ReturnsAsync(releases);
 
-            var releaseGenreJoiningTable = DatabaseDataGenerator.GetSampleDiscogsGenreTagToDiscogsReleases();
-            var genreTagTable = DatabaseDataGenerator.GetSampleDiscogsGenreTags();
-            
-            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetDiscogsGenreTagToDiscogsReleaseAsList()).ReturnsAsync(releaseGenreJoiningTable);
-            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetAllGenreTagsAsList()).ReturnsAsync(genreTagTable);
-            var tracks = DatabaseDataGenerator.GetUniqueSampleTracks();
-            _tracksDataServiceMock.Setup(s => s.GetTracksForRelease(300)).ReturnsAsync(tracks);
+            //var artist = DatabaseDataGenerator.GetSampleArtists().Where(x => x.DiscogsArtistId == 300).First();
+            //_artistDataServiceMock.Setup(s => s.GetArtistByDiscogsId(300, true)).ReturnsAsync(artist);
 
-            var artist = DatabaseDataGenerator.GetSampleArtists().Where(x => x.DiscogsArtistId == 300).First();
-            _artistDataServiceMock.Setup(s => s.GetArtistByDiscogsId(300, true)).ReturnsAsync(artist);
-
-            var image = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0 };
-            _releaseDataServiceMock.Setup(s => s.GetImageForRelease("1")).ReturnsAsync(image);
+            //var image = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,0 };
+            //_releaseDataServiceMock.Setup(s => s.GetImageForRelease("1")).ReturnsAsync(image);
         }
 
         [Test]
@@ -81,10 +67,6 @@ namespace DiscogsInsight.Service.Tests
                     new("Alternative", 3)
                 };
 
-            _discogsGenresAndTagsDataServiceMock.Setup(s => s.GetGenresForDiscogsRelease(100)).ReturnsAsync(genresAndIds);
-
-
-
             //Act
             var result = _service.GetReleasesByDiscogsGenreTagId(300).Result;
 
@@ -104,12 +86,12 @@ namespace DiscogsInsight.Service.Tests
             var expectedTracksData = new List<Track>() { new Track() { DiscogsArtistId = 1, Title = "Stone Faces" } };
             expectedCoverImage = new byte[10];
 
-            _releaseDataServiceMock.Setup(x => x.GetReleaseAndImageAndRetrieveAllApiDataForRelease(123))
-                .ReturnsAsync((expectedReleaseData, expectedCoverImage));
+            //_releaseDataServiceMock.Setup(x => x.GetReleaseAndImageAndRetrieveAllApiDataForRelease(123))
+            //    .ReturnsAsync((expectedReleaseData, expectedCoverImage));
 
-            _artistDataServiceMock.Setup(x => x.GetArtistByDiscogsId(1, false)).ReturnsAsync(expectedArtistData);
+            //_artistDataServiceMock.Setup(x => x.GetArtistByDiscogsId(1, false)).ReturnsAsync(expectedArtistData);
 
-            _tracksDataServiceMock.Setup(x => x.GetTracksForRelease(123)).ReturnsAsync(expectedTracksData);
+            //_tracksDataServiceMock.Setup(x => x.GetTracksForRelease(123)).ReturnsAsync(expectedTracksData);
         }
 
     }
