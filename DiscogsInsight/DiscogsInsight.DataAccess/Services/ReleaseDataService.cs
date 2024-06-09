@@ -636,7 +636,7 @@ namespace DiscogsInsight.DataAccess.Services
                                                         WHERE Tag IN ({quotedTags});
                                                         ";
                 var reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery);
-                var reponseTagNamesAlreadyInDb = reponseTagNamesAlreadyInDbClassObject.Select(x => x.Tag).ToList();
+                var reponseTagNamesAlreadyInDb = reponseTagNamesAlreadyInDbClassObject.Where(x => !string.IsNullOrWhiteSpace(x.Tag)).Select(x => x.Tag).ToList();
                 var tagNamesToSave = tagsNamesInResponse.Except(reponseTagNamesAlreadyInDb).ToList();
                 
                 if (tagNamesToSave.Any())
@@ -647,7 +647,7 @@ namespace DiscogsInsight.DataAccess.Services
                         await _db.InsertAsync(tagToSave);
                     }
                     //requery                    
-                    reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery, tagsNamesInResponse);
+                    reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery, quotedTags);
                 }
                 foreach (var tag in tagsNamesInResponse)
                 {
