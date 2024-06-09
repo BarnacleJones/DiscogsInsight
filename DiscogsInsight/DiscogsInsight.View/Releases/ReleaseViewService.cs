@@ -70,20 +70,7 @@ namespace DiscogsInsight.Service.Releases
                 };
             }
         }
-        public async Task<List<ReleaseViewModel>> GetAllReleaseViewModelsForArtistByDiscogsArtistId(int? discogsArtistId)
-        {
-            if (discogsArtistId == null) { throw new ArgumentNullException(nameof(discogsArtistId)); }
-            var releaseData = await _releaseDataService.GetAllReleaseDataModelsForArtist(discogsArtistId.Value);
-
-            var returnedReleases = new List<ReleaseViewModel>();
-
-            foreach (var release in releaseData)
-            {
-                if (release is null) continue;
-                returnedReleases.Add(GetReleaseViewModel(release));
-            }
-            return returnedReleases;
-        }             
+              
         public async Task<ViewResult<ReleaseViewModel>> GetRandomRelease()
         {
             try

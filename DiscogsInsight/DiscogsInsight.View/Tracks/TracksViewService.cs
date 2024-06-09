@@ -88,7 +88,7 @@ namespace DiscogsInsight.Service.Tracks
         {
             try
             {
-                var tracks = await _tracksDataService.GetAllTracks();
+                var tracks = await _tracksDataService.GetAllTracksForGrid();
 
                 var tracksAsGridItems = tracks.Select(x => new TracksItemViewModel
                 {

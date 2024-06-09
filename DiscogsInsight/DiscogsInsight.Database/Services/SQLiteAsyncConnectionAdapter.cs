@@ -1,6 +1,7 @@
 ﻿using SQLite;
 using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
+using CloudKit;
 
 
 namespace DiscogsInsight.Database.Services
@@ -22,6 +23,41 @@ namespace DiscogsInsight.Database.Services
             _ = InitializeAsync();
         }
 
+        public async Task Purge()
+        {
+            try
+            {
+                await _connection.DeleteAllAsync<Artist>();
+                await _connection.DeleteAllAsync<Release>();
+                //intentionally leaving other data. Use PurgeEntireDb for the other
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at DiscogsInsightDb Purge:{ex.Message} ");
+                throw;
+            }
+        }
+
+        public async Task PurgeEntireDb()
+        {
+            try
+            {
+                await _connection.DeleteAllAsync<Artist>();
+                await _connection.DeleteAllAsync<DiscogsGenreTags>();
+                await _connection.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
+                await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
+                await _connection.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
+                await _connection.DeleteAllAsync<MusicBrainzTags>();
+                await _connection.DeleteAllAsync<Release>();
+                await _connection.DeleteAllAsync<Track>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at DiscogsInsightDb Purge all database data:{ex.Message} ");
+                throw;
+            }
+        }
         private async Task InitializeAsync()
         {
             try

@@ -2,23 +2,24 @@
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Insights;
 using DiscogsInsight.Service.Models.Results;
+using DiscogsInsight.DataAccess.Services;
 
 namespace DiscogsInsight.Service.Insights
 {
     public class TracksInsightsViewService
     {
-        private readonly ITracksDataService _trackDataService;
+        private readonly InsightsDataService _insightsDataService;
 
-        public TracksInsightsViewService(ITracksDataService trackDataService)
+        public TracksInsightsViewService(InsightsDataService trackDataService)
         {
-            _trackDataService = trackDataService;
+            _insightsDataService = trackDataService;
         }
 
         public async Task<ViewResult<TracksInsightsStatsModel>> GetTracksStatistics()
         {
             try
             {
-                var tracks = await _trackDataService.GetAllTracks();
+                var tracks = await _insightsDataService.GetTrackInsightData();
 
                 var averageTrackLengthFormatted = GetAverageTrackLengthStringFormatted(tracks);
                 var averageTracksPerReleaseText = GetAverageTracksPerReleaseStringFormatted(tracks);

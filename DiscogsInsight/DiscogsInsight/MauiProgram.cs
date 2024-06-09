@@ -60,7 +60,6 @@ namespace DiscogsInsight
 
             //Database layer
             builder.Services.AddSingleton<ISQLiteAsyncConnection, SQLiteAsyncConnectionAdapter>();
-            builder.Services.AddSingleton<IDiscogsInsightDb, DiscogsInsightDb>();
 
             //Api layer
             builder.Services.AddSingleton<IDiscogsApiService, DiscogsApiService>();
@@ -70,13 +69,11 @@ namespace DiscogsInsight
 
             //Data Access
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
-            builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
             builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
+            builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
             builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
-            builder.Services.AddSingleton<ITagsDataService,TagsDataService>();
             builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
-            builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
-            builder.Services.AddSingleton<IDiscogsGenresAndTagsDataService, DiscogsGenresAndTagsDataService>();
+            builder.Services.AddSingleton<IInsightsDataService, InsightsDataService>();
 
             //view layer
             builder.Services.AddSingleton<UserNotificationService>();

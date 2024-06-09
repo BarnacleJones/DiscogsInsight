@@ -1,5 +1,4 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.Service.Releases;
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
 
@@ -8,13 +7,9 @@ namespace DiscogsInsight.Service.Artist
     public class ArtistViewService
     {
         private readonly IArtistDataService _artistDataService;
-        private readonly ITagsDataService _tagsDataService;
-        private readonly ReleaseViewService _releaseViewService;
-        public ArtistViewService(IArtistDataService artistDataService, ITagsDataService tagsDataService, ReleaseViewService releaseViewService)
+        public ArtistViewService(IArtistDataService artistDataService)
         {
             _artistDataService = artistDataService;
-            _tagsDataService = tagsDataService;
-            _releaseViewService = releaseViewService;
         }
 
         public async Task<ViewResult<ArtistViewModel>> GetRandomArtist()
@@ -32,7 +27,20 @@ namespace DiscogsInsight.Service.Artist
             {
                 var artist = await _artistDataService.GetArtistByDiscogsId(discogsArtistId);
 
-                var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+                //var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+                //TagsDataService moved from here only used here - will get fixed with rewrite
+
+                //public async Task<List<MusicBrainzTags>> GetTagsByMusicBrainzArtistId(string musicBrainzArtistId)
+                //{
+                //    var musicBrainzTagsList = await _db.Table<MusicBrainzTags>().ToListAsync();
+                //    var musicBrainzTagsToArtistsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
+
+                //    var musicBrainzTagsToArtistsList = musicBrainzTagsToArtistsTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId);
+                //    var tagsIdsListForArtist = musicBrainzTagsToArtistsList.Select(x => x.TagId).ToList();
+
+                //    return musicBrainzTagsList.Where(x => tagsIdsListForArtist.Contains(x.Id)).ToList();
+                //}
+
                 var tagsList = tags.Select(x => x.Tag).ToList();
 
                 var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
@@ -50,7 +58,27 @@ namespace DiscogsInsight.Service.Artist
                                     }).ToList()
                     }).ToList();
 
-                var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId);
+
+                
+                
+                //old line was calling to release view service
+                //var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId);
+
+                //below
+                //public async Task<List<ReleaseViewModel>> GetAllReleaseViewModelsForArtistByDiscogsArtistId(int? discogsArtistId)
+                //{
+                //    if (discogsArtistId == null) { throw new ArgumentNullException(nameof(discogsArtistId)); }
+                //    var releaseData = await _releaseDataService.GetAllReleaseDataModelsForArtist(discogsArtistId.Value);
+
+                //    var returnedReleases = new List<ReleaseViewModel>();
+
+                //    foreach (var release in releaseData)
+                //    {
+                //        if (release is null) continue;
+                //        returnedReleases.Add(GetReleaseViewModel(release));
+                //    }
+                //    return returnedReleases;
+                //}
 
                 var data = new ArtistViewModel
                 {

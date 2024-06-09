@@ -7,11 +7,11 @@ namespace DiscogsInsight.Service.Insights
 {
     public class ReleaseInsightsViewService
     {
-        private readonly IReleaseDataService _releaseDataService;
+        private readonly IInsightsDataService _insightsDataService;
 
-        public ReleaseInsightsViewService(IReleaseDataService releaseDataService)
+        public ReleaseInsightsViewService(IInsightsDataService insightsDataService)
         {
-            _releaseDataService = releaseDataService;
+            _insightsDataService = insightsDataService;
         }
 
         public async Task<ViewResult<ReleaseInsightsStatsModel>> GetReleaseStatistics()
@@ -19,7 +19,8 @@ namespace DiscogsInsight.Service.Insights
             try
             {
                 //get data
-                var releases = await _releaseDataService.GetAllReleasesAsList();
+                //var releases = await _releaseDataService.GetAllReleasesAsList();
+                var releases = await _insightsDataService.GetAllReleasesDataModelsAsList();
 
                 var earliestRelease = releases.Where(x => !string.IsNullOrWhiteSpace(x.OriginalReleaseYear))
                                               .OrderBy(x => x.OriginalReleaseYear)

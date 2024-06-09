@@ -1,11 +1,10 @@
-﻿using DiscogsInsight.Database.Entities;
-
+﻿using DiscogsInsight.DataAccess.Models;
 
 namespace DiscogsInsight.DataAccess.Contract
 {
     public interface ITracksDataService
     {
         Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title);
-        Task<List<Track>> GetAllTracks();
+        Task<List<TrackGridModel>> GetAllTracksForGrid();
     }
 }

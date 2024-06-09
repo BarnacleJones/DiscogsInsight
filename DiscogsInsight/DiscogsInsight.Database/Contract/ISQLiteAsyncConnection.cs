@@ -14,5 +14,7 @@ namespace DiscogsInsight.Database.Contract
         Task<int> DeleteAsync(object obj);
         Task<int> ExecuteAsync(string query, params object[] args);
         Task<int> DeleteAllAsync<T>() where T : new();
+        Task Purge();
+        Task PurgeEntireDb();
     }
 }

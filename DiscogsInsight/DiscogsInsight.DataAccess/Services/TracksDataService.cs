@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
 using DiscogsInsight.DataAccess.Contract;
+using DiscogsInsight.DataAccess.Models;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -15,7 +16,7 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
-        public async Task<List<Track>> GetAllTracks()
+        public async Task<List<TrackGridModel>> GetAllTracksForGrid()
         {
             return await _db.Table<Track>().ToListAsync();
         }

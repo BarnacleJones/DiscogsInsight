@@ -9,17 +9,15 @@ namespace DiscogsInsight.DataAccess.Services
 {
     public class CollectionDataService : ICollectionDataService
     {
-        private readonly IDiscogsInsightDb _db;
+        private readonly ISQLiteAsyncConnection _db;
         private readonly IDiscogsApiService _discogsApiService;
-        private readonly IDiscogsGenresAndTagsDataService _genresAndTagsDataService;
         private readonly ILogger<CollectionDataService> _logger;
 
-        public CollectionDataService(IDiscogsInsightDb db, IDiscogsApiService discogsApiService, ILogger<CollectionDataService> logger, IDiscogsGenresAndTagsDataService genresAndTagsDataService)
+        public CollectionDataService(ISQLiteAsyncConnection db, IDiscogsApiService discogsApiService, ILogger<CollectionDataService> logger)
         {
             _db = db;
             _discogsApiService = discogsApiService;
             _logger = logger;
-            _genresAndTagsDataService = genresAndTagsDataService;
         }
 
         #region Public Methods
@@ -48,13 +46,13 @@ namespace DiscogsInsight.DataAccess.Services
         private async Task<List<T>> GetCollectionEntityAsList<T>() where T : IDatabaseEntity, new()
         {
             List<T> entityList;
-            var entities = await _db.GetAllEntitiesAsListAsync<T>();
+            var entities = await _db.Table<T>().ToListAsync();
             entityList = entities.ToList();
 
             if (entityList != null && entityList.Count == 0)
             {
                 await CollectionSavedOrUpdatedFromDiscogs();
-                var newEntity = await _db.GetAllEntitiesAsListAsync<T>();
+                var newEntity = await _db.Table<T>().ToListAsync();
                 entityList = newEntity.ToList();
             }
             return entityList;
@@ -109,7 +107,7 @@ namespace DiscogsInsight.DataAccess.Services
                         var artistsToSave = release.basic_information?.artists?.ToList();
                         foreach (var artist in artistsToSave)
                         {
-                            var artistsTable = await _db.GetAllEntitiesAsListAsync<DiscogsInsight.Database.Entities.Artist>();
+                            var artistsTable = await _db.Table<DiscogsInsight.Database.Entities.Artist>().ToListAsync();
                             var existingArtist = artistsTable.Where(x => x.DiscogsArtistId == artist.id).FirstOrDefault();
                             if (existingArtist == null)
                             {
@@ -167,7 +165,7 @@ namespace DiscogsInsight.DataAccess.Services
                         }
                         //else //should not need to update every release? its just basic information at this point, and a collection update or first pull from api
                         //{
-                                //here needs to not be instantiating a new release potentially
+                        //here needs to not be instantiating a new release potentially
                         //    _ = await _db.UpdateAsync(new Release()
                         //    {
                         //        Id = existingRelease.Id,
@@ -181,7 +179,56 @@ namespace DiscogsInsight.DataAccess.Services
                         //}
 
                         //save genres
-                        var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
+
+                        //this is what it was doing before removing the service 
+                        //var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
+
+
+                        //public async Task<bool> SaveGenresFromDiscogsRelease(ResponseRelease responseRelease, int? discogsReleaseId, int? discogsArtistId)
+                        //{
+                        //    try
+                        //    {
+                        //        var discogsGenreTagsList = await _db.Table<DiscogsGenreTags>().ToListAsync();
+
+                        //        if (responseRelease == null) return true;//dont think this is possible
+
+                        //        var releaseGenresFromReleaseResponse = responseRelease.basic_information.genres;
+
+                        //        if (releaseGenresFromReleaseResponse == null) return true;//dont want to error, there may just be no genres associated
+
+                        //        var stylesNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag)).ToList();
+
+                        //        if (stylesNotInDatabaseAlready != null && stylesNotInDatabaseAlready.Count != 0)
+                        //        {
+                        //            foreach (var style in stylesNotInDatabaseAlready)
+                        //            {
+                        //                await _db.InsertAsync(new DiscogsGenreTags { DiscogsTag = style });
+                        //            }
+
+                        //            discogsGenreTagsList = await _db.Table<DiscogsGenreTags>().ToListAsync();
+                        //        }
+
+                        //        foreach (var style in releaseGenresFromReleaseResponse)
+                        //        {
+                        //            var genreTagId = discogsGenreTagsList.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
+
+                        //            await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
+                        //            {
+                        //                DiscogsReleaseId = discogsReleaseId,
+                        //                DiscogsArtistId = discogsArtistId,
+                        //                DiscogsGenreTagId = genreTagId
+                        //            });
+                        //        }
+
+                        //        return true;
+                        //    }
+                        //    catch (Exception)
+                        //    {
+                        //        throw;
+                        //    }
+
+
+                        //}
                     }
                 }
             }

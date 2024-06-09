@@ -20,16 +20,14 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
         private readonly ICollectionDataService _collectionDataService;
         private readonly ILogger<ReleaseDataService> _logger;
-        private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags,IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
             _collectionDataService = collectionDataService;
             _coverArchiveApiService = coverArchiveApiService;
             _discogsApiService = discogsApiService;
-            _discogsGenresAndTagsDataService = discogsGenresAndTags;
             _logger = logger;
         }
 
@@ -47,8 +45,21 @@ namespace DiscogsInsight.DataAccess.Services
                 DiscogsReleaseId = x.DiscogsReleaseId ?? 0
             }).ToList();
 
-            var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
+            //var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
+            
+            //public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)
+            //{
+            //    if (discogsReleaseId == null) { return new List<(string?, int)>(); };
 
+            //    var discogsGenreJoiningTableList = await GetDiscogsGenreTagToDiscogsReleaseAsList();
+
+            //    var genreIdsForThisRelease = discogsGenreJoiningTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).Select(x => x.DiscogsGenreTagId).ToList();
+
+            //    var genreTable = await GetAllGenreTagsAsList();
+
+            //    return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => (x.DiscogsTag, x.Id)).ToList();
+
+            //}
             return new ReleaseDataModel
             {
                 Artist = releaseArtistName ?? "Missing Artist",

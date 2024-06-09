@@ -88,7 +88,6 @@ namespace DiscogsInsight.Service.Settings
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
-
         public async Task<ViewResult<bool>> PurgeEntireDatabase()
         {
             try

@@ -6,13 +6,11 @@ namespace DiscogsInsight.Service.Collection
 {
     public class CollectionStatisticsViewService
     {
-        private readonly ICollectionDataService _collectionDataService;
-        private readonly ITracksDataService _tracksDataService;
+        private readonly IInsightsDataService _insightsDataService;
 
-        public CollectionStatisticsViewService(ICollectionDataService collectionDataService, ITracksDataService tracksDataService)
+        public CollectionStatisticsViewService(IInsightsDataService insightsDataService)
         {
-            _collectionDataService = collectionDataService;
-            _tracksDataService = tracksDataService;
+            _insightsDataService = insightsDataService;
         }
 
         public async Task<ViewResult<CollectionStatsViewModel>> GetHomePageStatistics()
@@ -42,10 +40,10 @@ namespace DiscogsInsight.Service.Collection
 
         private async Task<CollectionStatsViewModel> GetCollectionStatsViewModel()
         {
-            var releases = await _collectionDataService.GetReleases();
+            var releases = await _insightsDataService.GetAllReleasesDataModelsAsList();
             var releasesCount = releases.Count();
 
-            var tracks = await _tracksDataService.GetAllTracks();
+            var tracks = await _insightsDataService.GetTrackInsightData();
             var tracksCount = tracks.Count();
             var tracksReleasesList = tracks.Select(x => x.DiscogsReleaseId).ToList();
 

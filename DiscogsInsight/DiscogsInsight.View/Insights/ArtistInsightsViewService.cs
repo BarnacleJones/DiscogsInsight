@@ -6,11 +6,11 @@ namespace DiscogsInsight.Service.Insights
 {
     public class ArtistInsightsViewService
     {
-        private readonly IArtistDataService _artistDataService;
+        private readonly IInsightsDataService _insightsDataService;
 
-        public ArtistInsightsViewService(IArtistDataService artistDataService)
+        public ArtistInsightsViewService(IInsightsDataService insightsDataService)
         {
-            _artistDataService = artistDataService;
+            _insightsDataService = insightsDataService;
         }
 
 
