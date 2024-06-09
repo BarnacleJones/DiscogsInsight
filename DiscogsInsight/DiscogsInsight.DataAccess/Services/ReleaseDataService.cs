@@ -83,12 +83,12 @@ namespace DiscogsInsight.DataAccess.Services
         }
         public async Task<List<ReleaseDataModel>> GetReleaseDataModelsByDiscogsGenreTagId(int discogsGenreTagId)
         {
-            var releasesWithThisGenreIdQuery =$@"
-                SELECT DiscogsReleaseId
-                FROM DiscogsGenreTagToDiscogsRelease
-                WHERE DiscogsGenreTagId = {discogsGenreTagId};";
+            var releasesWithThisGenreIdQuery = @"
+                    SELECT DiscogsReleaseId
+                    FROM DiscogsGenreTagToDiscogsRelease
+                    WHERE DiscogsGenreTagId = ?;";
 
-            var discogsReleaseIds = await _db.QueryAsync<DiscogsReleaseIdClass>(releasesWithThisGenreIdQuery, new { discogsGenreTagId });
+            var discogsReleaseIds = await _db.QueryAsync<DiscogsReleaseIdClass>(releasesWithThisGenreIdQuery, discogsGenreTagId);
 
             var releaseIds = discogsReleaseIds.Select(x => x.DiscogsReleaseId).ToList();
             var releasesOfThisGenre = await GetReleaseInterimDataModelListByDiscogsReleaseIds(releaseIds);
@@ -322,6 +322,7 @@ namespace DiscogsInsight.DataAccess.Services
         }
         private async Task<List<ReleaseInterimData>> GetReleaseInterimDataModelListByDiscogsReleaseIds(List<int> discogsReleaseIds)
         {
+            var data = string.Join(",", discogsReleaseIds);
             var releasesByReleaseIdsQuery = @$"
                 SELECT 
                 Release.Year,
@@ -335,13 +336,13 @@ namespace DiscogsInsight.DataAccess.Services
                 Release.MusicBrainzReleaseId,
                 Release.DiscogsReleaseUrl,
                 Release.DateAdded,
-                Release.IsFavourited
+                Release.IsFavourited,
                 Release.HasAllApiData
                 FROM Release
                 INNER JOIN Artist on Release.DiscogsArtistId = Artist.DiscogsArtistId
-                WHERE Release.DiscogsReleaseId in ({string.Join(",", discogsReleaseIds)});";
+                WHERE Release.DiscogsReleaseId in ({data});";
 
-            var releasesByReleaseIds = await _db.QueryAsync<ReleaseInterimData>(releasesByReleaseIdsQuery, new { discogsReleaseIds });
+            var releasesByReleaseIds = await _db.QueryAsync<ReleaseInterimData>(releasesByReleaseIdsQuery);
             return releasesByReleaseIds;
         }
         private async Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId)
@@ -370,13 +371,13 @@ namespace DiscogsInsight.DataAccess.Services
                 Release.MusicBrainzReleaseId,
                 Release.DiscogsReleaseUrl,
                 Release.DateAdded,
-                Release.IsFavourited
+                Release.IsFavourited,
                 Release.HasAllApiData
                 FROM Release
                 INNER JOIN Artist on Release.DiscogsArtistId = Artist.DiscogsArtistId
-                WHERE Release.DiscogsReleaseId = {discogsReleaseId});";
+                WHERE Release.DiscogsReleaseId = ?;";
 
-            var releasesByReleaseIds = await _db.QueryAsync<ReleaseInterimData>(releasesByReleaseIdsQuery, new { discogsReleaseId });
+            var releasesByReleaseIds = await _db.QueryAsync<ReleaseInterimData>(releasesByReleaseIdsQuery, discogsReleaseId);
             return releasesByReleaseIds;
         }
 
@@ -572,7 +573,7 @@ namespace DiscogsInsight.DataAccess.Services
         /// <param name="artistResponse"></param>
         /// <param name="existingArtist"></param>
         /// <returns></returns>
-        private async Task SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(MusicBrainzInitialArtist artistResponse, Database.Entities.Artist existingArtist)
+        private async Task SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(MusicBrainzInitialArtist artistResponse, Artist existingArtist)
         {
             //**this makes an assumption that can cause bad data**
             //Artists in the response is a list, there are similar named artists in the list
@@ -628,12 +629,13 @@ namespace DiscogsInsight.DataAccess.Services
 
             if (tagsNamesInResponse.Any())
             {
+                var quotedTags = string.Join(", ", tagsNamesInResponse.Select(tag => $"'{tag}'"));
                 var musicBrainsTagRecordsForGivenTagsDbQuery = @$"
                                                         SELECT Id, Tag
                                                         FROM MusicBrainzTags
-                                                        WHERE Tag IN ({string.Join(",", tagsNamesInResponse)})`;
+                                                        WHERE Tag IN ({quotedTags});
                                                         ";
-                var reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery, new { tagsNamesInResponse });
+                var reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery);
                 var reponseTagNamesAlreadyInDb = reponseTagNamesAlreadyInDbClassObject.Select(x => x.Tag).ToList();
                 var tagNamesToSave = tagsNamesInResponse.Except(reponseTagNamesAlreadyInDb).ToList();
                 
@@ -717,9 +719,9 @@ namespace DiscogsInsight.DataAccess.Services
             var existingMusicBrainzReleaseIdIdsForThisArtistQuery = @$"
                 SELECT MusicBrainzReleaseId
                 FROM MusicBrainzArtistToMusicBrainzRelease
-                WHERE MusicBrainzArtistToMusicBrainzRelease.MusicBrainzArtistId = {musicBrainzArtistId};";
+                WHERE MusicBrainzArtistToMusicBrainzRelease.MusicBrainzArtistId = ?;";
 
-            var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, new { musicBrainzArtistId });
+            var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, musicBrainzArtistId);
             var existingMusicBrainzReleaseIdsForThisArtistAsStringList = existingMusicBrainzReleaseIdsForThisArtist.Select(x => x.MusicBrainzReleaseId).ToList();
 
             if (releasesByArtist != null && releasesByArtist.Any())
