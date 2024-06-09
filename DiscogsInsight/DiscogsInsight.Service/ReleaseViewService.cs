@@ -6,15 +6,6 @@ using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
 using Microsoft.Extensions.Logging;
 
-/* Unmerged change from project 'DiscogsInsight.Service (net8.0-maccatalyst)'
-Before:
-namespace DiscogsInsight.Service.Releases
-After:
-using DiscogsInsight;
-using DiscogsInsight.Service;
-using DiscogsInsight.Service.Releases;
-using DiscogsInsight.Service;
-*/
 namespace DiscogsInsight.Service
 {
     public class ReleaseViewService

@@ -11,14 +11,14 @@ namespace DiscogsInsight.DataAccess.Services
 {
     public class ArtistDataService : IArtistDataService
     {
-        private readonly IDiscogsInsightDb _db;
         private readonly IDiscogsApiService _discogsApiService;
+        private readonly ISQLiteAsyncConnection _db;
         private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly ILogger<ArtistDataService> _logger;
         private readonly ITagsDataService _tagsDataService;
 
-        public ArtistDataService(IDiscogsInsightDb db, 
-            IDiscogsApiService discogsApiService, 
+        public ArtistDataService(IDiscogsApiService discogsApiService,
+            ISQLiteAsyncConnection db,
             ILogger<ArtistDataService> logger, 
             IMusicBrainzApiService musicBrainzApiService,
             ITagsDataService tagsDataService)
@@ -32,13 +32,13 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task<Artist?> GetArtistByDiscogsIdFromDb(int discogsArtistId)
         {
-            var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
+            var artists = await _db.Table<Artist>().ToListAsync();
             return artists.FirstOrDefault(x => x.DiscogsArtistId == discogsArtistId);
         }
 
         public async Task<List<Artist>?> GetAllArtistsFromDatabase()
         {
-            var artists = await _db.GetAllEntitiesAsListAsync<Artist>();
+            var artists = await _db.Table<Artist>().ToListAsync();
             return artists.ToList();
         }
 
@@ -144,16 +144,62 @@ namespace DiscogsInsight.DataAccess.Services
                    
 
             //save tags - yes it is saving to joining table too before saving the actual artist table information, but its saving writes to the db....
-            var success = await _tagsDataService.SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
+            var success = await SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
+            //
+
 
             return true;  
+        }
+        public async Task<bool> SaveTagsByMusicBrainzArtistId(MusicBrainzInitialArtist artistResponse, string musicBrainzArtistId)
+        {
+            try
+            {
+                var tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
+                var existingTagNamesInDb = tagsTable.Count != 0 ? tagsTable.Select(x => x.Tag).ToList() : new List<string?>();
+
+                var artistFromResponse = artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).FirstOrDefault();
+                if (artistFromResponse == null) { return true; } //artist id mismatch potentially 
+                var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count >= 1).ToList();
+
+                if (tagsInResponse != null && tagsInResponse.Any())
+                {
+                    foreach (var tag in tagsInResponse)
+                    {
+                        if (!existingTagNamesInDb.Contains(tag.Name))
+                        {
+                            var tagToSave = new MusicBrainzTags { Tag = tag.Name };
+                            await _db.InsertAsync(tagToSave);
+                        }
+                    }
+                }
+
+                //get table again with newly saved tags to save to joining table 
+                tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
+
+                foreach (var tag in tagsInResponse)
+                {
+                    var tagId = tagsTable.Where(x => x.Tag == tag.Name).FirstOrDefault()?.Id;
+                    if (tagId != null)
+                    {
+                        var tagToArtist = new MusicBrainzArtistToMusicBrainzTags { TagId = tagId.Value, MusicBrainzArtistId = musicBrainzArtistId };
+                        await _db.InsertAsync(tagToArtist);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception at SaveTagsByMusicBrainzArtistId:{ex.Message} ");
+                throw;
+            }
         }
 
         public async Task<List<MusicBrainzArtistRelease>> GetArtistsReleasesByMusicBrainzArtistId(string musicBrainzArtistId)
         {
             try
             {
-                var allReleasesTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                var allReleasesTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
 
                 var allReleasesByArtist = allReleasesTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId).ToList();
 
@@ -178,11 +224,11 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<PossibleArtistsFromMusicBrainzApi>> GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
         {
             //get artist name from release id
-            var allReleases = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
+            var allReleases = await _db.Table<Database.Entities.Release>().ToListAsync();
             var thisRelease = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault();//there could be more than one
             
 
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
+            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
             var recordForThisArtist = allArtists.Where(x => x.DiscogsArtistId == thisRelease.DiscogsArtistId).FirstOrDefault();//could be more than one
             
             
@@ -206,7 +252,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             await DeleteAllBadArtistAndReleaseData(discogsReleaseId, newAritstMusicBrainzId);
 
-            var releaseTableList = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
+            var releaseTableList = await _db.Table<Database.Entities.Release>().ToListAsync();
             var discogsArtistFromReleaseId = releaseTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault().DiscogsArtistId;
           
             if (newAritstMusicBrainzId == null)
@@ -227,7 +273,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             var releasesByArtist = artistCallResponse.Releases?.ToList();
             var releaseGroupsByArtist = artistCallResponse.ReleaseGroups?.ToList();
-            var existingJoins = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
+            var existingJoins = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
             var existingReleasesForThisArtistList = existingJoins.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).Select(x => x.MusicBrainzReleaseId).ToList();
 
             if (releasesByArtist != null && releasesByArtist.Count != 0)
@@ -277,7 +323,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task UpdateArtistTableWithCorrectedData(string newAritstMusicBrainzId, MusicBrainzArtist artistCallResponse)
         {
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
+            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
             var recordForThisArtist = allArtists.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).ToList();//could be more than one
 
             var artistBeginArea = artistCallResponse.BeginArea;
@@ -331,7 +377,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         private async Task DeleteAllBadArtistAndReleaseData(int? discogsReleaseId, string newAritstMusicBrainzId)
         {
-            var allReleases = await _db.GetAllEntitiesAsListAsync<Database.Entities.Release>();
+            var allReleases = await _db.Table<Database.Entities.Release>().ToListAsync();
             var thisReleaseList = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();//there could be more than one
 
             foreach (var release in thisReleaseList)
@@ -342,7 +388,7 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(release);
             }
 
-            var allArtists = await _db.GetAllEntitiesAsListAsync<Database.Entities.Artist>();
+            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
             var artistId = thisReleaseList.FirstOrDefault().DiscogsArtistId;
             var recordsForThisArtist = allArtists.Where(x => x.DiscogsArtistId == artistId).ToList();//could be more than one
 
@@ -358,14 +404,14 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(artist);
             }
 
-            var artistToTagsTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>();
+            var artistToTagsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
             var artistsToTagsToRemove = artistToTagsTable.Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToList();
             foreach (var artistToTag in artistsToTagsToRemove)
             {
                 await _db.DeleteAsync(artistToTag);
             }
 
-            var artistToReleaseTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
+            var artistToReleaseTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
             var artistsToReleasesToRemove = artistToReleaseTable.Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToList();
             var listOfReleaseIdsTiedToThisArtist = new List<string>();
             foreach (var artistRecord in artistsToReleasesToRemove)
@@ -375,7 +421,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
 
 
-            var coverImageTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzReleaseToCoverImage>();
+            var coverImageTable = await _db.Table<MusicBrainzReleaseToCoverImage>().ToListAsync();
             var coverImagesForThisRelease = thisReleaseList.FirstOrDefault().MusicBrainzReleaseId;
             var coverImagesStoredForBadReleases = coverImageTable.Where(x => listOfReleaseIdsTiedToThisArtist.Contains(x.MusicBrainzReleaseId)).ToList();
             foreach (var coverImageRecord in coverImagesStoredForBadReleases)

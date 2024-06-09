@@ -2,19 +2,6 @@
 using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
 
-/* Unmerged change from project 'DiscogsInsight.Database (net8.0-android)'
-Before:
-using CloudKit;
-After:
-using CloudKit;
-using DiscogsInsight;
-using DiscogsInsight.Database;
-using DiscogsInsight.Database.Services;
-using DiscogsInsight.Database;
-*/
-using CloudKit;
-
-
 namespace DiscogsInsight.Database
 {
     /// <summary>
