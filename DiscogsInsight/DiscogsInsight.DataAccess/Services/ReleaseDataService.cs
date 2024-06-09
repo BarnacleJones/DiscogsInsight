@@ -399,7 +399,7 @@ namespace DiscogsInsight.DataAccess.Services
                 await SaveInformationFromDiscogsReleaseResponse(release, discogsReleaseResponse);
             }
            
-            var artist = await _db.Table<Database.Entities.Artist>().FirstOrDefaultAsync(x => x.DiscogsArtistId == release.DiscogsArtistId);
+            var artist = await _db.Table<Artist>().FirstOrDefaultAsync(x => x.DiscogsArtistId == release.DiscogsArtistId);
 
             if (artist == null)
                 throw new Exception("No artist - try refreshing data ????");
@@ -420,6 +420,7 @@ namespace DiscogsInsight.DataAccess.Services
                     {
                         var musicBrainzResult = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(artist.Name);
                         await SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(musicBrainzResult, artist);
+                        await SaveReleasesFromMusicBrainzArtistCall(artist.MusicBrainzArtistId, artist.DiscogsArtistId);
                     }
                 }
                 artist.HasAllApiData = true;
@@ -432,7 +433,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             //The release may not exist on that call, this is using Levenshtein algorithm which is not right every time.
 
-            if (release.ArtistHasBeenManuallyCorrected)//coming into this function the first time after correcting artist data
+            if (release.ArtistHasBeenManuallyCorrected || release.MusicBrainzReleaseId == null)//coming into this function the first time after correcting artist data
             {
                 var mostLikelyRelease = await GetMusicBrainzReleaseIdFromDiscogsReleaseInformation(release.Title, release.DiscogsArtistId ?? 0);
 
@@ -453,7 +454,7 @@ namespace DiscogsInsight.DataAccess.Services
                 await MakeMusicBrainzReleaseCallAndSaveTracks(release, release.MusicBrainzReleaseId, release.IsAReleaseGroupGroupId);
 
             }
-            var coverImageExists = await _db.Table<MusicBrainzReleaseToCoverImage>().Where(x => x.MusicBrainzReleaseId == release.MusicBrainzReleaseId).CountAsync() == 0;
+            var coverImageExists = await _db.Table<MusicBrainzReleaseToCoverImage>().Where(x => x.MusicBrainzReleaseId == release.MusicBrainzReleaseId).CountAsync() > 0;
             
             if (!coverImageExists && release?.MusicBrainzReleaseId != null)//various artist albums will not get a release id or cover image
             {
