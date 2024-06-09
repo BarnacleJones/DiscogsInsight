@@ -99,7 +99,7 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 await GetAllApiDataForListOfDiscogsReleaseIds(releasesByGenreWithoutAllApiData);
                 //requery
-                releasesOfThisGenre = await _db.QueryAsync<ReleaseInterimData>(releasesWithThisGenreIdQuery, new { discogsGenreTagId });
+                releasesOfThisGenre = await _db.QueryAsync<ReleaseInterimData>(releasesWithThisGenreIdQuery, discogsGenreTagId);
 
             }
 
@@ -647,7 +647,7 @@ namespace DiscogsInsight.DataAccess.Services
                         await _db.InsertAsync(tagToSave);
                     }
                     //requery                    
-                    reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery, new { tagsNamesInResponse });
+                    reponseTagNamesAlreadyInDbClassObject = await _db.QueryAsync<MusicBrainzTags>(musicBrainsTagRecordsForGivenTagsDbQuery, tagsNamesInResponse);
                 }
                 foreach (var tag in tagsNamesInResponse)
                 {

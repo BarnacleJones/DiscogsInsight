@@ -4,17 +4,20 @@ using DiscogsInsight.Service.Models.Collection;
 using DiscogsInsight.Service.Models.DataCorrection;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
+using Microsoft.Extensions.Logging;
 namespace DiscogsInsight.Service.Releases
 {
     public class ReleaseViewService
     {
         private readonly IReleaseDataService _releaseDataService;
         private readonly IArtistDataService _artistDataService;
+        private readonly ILogger<ReleaseViewService> _logger;
 
-        public ReleaseViewService(IReleaseDataService releaseDataService, IArtistDataService artistDataService)
+        public ReleaseViewService(IReleaseDataService releaseDataService, IArtistDataService artistDataService, ILogger<ReleaseViewService> logger)
         {
             _releaseDataService = releaseDataService;
             _artistDataService = artistDataService;
+            _logger = logger;
         }
         public async Task<ViewResult<ReleaseViewModel>> GetRelease(int? discogsReleaseId)
         {
@@ -96,6 +99,8 @@ namespace DiscogsInsight.Service.Releases
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
                 return new ViewResult<ReleaseViewModel>
                 {
                     Data = null,
