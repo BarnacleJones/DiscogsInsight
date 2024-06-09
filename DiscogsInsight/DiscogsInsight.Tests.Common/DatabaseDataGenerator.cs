@@ -1,11 +1,11 @@
 ﻿using DiscogsInsight.Database.Entities;
 
-namespace DiscogsInsight.DataAccess.Tests.Helpers
+namespace DiscogsInsight.Tests.Common
 {
     /// <summary>
     /// Generates dummy data for mocking database entities in various unit tests
     /// </summary>
-    public static class DummyDatabaseDataGenerator
+    public static class DatabaseDataGenerator
     {
         #region Artist
 
@@ -76,6 +76,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region Track
         public static List<Track> GetUniqueSampleTracks()
         {
@@ -85,9 +86,9 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                 var a = new Track()
                 {
                     Id = i,
-                    DiscogsArtistId = i,
-                    DiscogsReleaseId = i,
-                    DiscogsMasterId = i,
+                    DiscogsArtistId = i * 100,
+                    DiscogsReleaseId = i * 100,
+                    DiscogsMasterId = i * 100,
                     Title = $"Track {i}",
                     Duration = "3:45",
                     MusicBrainzTrackLength = i,
@@ -114,7 +115,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                 {
                     Id = i,
                     DiscogsArtistId = i * 100,
-                    DiscogsReleaseId = i,
+                    DiscogsReleaseId = i * 100,
                     DiscogsMasterId = i * 300,
                     Title = $"Release {i}",
                     DateAdded = DateTime.Now.AddDays(-i * 10),
@@ -178,6 +179,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region MusicBrainzArtistToMusicBrainzRelease
 
 
@@ -203,6 +205,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
         }
 
         #endregion
+
         #region MusicBrainzReleaseToCoverImage
 
         public static List<MusicBrainzReleaseToCoverImage> GetSampleMusicBrainzReleaseToCoverImages()
@@ -244,10 +247,10 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
             {
                 var item = new DiscogsGenreTagToDiscogsRelease()
                 {
-                    Id = i,
-                    DiscogsGenreTagId = i,
-                    DiscogsArtistId = i,
-                    DiscogsReleaseId = i
+                    Id = i * 100,
+                    DiscogsGenreTagId = i * 100,
+                    DiscogsArtistId = i * 100,
+                    DiscogsReleaseId = i * 100
                 };
                 discogsGenreTagToDiscogsReleases.Add(item);
             }
@@ -265,7 +268,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
             {
                 var item = new DiscogsGenreTags()
                 {
-                    Id = i,
+                    Id = i * 100,
                     DiscogsTag = $"Tag {i}"
                 };
                 discogsGenreTags.Add(item);

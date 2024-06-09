@@ -14,35 +14,10 @@ namespace DiscogsInsight.Database.Services
             _logger = logger;
             _database = database;
         }
-             
 
         public async Task<List<T>> GetAllEntitiesAsListAsync<T>() where T : new()
-        {
-            try
-            {
-                return await _database.Table<T>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at DiscogsInsightDb GetAllEntitiesAsync:{ex.Message} ");
-                throw;
-            }
-        }
-
-        public async Task<int> SaveItemAsync<T>(T item) where T : IDatabaseEntity
-        {
-            try
-            {
-                if (item.Id != 0)
-                    return await _database.UpdateAsync(item);
-
-                return await _database.InsertAsync(item);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at DiscogsInsightDb SaveItemAsync:{ex.Message} ");
-                throw;
-            }
+        { 
+            return await _database.Table<T>().ToListAsync();
         }
 
         public async Task Purge()

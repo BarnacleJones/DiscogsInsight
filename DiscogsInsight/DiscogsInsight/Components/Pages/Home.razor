@@ -3,7 +3,6 @@
 @using DiscogsInsight.Service.Notifications
 @using DiscogsInsight.Service.Releases
 @using DiscogsInsight.Service.Settings
-@using DiscogsInsight.Service.Tracks
 @using DiscogsInsight.Service.Models
 @using DiscogsInsight.Service.Models.Collection
 @using DiscogsInsight.Service.Models.EntityViewModels
@@ -12,7 +11,6 @@
 @inject UserNotificationService UserNotificationService
 @inject ReleaseViewService ReleaseViewService
 @inject SettingsViewService SettingsViewService
-@inject TracksViewService TracksViewService
 @inject CollectionStatisticsViewService CollectionStatisticsViewService
 @inject CollectionViewService CollectionViewService
 @inject NavigationManager NavigationManager
@@ -24,12 +22,8 @@
         {
             <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
                 <MudButton OnClick="OnRandomExpandCollapseClick" Color="Color.Secondary">@(_randomExpanded ? "Hide Random Release" : "Show Random Release")</MudButton>
-                <MudButton OnClick="OnRandomTrackExpandCollapseClick" Color="Color.Secondary">@(_randomTrackExpanded ? "Hide Random Track" : "Show Random Track")</MudButton>
                 <MudCollapse Expanded="_randomExpanded">
                     <ReleaseComponent Release="@_randomRelease" ShowRefreshRelease="true" OnButtonClick="RefreshRandom" />
-                </MudCollapse>
-                <MudCollapse Expanded="_randomTrackExpanded">
-                    <TrackComponent Track="@_randomTrack" ShowRefreshTrack="true" OnButtonClick="RefreshRandomTrack" />
                 </MudCollapse>
                 <MudContainer>
                 @if (_collectionStats.AlbumsInCollectionWithoutTracksInfo > 0)
@@ -54,10 +48,8 @@ else
 @code{
     private static bool _hasKey { get; set; }
     private bool _randomExpanded { get; set; }
-    private bool _randomTrackExpanded { get; set; }
     private string discogsUsername = string.Empty;
     private ReleaseViewModel? _randomRelease;
-    private TracksItemViewModel? _randomTrack;
     private CollectionStatsViewModel? _collectionStats;
 
     public async void handleButtonClick()
@@ -73,7 +65,6 @@ else
         {
             var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
             HandleRandomResult(await ReleaseViewService.GetRandomRelease());
-            HandleRandomTrackResult(await TracksViewService.GetRandomTrack());
             HandleStatisticsResult(await CollectionStatisticsViewService.GetHomePageStatistics());
         }
     }
@@ -82,14 +73,6 @@ else
     {
         if (result.Success)
             _randomRelease = result.Data;        
-        else
-            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");       
-    }
-
-    private async void HandleRandomTrackResult(ViewResult<TracksItemViewModel> result)
-    {
-        if (result.Success)
-            _randomTrack = result.Data;        
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");       
     }
@@ -119,18 +102,9 @@ else
         HandleRandomResult(await ReleaseViewService.GetRandomRelease());
         StateHasChanged();
     }
-    public async Task RefreshRandomTrack()
-    {
-        HandleRandomTrackResult(await TracksViewService.GetRandomTrack());
-        StateHasChanged();
-    }
 
     private void OnRandomExpandCollapseClick() {
         _randomExpanded = !_randomExpanded;
     }
 
-    private void OnRandomTrackExpandCollapseClick()
-    {
-        _randomTrackExpanded = !_randomTrackExpanded;
-    }
 }

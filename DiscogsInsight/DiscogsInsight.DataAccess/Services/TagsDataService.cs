@@ -8,10 +8,10 @@ namespace DiscogsInsight.DataAccess.Services
 {
     public class TagsDataService : ITagsDataService
     {
-        private readonly IDiscogsInsightDb _db;
+        private readonly ISQLiteAsyncConnection _db;
         private readonly ILogger<TagsDataService> _logger;
 
-        public TagsDataService(IDiscogsInsightDb db, ILogger<TagsDataService> logger)
+        public TagsDataService(ISQLiteAsyncConnection db, ILogger<TagsDataService> logger)
         {
             _db = db;
             _logger = logger;
@@ -21,7 +21,7 @@ namespace DiscogsInsight.DataAccess.Services
         {
             try
             {
-                var tagsTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzTags>();
+                var tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
                 var existingTagNamesInDb = tagsTable.Any() ? tagsTable.Select(x => x.Tag).ToList() : new List<string?>();
 
                 var artistFromResponse =   artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).FirstOrDefault();
@@ -35,13 +35,13 @@ namespace DiscogsInsight.DataAccess.Services
                         if (!existingTagNamesInDb.Contains(tag.Name))
                         {
                             var tagToSave = new MusicBrainzTags { Tag = tag.Name };
-                            await _db.SaveItemAsync(tagToSave);
+                            await _db.InsertAsync(tagToSave);
                         }
                     }                
                 }
 
                 //get table again with newly saved tags to save to joining table
-                tagsTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzTags>();
+                tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
                 
                 foreach (var tag in tagsInResponse)
                 {
@@ -49,7 +49,7 @@ namespace DiscogsInsight.DataAccess.Services
                     if (tagId != null)
                     {
                         var tagToArtist = new MusicBrainzArtistToMusicBrainzTags { TagId = tagId.Value, MusicBrainzArtistId = musicBrainzArtistId };
-                        await _db.SaveItemAsync(tagToArtist);
+                        await _db.InsertAsync(tagToArtist);
                     }
                 }
 
@@ -64,8 +64,8 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<List<MusicBrainzTags>> GetTagsByMusicBrainzArtistId(string musicBrainzArtistId)
         {
-            var musicBrainzTagsList = await _db.GetAllEntitiesAsListAsync<MusicBrainzTags>();
-            var musicBrainzTagsToArtistsTable = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzTags>();
+            var musicBrainzTagsList = await _db.Table<MusicBrainzTags>().ToListAsync();
+            var musicBrainzTagsToArtistsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
 
             var musicBrainzTagsToArtistsList = musicBrainzTagsToArtistsTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId);
             var tagsIdsListForArtist =  musicBrainzTagsToArtistsList.Select(x => x.TagId).ToList();

@@ -1,9 +1,10 @@
 ﻿using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 
-namespace DiscogsInsight.DataAccess.Tests.Helpers
+namespace DiscogsInsight.Tests.Common
 {
-    public static class DummyApiDataGenerator
+    public static class ApiDataGenerator
+
     {
         /// <summary>
         /// Generates dummy data for mocking api responses in various unit tests
@@ -30,7 +31,7 @@ namespace DiscogsInsight.DataAccess.Tests.Helpers
                     Name = $"Artist {i}",
                     SortName = $"Artist{i}",
                     Country = "US",
-                    LifeSpan = new LifeSpan { Begin = "here", End = "there"},
+                    LifeSpan = new LifeSpan { Begin = "here", End = "there" },
                     Area = new Area { Type = "City", Name = "Tellyland" },
                     Tags = new List<Tag> { new Tag { Count = i, Name = $"Tag{i}" } }
                 };

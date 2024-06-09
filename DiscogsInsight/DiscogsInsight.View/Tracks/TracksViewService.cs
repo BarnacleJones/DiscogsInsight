@@ -26,61 +26,63 @@ namespace DiscogsInsight.Service.Tracks
             return success;
         }
 
-        public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack()
-        {
-            try
-            {
-                var tracks = await _tracksDataService.GetAllTracks();
+        //Decided in the refactor to get rid of random track. Leaving this here 08/06/2024 in case I change my mind
+        //Needs refactoring lol
+        //public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack()
+        //{
+        //    try
+        //    {
+        //        var tracks = await _tracksDataService.GetAllTracks();
 
-                var random = new Random();
-                var randomTrack = tracks.OrderBy(x => random.Next()).FirstOrDefault();
+        //        var random = new Random();
+        //        var randomTrack = tracks.OrderBy(x => random.Next()).FirstOrDefault();
 
-                if (randomTrack != null)
-                {
-                    var releases = await _releaseDataService.GetAllReleasesAsList();
-                    var artists = await _artistDataService.GetAllArtistsFromDatabase();
-                    var releaseTitle = releases.Where(x => x.DiscogsReleaseId == randomTrack.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
-                    var releaseArtist = artists.Where(x => x.DiscogsArtistId == randomTrack.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
+        //        if (randomTrack != null)
+        //        {
+        //            var releases = await _releaseDataService.GetAllReleasesAsList();
+        //            var artists = await _artistDataService.GetAllArtistsFromDatabase();
+        //            var releaseTitle = releases.Where(x => x.DiscogsReleaseId == randomTrack.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
+        //            var releaseArtist = artists.Where(x => x.DiscogsArtistId == randomTrack.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
 
-                    var data = new TracksItemViewModel
-                    {
-                        DiscogsArtistId = randomTrack.DiscogsArtistId ?? 0,
-                        DiscogsReleaseId = randomTrack.DiscogsReleaseId ?? 0,
-                        Duration = randomTrack.MusicBrainzTrackLength == null
-                                    ? randomTrack.Duration
-                                    : TimeSpan.FromMilliseconds(randomTrack.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
-                        Title = randomTrack.Title,
-                        Position = randomTrack.Position,
-                        Rating = randomTrack.Rating ?? 0,
-                        Artist = releaseArtist,
-                        Release = releaseTitle
-                    };
+        //            var data = new TracksItemViewModel
+        //            {
+        //                DiscogsArtistId = randomTrack.DiscogsArtistId ?? 0,
+        //                DiscogsReleaseId = randomTrack.DiscogsReleaseId ?? 0,
+        //                Duration = randomTrack.MusicBrainzTrackLength == null
+        //                            ? randomTrack.Duration
+        //                            : TimeSpan.FromMilliseconds(randomTrack.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
+        //                Title = randomTrack.Title,
+        //                Position = randomTrack.Position,
+        //                Rating = randomTrack.Rating ?? 0,
+        //                Artist = releaseArtist,
+        //                Release = releaseTitle
+        //            };
 
-                    return new ViewResult<TracksItemViewModel>
-                    {
-                        Data = data,
-                        ErrorMessage = "",
-                        Success = true
-                    };
-                }
-                return new ViewResult<TracksItemViewModel>
-                {
-                    Data = null,
-                    ErrorMessage = "Random track was null",
-                    Success = false
-                };
+        //            return new ViewResult<TracksItemViewModel>
+        //            {
+        //                Data = data,
+        //                ErrorMessage = "",
+        //                Success = true
+        //            };
+        //        }
+        //        return new ViewResult<TracksItemViewModel>
+        //        {
+        //            Data = null,
+        //            ErrorMessage = "Random track was null",
+        //            Success = false
+        //        };
 
-            }
-            catch (Exception ex)
-            {
-                return new ViewResult<TracksItemViewModel>
-                {
-                    Data = null,
-                    ErrorMessage = ex.Message,
-                    Success = false
-                };
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ViewResult<TracksItemViewModel>
+        //        {
+        //            Data = null,
+        //            ErrorMessage = ex.Message,
+        //            Success = false
+        //        };
+        //    }
+        //}
 
         public async Task<ViewResult<TracksGridViewModel>> GetTracksForTracksGrid()
         {

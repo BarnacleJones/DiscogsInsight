@@ -5,15 +5,15 @@ namespace DiscogsInsight.DataAccess.Contract
 {
     public interface IReleaseDataService
     {
-        Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId);
+        Task SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId);
         Task<List<Release>> GetAllReleasesAsList();
-        Task<List<int?>> GetAllDiscogsReleaseIdsForArtist(int? discogsArtistId);
-        Task<(Release?, byte[]?)> GetReleaseAndImageAndRetrieveAllApiDataForRelease(int? discogsReleaseId);
-        Task<byte[]?> GetImageForRelease(string musicBrainzReleaseId);
-        Task<(Release?, byte[]?)> GetRandomRelease();
-        Task<List<Release>> GetNewestReleases(int howManyToReturn);
         Task<List<PossibleReleasesFromArtist>> GetPossibleReleasesForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId);
-        Task<(string, List<PossibleReleasesFromArtist>)> GetAllStoredMusicBrainzReleasesForArtistByDiscogsReleaseId(int? discogsReleaseId);
         Task<bool> UpdateReleaseToBeNewMusicBrainzReleaseId(int? discogsReleaseId, string musicBrainzReleaseId);
+        Task<List<ReleaseDataModel>> GetReleaseDataModelsByDiscogsGenreTagId(int discogsGenreTagId);
+        Task<ReleaseDataModel> GetReleaseDataModelByDiscogsReleaseId(int discogsReleaseId);
+        Task<List<ReleaseDataModel>> GetNewestReleases(int howManyToReturn);
+        Task<List<ReleaseDataModel>> GetAllReleaseDataModelsForArtist(int howManyToReturn);
+        Task<List<ReleaseDataModel>> GetAllReleaseDataModelsByYear(int year);
+        Task<ReleaseDataModel> GetRandomRelease();
     }
 }

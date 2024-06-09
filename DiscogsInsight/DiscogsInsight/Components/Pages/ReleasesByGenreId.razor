@@ -1,4 +1,4 @@
-﻿@page "/ReleasesByGenreId/{genreId:int}"
+﻿@page "/releasesByGenre"
 @using DiscogsInsight.Service.Releases
 @using DiscogsInsight.Service.Notifications
 @using DiscogsInsight.Service.Models.EntityViewModels
@@ -28,8 +28,8 @@ else
 
 @code{
 
-    [Parameter]
-    public int genreId { get; set; }
+    [Parameter] public int GenreId { get; set; }
+    [Parameter] public string Name { get; set; }
 
     private int internalGenreId { get; set; }
 
@@ -38,8 +38,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        internalGenreId = genreId;
-        HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));
+        internalGenreId = GenreId;
+        _thisGenre = Name;
+        HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByDiscogsGenreTagId(GenreId));
     }
 
     /// <summary>
@@ -50,18 +51,28 @@ else
     /// <returns></returns>
     protected override async Task OnParametersSetAsync()
     {
-       if (internalGenreId != genreId)
-       {
-            HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByGenreId(genreId));            
-       }
+        // Retrieve the parameters from the query string
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("genreId", out var genreId))
+        {
+            GenreId = int.Parse(genreId);
+        }
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("name", out var name))
+        {
+            Name = name;
+        }
+        if (internalGenreId != GenreId)
+        {
+            HandleReleaseByGenreResult(await ReleaseViewService.GetReleasesByDiscogsGenreTagId(GenreId));            
+        }
     }
-    
+
     private async void HandleReleaseByGenreResult(ViewResult<List<ReleaseViewModel>> result)
     {
         if (result.Success)
         {
             _releasesOfThisGenre = result.Data;
-            _thisGenre = result.ErrorMessage;//hack!
+            _thisGenre = "";
         }
         else
         {
