@@ -4,11 +4,6 @@ using DiscogsInsight.Database.Entities;
 
 namespace DiscogsInsight.Database
 {
-    /// <summary>
-    /// Created a connection adapter to abstract the DiscogsInsightDb class for testing.
-    /// I had to do that as the SQLiteAsyncConnection was a static service and was causing headaches mocking
-    /// But there has to be an implementation like this for it all to work
-    /// </summary>
     public class SQLiteAsyncConnectionAdapter : Contract.ISQLiteAsyncConnection
     {
         SQLiteAsyncConnection _connection;
