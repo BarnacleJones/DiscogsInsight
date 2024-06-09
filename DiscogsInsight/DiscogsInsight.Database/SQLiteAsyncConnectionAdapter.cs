@@ -1,10 +1,21 @@
 ﻿using SQLite;
 using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
+
+/* Unmerged change from project 'DiscogsInsight.Database (net8.0-android)'
+Before:
+using CloudKit;
+After:
+using CloudKit;
+using DiscogsInsight;
+using DiscogsInsight.Database;
+using DiscogsInsight.Database.Services;
+using DiscogsInsight.Database;
+*/
 using CloudKit;
 
 
-namespace DiscogsInsight.Database.Services
+namespace DiscogsInsight.Database
 {
     /// <summary>
     /// Created a connection adapter to abstract the DiscogsInsightDb class for testing.
@@ -17,7 +28,7 @@ namespace DiscogsInsight.Database.Services
         ILogger<SQLiteAsyncConnectionAdapter> _logger;
 
         public SQLiteAsyncConnectionAdapter(ILogger<SQLiteAsyncConnectionAdapter> logger)
-        {           
+        {
             _logger = logger;
             _connection = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
             _ = InitializeAsync();

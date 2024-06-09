@@ -1,4 +1,4 @@
-﻿namespace DiscogsInsight.Service.Notifications
+﻿namespace DiscogsInsight.Service
 {
     public class UserNotificationService
     {

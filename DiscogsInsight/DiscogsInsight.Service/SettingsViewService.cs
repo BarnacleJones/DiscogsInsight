@@ -1,7 +1,7 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Results;
 
-namespace DiscogsInsight.Service.Settings
+namespace DiscogsInsight.Service
 {
     public class SettingsViewService
     {

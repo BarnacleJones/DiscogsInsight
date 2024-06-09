@@ -12,7 +12,7 @@ using DiscogsInsight.Service.Insights;
 using DiscogsInsight.Service.Settings;
 using DiscogsInsight.Service.Releases;
 using DiscogsInsight.Database.Contract;
-using DiscogsInsight.Database.Services;
+using DiscogsInsight.Database;
 
 namespace DiscogsInsight
 {

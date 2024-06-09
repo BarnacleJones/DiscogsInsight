@@ -1,9 +1,18 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
+
+/* Unmerged change from project 'DiscogsInsight.Service (net8.0-windows10.0.19041.0)'
+Before:
+using DiscogsInsight.Service.Models.Collection;
+After:
+using DiscogsInsight.Service;
+using DiscogsInsight.Service;
+using DiscogsInsight.Service.Models.Collection;
+*/
 using DiscogsInsight.Service.Models.Collection;
 using DiscogsInsight.Service.Models.Results;
 using Microsoft.Extensions.Logging;
 
-namespace DiscogsInsight.Service.Tracks
+namespace DiscogsInsight.Service
 {
     public class TracksViewService
     {

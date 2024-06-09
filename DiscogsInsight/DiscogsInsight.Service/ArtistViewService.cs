@@ -2,7 +2,7 @@
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
 
-namespace DiscogsInsight.Service.Artist
+namespace DiscogsInsight.Service
 {
     public class ArtistViewService
     {
@@ -59,8 +59,8 @@ namespace DiscogsInsight.Service.Artist
                     }).ToList();
 
 
-                
-                
+
+
                 //old line was calling to release view service
                 //var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId);
 

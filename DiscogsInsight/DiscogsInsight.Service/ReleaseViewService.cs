@@ -5,7 +5,17 @@ using DiscogsInsight.Service.Models.DataCorrection;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
 using Microsoft.Extensions.Logging;
+
+/* Unmerged change from project 'DiscogsInsight.Service (net8.0-maccatalyst)'
+Before:
 namespace DiscogsInsight.Service.Releases
+After:
+using DiscogsInsight;
+using DiscogsInsight.Service;
+using DiscogsInsight.Service.Releases;
+using DiscogsInsight.Service;
+*/
+namespace DiscogsInsight.Service
 {
     public class ReleaseViewService
     {
@@ -27,7 +37,7 @@ namespace DiscogsInsight.Service.Releases
 
                 var release = await _releaseDataService.GetReleaseDataModelByDiscogsReleaseId(discogsReleaseId.Value);
                 if (release is null) throw new Exception("Release was null");
-      
+
                 return new ViewResult<ReleaseViewModel>
                 {
                     Data = GetReleaseViewModel(release),
@@ -70,7 +80,7 @@ namespace DiscogsInsight.Service.Releases
                 };
             }
         }
-              
+
         public async Task<ViewResult<ReleaseViewModel>> GetRandomRelease()
         {
             try
@@ -100,7 +110,7 @@ namespace DiscogsInsight.Service.Releases
         {
             try
             {
-                
+
                 var releaseData = await _releaseDataService.GetReleaseDataModelsByDiscogsGenreTagId(discogsGenreTagId);
 
                 var returnedReleases = new List<ReleaseViewModel>();
@@ -132,7 +142,7 @@ namespace DiscogsInsight.Service.Releases
             {
                 if (releaseYear == null) { throw new ArgumentNullException(nameof(releaseYear)); }
                 var releaseDataList = await _releaseDataService.GetAllReleaseDataModelsByYear(releaseYear.Value);
-                
+
                 var listToReturn = releaseDataList.Select(x => GetReleaseViewModel(x)).ToList();
 
                 return new ViewResult<List<ReleaseViewModel>>
