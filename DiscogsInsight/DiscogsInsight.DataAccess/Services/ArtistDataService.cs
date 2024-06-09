@@ -230,7 +230,7 @@ namespace DiscogsInsight.DataAccess.Services
             var existingJoins = await _db.GetAllEntitiesAsListAsync<MusicBrainzArtistToMusicBrainzRelease>();
             var existingReleasesForThisArtistList = existingJoins.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).Select(x => x.MusicBrainzReleaseId).ToList();
 
-            if (releasesByArtist != null && releasesByArtist.Any())
+            if (releasesByArtist != null && releasesByArtist.Count != 0)
             {
                 foreach (var artistsRelease in releasesByArtist)
                 {
@@ -252,7 +252,7 @@ namespace DiscogsInsight.DataAccess.Services
                 }
 
             }
-            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Any())
+            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Count != 0)
             {
                 foreach (var artistsReleaseGroup in releaseGroupsByArtist)
                 {

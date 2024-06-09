@@ -22,13 +22,13 @@ namespace DiscogsInsight.DataAccess.Services
             try
             {
                 var tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
-                var existingTagNamesInDb = tagsTable.Any() ? tagsTable.Select(x => x.Tag).ToList() : new List<string?>();
+                var existingTagNamesInDb = tagsTable.Count != 0 ? tagsTable.Select(x => x.Tag).ToList() : new List<string?>();
 
                 var artistFromResponse =   artistResponse.Artists.Where(x => x.Id == musicBrainzArtistId).FirstOrDefault();
                 if (artistFromResponse == null) { return true;  } //artist id mismatch potentially
                 var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count >= 1).ToList();
                      
-                if (tagsInResponse.Any()) 
+                if (tagsInResponse != null && tagsInResponse.Any()) 
                 {
                     foreach (var tag in tagsInResponse)
                     {

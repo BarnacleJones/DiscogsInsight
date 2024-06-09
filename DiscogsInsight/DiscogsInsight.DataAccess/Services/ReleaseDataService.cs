@@ -95,7 +95,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             //First fetch all API data if there is any missing
             var releasesByGenreWithoutAllApiData = releasesOfThisGenre.Where(x => !x.HasAllApiData && x.DiscogsReleaseId.HasValue).Select(x => x.DiscogsReleaseId);
-            if (releasesByGenreWithoutAllApiData.Any())
+            if (releasesByGenreWithoutAllApiData != null && releasesByGenreWithoutAllApiData.Any())
             {
                 await GetAllApiDataForListOfDiscogsReleaseIds(releasesByGenreWithoutAllApiData);
                 //requery
@@ -125,7 +125,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             var latestWithoutApiData = latestXReleases.Where(x => !x.HasAllApiData && x.DiscogsReleaseId.HasValue).Select(x => x.DiscogsReleaseId);
 
-            if (latestWithoutApiData.Any())
+            if (latestWithoutApiData != null && latestWithoutApiData.Any())
             {
                 await GetAllApiDataForListOfDiscogsReleaseIds(latestWithoutApiData);
                 //requery
@@ -197,7 +197,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             //First fetch all API data if there is any missing
             var releasesByGenreWithoutAllApiData = artistsReleasesInterimDataModels.Where(x => !x.HasAllApiData && x.DiscogsReleaseId.HasValue).Select(x => x.DiscogsReleaseId);
-            if (releasesByGenreWithoutAllApiData.Any())
+            if (releasesByGenreWithoutAllApiData != null && releasesByGenreWithoutAllApiData.Any())
             {
                 await GetAllApiDataForListOfDiscogsReleaseIds(releasesByGenreWithoutAllApiData);
                 //requery
@@ -227,7 +227,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             //First fetch all API data if there is any missing
             var releasesByGenreWithoutAllApiData = releasesInterimDataModels.Where(x => !x.HasAllApiData && x.DiscogsReleaseId.HasValue).Select(x => x.DiscogsReleaseId);
-            if (releasesByGenreWithoutAllApiData.Any())
+            if (releasesByGenreWithoutAllApiData != null && releasesByGenreWithoutAllApiData.Any())
             {
                 var discogsArtistId = releasesInterimDataModels.Select(x => x.DiscogsArtistId).FirstOrDefault() ?? 0;
                 await GetAllApiDataForListOfDiscogsReleaseIds(releasesByGenreWithoutAllApiData);
@@ -519,7 +519,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
                 
             //save genres (styles) from response if there are any
-            if (releaseResponse.styles == null || !releaseResponse.styles.Any())
+            if (releaseResponse.styles == null || releaseResponse.styles.Count == 0)
                 return;
 
             var releaseGenresFromReleaseResponse = releaseResponse.styles;
@@ -532,7 +532,7 @@ namespace DiscogsInsight.DataAccess.Services
             bool needToRequeryGenreTable = false;
 
             //save to genre table 
-            if (genresNotInDatabaseAlready.Any())
+            if (genresNotInDatabaseAlready != null && genresNotInDatabaseAlready.Count != 0)
             {
                 needToRequeryGenreTable = true;
                 foreach (var genreName in genresNotInDatabaseAlready)
@@ -581,7 +581,7 @@ namespace DiscogsInsight.DataAccess.Services
             //It looks like the first in the list is closest match
             //Ability to correct this data is on the release card
 
-            var musicBrainsArtistDataToSave = artistResponse.Artists.Select(x => new 
+            var musicBrainsArtistDataToSave = artistResponse.Artists?.Select(x => new 
             {
                 x.Id,
                 x.Area,
@@ -594,12 +594,12 @@ namespace DiscogsInsight.DataAccess.Services
                 x.Tags
             }).FirstOrDefault();
 
-            existingArtist.MusicBrainzArtistId = musicBrainsArtistDataToSave.Id;
+            existingArtist.MusicBrainzArtistId = musicBrainsArtistDataToSave?.Id;
 
-            var beginAreaName = musicBrainsArtistDataToSave.BeginAreaName;
+            var beginAreaName = musicBrainsArtistDataToSave?.BeginAreaName;
             if (beginAreaName != null)
             {
-                if (musicBrainsArtistDataToSave.BeginAreaType == "City")
+                if (musicBrainsArtistDataToSave?.BeginAreaType == "City")
                 {
                     existingArtist.City = beginAreaName;
                 }
@@ -609,10 +609,10 @@ namespace DiscogsInsight.DataAccess.Services
                 }
             }
 
-            var areaName = musicBrainsArtistDataToSave.AreaName;
+            var areaName = musicBrainsArtistDataToSave?.AreaName;
             if (areaName != null)
             {
-                if (musicBrainsArtistDataToSave.AreaType == "City")
+                if (musicBrainsArtistDataToSave?.AreaType == "City")
                 {
                     existingArtist.City = areaName;
                 }
@@ -622,13 +622,13 @@ namespace DiscogsInsight.DataAccess.Services
                 }
             }
 
-            existingArtist.StartYear = musicBrainsArtistDataToSave.Begin;
-            existingArtist.EndYear = musicBrainsArtistDataToSave.End;
+            existingArtist.StartYear = musicBrainsArtistDataToSave?.Begin;
+            existingArtist.EndYear = musicBrainsArtistDataToSave?.End;
 
             //save tags - yes it is saving to joining table too before saving the actual artist table information, but its saving calls to the db....
-            var tagsNamesInResponse = musicBrainsArtistDataToSave.Tags.Where(x => x.Count > 1).Select(x => x.Name);//excludes a lot of random tags
+            var tagsNamesInResponse = musicBrainsArtistDataToSave?.Tags?.Where(x => x.Count > 1).Select(x => x.Name);//excludes a lot of random tags
 
-            if (tagsNamesInResponse.Any())
+            if (tagsNamesInResponse != null && tagsNamesInResponse.Any())
             {
                 var quotedTags = string.Join(", ", tagsNamesInResponse.Select(tag => $"'{tag}'"));
                 var musicBrainsTagRecordsForGivenTagsDbQuery = @$"
@@ -640,7 +640,7 @@ namespace DiscogsInsight.DataAccess.Services
                 var reponseTagNamesAlreadyInDb = reponseTagNamesAlreadyInDbClassObject.Where(x => !string.IsNullOrWhiteSpace(x.Tag)).Select(x => x.Tag).ToList();
                 var tagNamesToSave = tagsNamesInResponse.Except(reponseTagNamesAlreadyInDb).ToList();
                 
-                if (tagNamesToSave.Any())
+                if (tagNamesToSave != null && tagNamesToSave.Any())
                 {
                     foreach (var tag in tagNamesToSave)
                     {
@@ -672,7 +672,7 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(release);
 
                 var tracksFromReleaseData = releaseData.Media.SelectMany(x => x.Tracks).ToList();
-                if (!tracksFromReleaseData.Any()) { return; }
+                if (tracksFromReleaseData != null && tracksFromReleaseData.Count == 0) { return; }
 
                 var tracksForThisRelease = await _db.Table<Track>()
                                                     .Where(x => x.DiscogsReleaseId == release.DiscogsReleaseId)
@@ -689,7 +689,7 @@ namespace DiscogsInsight.DataAccess.Services
                         levenshteinDistanceAndTrackLength.Add((levenshteinDistance, apiTrack.Length));
                     }
                     //sort by distance - lowest number of edits is the most similar
-                    if (levenshteinDistanceAndTrackLength.Any())
+                    if (levenshteinDistanceAndTrackLength.Count != 0)
                     {
                         levenshteinDistanceAndTrackLength.Sort((x, y) => x.Item1.CompareTo(y.Item1));
                         var matchingRelease = levenshteinDistanceAndTrackLength.First();
@@ -725,7 +725,7 @@ namespace DiscogsInsight.DataAccess.Services
             var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, musicBrainzArtistId);
             var existingMusicBrainzReleaseIdsForThisArtistAsStringList = existingMusicBrainzReleaseIdsForThisArtist.Select(x => x.MusicBrainzReleaseId).ToList();
 
-            if (releasesByArtist != null && releasesByArtist.Any())
+            if (releasesByArtist != null && releasesByArtist.Count != 0)
             {
                 foreach (var artistsRelease in releasesByArtist)
                 {
@@ -747,7 +747,7 @@ namespace DiscogsInsight.DataAccess.Services
                 }
 
             }
-            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Any())
+            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Count != 0)
             {
                 foreach (var artistsReleaseGroup in releaseGroupsByArtist)
                 {
@@ -785,7 +785,7 @@ namespace DiscogsInsight.DataAccess.Services
                 levenshteinDistanceAndReleaseIds.Add((levenshteinDistance, release));
             }
             //sort by distance - lowest number of edits is the most similar
-            if (levenshteinDistanceAndReleaseIds.Any())
+            if (levenshteinDistanceAndReleaseIds.Count != 0)
             {
                 levenshteinDistanceAndReleaseIds.Sort((x, y) => x.Item1.CompareTo(y.Item1));
                 var matchingRelease = levenshteinDistanceAndReleaseIds.First();

@@ -51,7 +51,7 @@ namespace DiscogsInsight.DataAccess.Services
             var entities = await _db.GetAllEntitiesAsListAsync<T>();
             entityList = entities.ToList();
 
-            if (!entityList.Any())
+            if (entityList != null && entityList.Count == 0)
             {
                 await CollectionSavedOrUpdatedFromDiscogs();
                 var newEntity = await _db.GetAllEntitiesAsListAsync<T>();

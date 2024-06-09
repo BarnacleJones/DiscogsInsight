@@ -50,7 +50,7 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 var discogsGenreTagsList = await GetAllGenreTagsAsList();
 
-                if (releaseResponse.styles == null || !releaseResponse.styles.Any() || discogsGenreTagsList == null)
+                if (releaseResponse.styles == null || releaseResponse.styles.Count == 0 || discogsGenreTagsList == null)
                 {
                     return false;
                 }
@@ -58,7 +58,7 @@ namespace DiscogsInsight.DataAccess.Services
                 var releaseStylesFromReleaseResponse = releaseResponse.styles;
                 var stylesNotInDatabaseAlready = releaseStylesFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag)).ToList();
 
-                if (stylesNotInDatabaseAlready.Any())
+                if (stylesNotInDatabaseAlready != null && stylesNotInDatabaseAlready.Count != 0)
                 {
                     foreach (var style  in stylesNotInDatabaseAlready)
                     {
@@ -103,7 +103,7 @@ namespace DiscogsInsight.DataAccess.Services
 
                 var stylesNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag)).ToList();
 
-                if (stylesNotInDatabaseAlready.Any())
+                if (stylesNotInDatabaseAlready != null && stylesNotInDatabaseAlready.Count != 0)
                 {
                     foreach (var style in stylesNotInDatabaseAlready)
                     {
