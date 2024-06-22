@@ -286,7 +286,7 @@ namespace DiscogsInsight.Service
 
         #endregion
 
-        public void LogError(Exception ex)
+        private void LogError(Exception ex)
         {
             if (ex != null) 
             {

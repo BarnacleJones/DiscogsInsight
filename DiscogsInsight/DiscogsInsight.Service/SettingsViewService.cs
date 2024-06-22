@@ -15,7 +15,7 @@ namespace DiscogsInsight.Service
             _logger = logger;
         }
 
-        public void LogError(Exception ex)
+        private void LogError(Exception ex)
         {
             if (ex != null)
             {
