@@ -20,7 +20,6 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
-        #region Public Methods
         public async Task<List<DiscogsArtistIdAndName>> GetArtistsIdsAndNames()
         {
             var artistList = await GetCollectionEntityAsList<DiscogsInsight.Database.Entities.Artist>();
@@ -38,9 +37,6 @@ namespace DiscogsInsight.DataAccess.Services
             return await GetCollectionEntityAsList<DiscogsInsight.Database.Entities.Release>();
         }
 
-        #endregion
-
-        #region Private
 
         //Use this method to get item from database and get collection from API if doesnt exist
         private async Task<List<T>> GetCollectionEntityAsList<T>() where T : IDatabaseEntity, new()
@@ -286,6 +282,22 @@ namespace DiscogsInsight.DataAccess.Services
                 throw;
             }
         }
-        #endregion
+
+        public Task<bool> UpdateCollectionFromDiscogs()
+        {
+            try
+            {
+                var data = await _discogsApiService.GetCollectionFromDiscogsApi();
+                if (data != null)
+                {
+                    return await SaveDiscogsCollectionResponse(data);
+                }
+                return false;
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

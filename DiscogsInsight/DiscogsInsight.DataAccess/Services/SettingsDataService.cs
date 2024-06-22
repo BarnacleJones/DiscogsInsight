@@ -15,7 +15,7 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<bool> UpdateCollection()
         {
-            return await _collectionDataService.CollectionSavedOrUpdatedFromDiscogs();
+            return await _collectionDataService.UpdateCollectionFromDiscogs();
         }
 
         public string GetDiscogsUsername()

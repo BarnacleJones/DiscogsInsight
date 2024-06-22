@@ -10,5 +10,6 @@ namespace DiscogsInsight.DataAccess.Contract
         Task PurgeEntireCollection();
         Task PurgeEntireDatabase();
         Task<bool> CollectionSavedOrUpdatedFromDiscogs();
+        Task<bool> UpdateCollectionFromDiscogs();
     }
 }
