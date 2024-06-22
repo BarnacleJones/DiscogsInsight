@@ -1,5 +1,5 @@
 ﻿
-namespace DiscogsInsight.DataAccess
+namespace DiscogsInsight.Database.Contract
 {
     public class DiscogsReleaseIdClass
     {

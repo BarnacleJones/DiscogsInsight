@@ -7,6 +7,8 @@ namespace DiscogsInsight.Database.Contract
         Task CreateTableAsync<T>() where T : new();
         AsyncTableQuery<T> Table<T>() where T : new();
         Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : new();
+        Task<HashSet<int>> AllDiscogsArtistIdsInDb();
+        Task<HashSet<int>> AllDiscogsReleaseIdsInDb();
         Task<T> FindAsync<T>(object pk) where T : new();
         Task<T> GetAsync<T>(object pk) where T : new();
         Task<int> InsertAsync(object obj);
@@ -17,5 +19,6 @@ namespace DiscogsInsight.Database.Contract
         Task Purge();
         Task PurgeEntireDb();
         Task<T> ExecuteScalarAsync<T>(string query, params object[] args);
+        public Task<int> InsertAllAsync<T>(IEnumerable<T> objects, bool runInTransaction = true) where T : IDatabaseEntity;
     }
 }

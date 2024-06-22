@@ -1,6 +1,7 @@
 ﻿using SQLite;
 using Microsoft.Extensions.Logging;
 using DiscogsInsight.Database.Entities;
+using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.Database
 {
@@ -127,6 +128,31 @@ namespace DiscogsInsight.Database
         public Task<int> UpdateAsync(object obj)
         {
             return _connection.UpdateAsync(obj);
+        }
+
+        public async Task<HashSet<int>> AllDiscogsArtistIdsInDb()
+        {
+            var discogsArtistIdsQuery = @$"SELECT DISTINCT DiscogsArtistId FROM Artist";
+
+            var discogsArtistIdsInterim = await QueryAsync<DiscogsArtistIdClass>(discogsArtistIdsQuery);
+
+            return discogsArtistIdsInterim.Select(artist => artist.DiscogsArtistId).ToHashSet();
+        } 
+        
+        public async Task<HashSet<int>> AllDiscogsReleaseIdsInDb()
+        {
+            var discogsReleasesInTheDbQuery = @$"SELECT DISTINCT DiscogsReleaseId FROM Release";
+
+            var artistsIdsInDbAlreadyInterim = await QueryAsync<DiscogsReleaseIdClass>(discogsReleasesInTheDbQuery);
+
+            return artistsIdsInDbAlreadyInterim.Select(x => x.DiscogsReleaseId).ToHashSet();
+
+
+        }
+
+        public Task<int> InsertAllAsync<T>(IEnumerable<T> objects, bool runInTransaction = true) where T : IDatabaseEntity
+        {
+            return InsertAllAsync(objects, runInTransaction);
         }
     }
 }
