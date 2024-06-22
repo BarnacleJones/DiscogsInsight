@@ -37,34 +37,7 @@ namespace DiscogsInsight.DataAccess.Services
             return await GetCollectionEntityAsList<DiscogsInsight.Database.Entities.Release>();
         }
 
-
-        //Use this method to get item from database and get collection from API if doesnt exist
-        private async Task<List<T>> GetCollectionEntityAsList<T>() where T : IDatabaseEntity, new()
-        {
-            List<T> entityList;
-            var entities = await _db.Table<T>().ToListAsync();
-            entityList = entities.ToList();
-
-            if (entityList != null && entityList.Count == 0)
-            {
-                await CollectionSavedOrUpdatedFromDiscogs();
-                var newEntity = await _db.Table<T>().ToListAsync();
-                entityList = newEntity.ToList();
-            }
-            return entityList;
-        }
-
-        public async Task PurgeEntireCollection()
-        {
-            await _db.Purge();
-        }
-
-        public async Task PurgeEntireDatabase()
-        {
-            await _db.PurgeEntireDb();
-        }
-
-        public async Task<bool> CollectionSavedOrUpdatedFromDiscogs()
+        public async Task<bool> UpdateCollectionFromDiscogs()
         {
             try
             {
@@ -79,6 +52,37 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 throw;
             }
+        }
+
+        //Use this method to get item from database and get collection from API if doesnt exist
+        private async Task<List<T>> GetCollectionEntityAsList<T>() where T : IDatabaseEntity, new()
+        {
+            List<T> entityList;
+            var entities = await _db.Table<T>().ToListAsync();
+            entityList = entities.ToList();
+
+            if (entityList != null && entityList.Count == 0)
+            {
+                var data = await _discogsApiService.GetCollectionFromDiscogsApi();
+                if (data != null)
+                {
+                    await SaveDiscogsCollectionResponse(data);
+                }
+               
+                var newEntity = await _db.Table<T>().ToListAsync();
+                entityList = newEntity.ToList();
+            }
+            return entityList;
+        }
+
+        public async Task PurgeEntireCollection()
+        {
+            await _db.Purge();
+        }
+
+        public async Task PurgeEntireDatabase()
+        {
+            await _db.PurgeEntireDb();
         }
 
         private async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
@@ -283,21 +287,5 @@ namespace DiscogsInsight.DataAccess.Services
             }
         }
 
-        public Task<bool> UpdateCollectionFromDiscogs()
-        {
-            try
-            {
-                var data = await _discogsApiService.GetCollectionFromDiscogsApi();
-                if (data != null)
-                {
-                    return await SaveDiscogsCollectionResponse(data);
-                }
-                return false;
-            }
-            catch
-            {
-                throw;
-            }
-        }
     }
 }
