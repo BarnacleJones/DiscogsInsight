@@ -74,6 +74,11 @@ namespace DiscogsInsight.Database
             }
         }
 
+        public Task<T> ExecuteScalarAsync<T>(string query, params object[] args)
+        {
+            return _connection.ExecuteScalarAsync<T>(query, args);
+        }
+
         public Task CreateTableAsync<T>() where T : new()
         {
             return _connection.CreateTableAsync<T>();

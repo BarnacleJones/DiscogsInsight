@@ -520,17 +520,23 @@ namespace DiscogsInsight.DataAccess.Services
         /// <param name="existingRelease"></param>
         /// <param name="releaseResponse"></param>
         /// <returns></returns>
-        private async Task SaveInformationFromDiscogsReleaseResponse(Database.Entities.Release existingRelease, DiscogsReleaseResponse releaseResponse)
+        private async Task SaveInformationFromDiscogsReleaseResponse(Release existingRelease, DiscogsReleaseResponse releaseResponse)
         {
-            var tracksAlreadySavedForThisRelease = await _db.Table<Database.Entities.Track>().Where(x => x.DiscogsReleaseId == existingRelease.DiscogsReleaseId).CountAsync() > 0;
-                
             await UpdateAdditionalReleaseProperties(releaseResponse, existingRelease);
 
+            var countQuery = @$"SELECT COUNT(*)
+                                FROM Track
+                                WHERE DiscogsReleaseId = ?;";
+
+            var count = await _db.ExecuteScalarAsync<int>(countQuery, existingRelease.DiscogsReleaseId);
+
+            var tracksAlreadySavedForThisRelease = count > 0;
+                
             if (!tracksAlreadySavedForThisRelease && releaseResponse.tracklist != null)
             {
                 foreach (var track in releaseResponse.tracklist)
                 {
-                    await _db.InsertAsync(new Database.Entities.Track
+                    await _db.InsertAsync(new Track
                     {
                         DiscogsArtistId = existingRelease.DiscogsArtistId,
                         DiscogsMasterId = existingRelease.DiscogsMasterId,
@@ -541,17 +547,26 @@ namespace DiscogsInsight.DataAccess.Services
                     });
                 }
             }
+                        
+            //save genres (and styles) from response if there are any
+            var responseGenres = new List<string>();
+            if (releaseResponse.styles != null) responseGenres.AddRange(releaseResponse.styles);
+            if (releaseResponse.genres != null) responseGenres.AddRange(releaseResponse.genres);
 
-            //save genres (styles) from response if there are any
-            if (releaseResponse.styles != null && releaseResponse.styles.Count > 0) 
+            if (responseGenres.Count > 0) 
             {
-                var releaseGenresFromReleaseResponse = releaseResponse.styles;
-                //todo have a think about how to further optimise this and the below
-                //when coming from all releases by genre - still getting the whole table per release
-                //not as bad if just loading a single release
-                var genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
-                var genresNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(genreInDatabaseAlready.Select(y => y.DiscogsTag)).ToList();
+                var quotedGenres = string.Join(", ", responseGenres.Select(tag => $"'{tag}'"));
 
+                var discogsTagsInTheDbAlreadyQuery = @$"SELECT Id, DiscogsTag
+                                                   FROM DiscogsGenreTags
+                                                   WHERE DiscogsTag IN ({quotedGenres});
+                                                        ";
+                var discogsGenreTagsInDbAlready = await _db.QueryAsync<DiscogsGenreTags>(discogsTagsInTheDbAlreadyQuery);
+
+                var genresNotInDatabaseAlready = responseGenres
+                                                .Except(discogsGenreTagsInDbAlready.Select(x => x.DiscogsTag ?? ""))
+                                                .ToList();
+                
                 bool needToRequeryGenreTable = false;
 
                 //save to genre table 
@@ -566,54 +581,14 @@ namespace DiscogsInsight.DataAccess.Services
 
                 if (needToRequeryGenreTable)
                 {
-                    genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
+                    discogsGenreTagsInDbAlready = await _db.QueryAsync<DiscogsGenreTags>(discogsTagsInTheDbAlreadyQuery);
+
                 }
 
                 //save to genre/release joining table
-                foreach (var style in releaseGenresFromReleaseResponse)
+                foreach (var style in responseGenres)
                 {
-                    var genreTagId = genreInDatabaseAlready.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
-
-                    await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
-                    {
-                        DiscogsReleaseId = existingRelease.DiscogsReleaseId,
-                        DiscogsArtistId = existingRelease.DiscogsArtistId,
-                        DiscogsGenreTagId = genreTagId
-                    });
-                }
-            }
-
-            //save genres (actual genres collection) from response if there are any
-            if (releaseResponse.genres != null && releaseResponse.genres.Count > 0)
-            {
-                var releaseGenresFromReleaseResponse = releaseResponse.genres;
-                //todo have a think about how to further optimise this
-                //when coming from all releases by genre - still getting the whole table per release
-                //not as bad if just loading a single release
-                var genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
-                var genresNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(genreInDatabaseAlready.Select(y => y.DiscogsTag)).ToList();
-
-                bool needToRequeryGenreTable = false;
-
-                //save to genre table 
-                if (genresNotInDatabaseAlready != null && genresNotInDatabaseAlready.Count != 0)
-                {
-                    needToRequeryGenreTable = true;
-                    foreach (var genreName in genresNotInDatabaseAlready)
-                    {
-                        await _db.InsertAsync(new DiscogsGenreTags { DiscogsTag = genreName });
-                    }
-                }
-
-                if (needToRequeryGenreTable)
-                {
-                    genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
-                }
-
-                //save to genre/release joining table
-                foreach (var style in releaseGenresFromReleaseResponse)
-                {
-                    var genreTagId = genreInDatabaseAlready.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
+                    var genreTagId = discogsGenreTagsInDbAlready.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
 
                     await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
                     {
@@ -624,6 +599,7 @@ namespace DiscogsInsight.DataAccess.Services
                 }
             }
         }
+
         private async Task UpdateAdditionalReleaseProperties(DiscogsReleaseResponse releaseResponse, Database.Entities.Release existingRelease)
         {
             //update existing release entity with additional properties
