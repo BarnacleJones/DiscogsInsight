@@ -18,3 +18,4 @@ namespace DiscogsInsight.DataAccess
         public string MusicBrainzReleaseId { get; set; }
     }
 }
+
