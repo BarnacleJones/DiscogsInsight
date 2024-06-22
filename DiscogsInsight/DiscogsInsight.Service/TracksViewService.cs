@@ -8,24 +8,11 @@ namespace DiscogsInsight.Service
     public class TracksViewService
     {
         private readonly ITracksDataService _tracksDataService;
-        private readonly IReleaseDataService _releaseDataService;
-        private readonly IArtistDataService _artistDataService;
         private readonly ILogger<TracksViewService> _logger;
-        public TracksViewService(ITracksDataService tracksDataService, ILogger<TracksViewService> logger, IReleaseDataService releaseDataService, IArtistDataService artistDataService)
+        public TracksViewService(ITracksDataService tracksDataService, ILogger<TracksViewService> logger)
         {
             _tracksDataService = tracksDataService;
             _logger = logger;
-            _releaseDataService = releaseDataService;
-            _artistDataService = artistDataService;
-        }
-
-        public void LogError(Exception ex)
-        {
-            if (ex != null)
-            {
-                _logger.LogError(ex.StackTrace);
-                _logger.LogError(ex.Message);
-            }
         }
 
         public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
@@ -34,6 +21,7 @@ namespace DiscogsInsight.Service
             return success;
         }
 
+        #region zombie code
         //Decided in the refactor to get rid of random track. Leaving this here 08/06/2024 in case I change my mind
         //Needs refactoring lol
         //public async Task<ViewResult<TracksItemViewModel>> GetRandomTrack()
@@ -91,6 +79,7 @@ namespace DiscogsInsight.Service
         //        };
         //    }
         //}
+        #endregion
 
         public async Task<ViewResult<TracksGridViewModel>> GetTracksForTracksGrid()
         {
@@ -107,25 +96,14 @@ namespace DiscogsInsight.Service
                                     : TimeSpan.FromMilliseconds(x.MusicBrainzTrackLength.Value).ToString(@"mm\:ss"),
                     Title = x.Title,
                     Position = x.Position,
-                    Rating = x.Rating ?? 0
+                    Rating = x.Rating ?? 0,
+                    Artist = x.ArtistName,
+                    Release = x.ReleaseName
                 }).ToList();
-
-                var releases = await _releaseDataService.GetAllReleasesAsList();
-                var artists = await _artistDataService.GetAllArtistsFromDatabase();
-
-                foreach (var tracksItems in tracksAsGridItems)
-                {
-                    var releaseTitle = releases.Where(x => x.DiscogsReleaseId == tracksItems.DiscogsReleaseId).Select(x => x.Title).FirstOrDefault();
-                    tracksItems.Release = releaseTitle;
-
-                    var releaseArtist = artists.Where(x => x.DiscogsArtistId == tracksItems.DiscogsArtistId).Select(x => x.Name).FirstOrDefault();
-                    tracksItems.Artist = releaseArtist;
-                }
 
                 return new ViewResult<TracksGridViewModel>
                 {
                     Data = new TracksGridViewModel { Tracks = tracksAsGridItems },
-                    ErrorMessage = "",
                     Success = true
                 };
             }
@@ -138,6 +116,15 @@ namespace DiscogsInsight.Service
                     ErrorMessage = ex.Message,
                     Success = false
                 };
+            }
+        }
+
+        private void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
             }
         }
     }

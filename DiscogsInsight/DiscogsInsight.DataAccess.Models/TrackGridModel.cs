@@ -11,5 +11,7 @@
         public long? MusicBrainzTrackLength { get; set; }
         public string? Position { get; set; }//Eg A1, A2, B1, etc - sorting property
         public int? Rating { get; set; }
+        public string? ArtistName { get; set; }
+        public string? ReleaseName { get; set; }
     }
 }

@@ -17,16 +17,20 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<List<TrackGridModel>> GetAllTracksForGrid()
         {
             var tracksGridModelItemsQuery = $@"SELECT
-                                               Id,
-                                               DiscogsArtistId,
-                                               DiscogsReleaseId,
-                                               DiscogsMasterId,
-                                               Title,
-                                               Duration,
-                                               MusicBrainzTrackLength,
-                                               Position,
-                                               Rating
-                                               FROM Track";
+                                               Track.Id,
+                                               Track.DiscogsArtistId,
+                                               Track.DiscogsReleaseId,
+                                               Track.DiscogsMasterId,
+                                               Track.Title,
+                                               Track.Duration,
+                                               Track.MusicBrainzTrackLength,
+                                               Track.Position,
+                                               Track.Rating,
+                                               Artist.Name as ArtistName,
+                                               Release.Title as ReleaseName
+                                               FROM Track
+                                               INNER JOIN Release on Track.DiscogsReleaseId = Release.DiscogsReleaseId
+                                               INNER JOIN Artist on Track.DiscogsArtistId = Artist.DiscogsArtistId;";
 
             var data = await _db.QueryAsync<TrackGridModel>(tracksGridModelItemsQuery);
 
