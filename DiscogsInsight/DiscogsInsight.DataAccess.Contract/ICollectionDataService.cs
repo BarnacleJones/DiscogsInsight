@@ -7,9 +7,7 @@ namespace DiscogsInsight.DataAccess.Contract
     {
         Task<List<DiscogsArtistIdAndName>> GetArtistsIdsAndNames();
         Task<List<Release>> GetReleases();
-        Task PurgeEntireCollection();
-        Task PurgeEntireDatabase();
-        Task<bool> CollectionSavedOrUpdatedFromDiscogs();
         Task<bool> UpdateCollectionFromDiscogs();
+        Task<bool> CheckCollectionIsSeededOrSeed();
     }
 }

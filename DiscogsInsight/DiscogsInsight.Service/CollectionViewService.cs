@@ -1,4 +1,5 @@
-﻿using DiscogsInsight.DataAccess.Contract;
+﻿using AndroidX.Lifecycle;
+using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Collection;
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
@@ -24,6 +25,33 @@ namespace DiscogsInsight.Service.Collection
                 _logger.LogError(ex.StackTrace);
                 _logger.LogError(ex.Message);
             }
+        }
+
+
+
+        public async Task<ViewResult<bool>> ConfirmDataIsSeededAndSeedIfNot()
+        {
+            try
+            {
+                var success = _collectionDataService.CheckCollectionIsSeededOrSeed();
+                return new ViewResult<bool>
+                {
+                    Data = true,
+                    ErrorMessage = "",
+                    Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                return new ViewResult<bool>
+                {
+                    Data = false,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
+            
         }
 
         public async Task<ViewResult<DiscogsCollectionViewModel>> GetCollection()

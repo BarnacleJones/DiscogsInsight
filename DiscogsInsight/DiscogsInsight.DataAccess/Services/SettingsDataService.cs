@@ -1,16 +1,19 @@
 using DiscogsInsight.DataAccess.Contract;
+using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.DataAccess.Services
 {
     public class SettingsDataService : ISettingsDataService
     {
+        private readonly ISQLiteAsyncConnection _db;
         private readonly ICollectionDataService _collectionDataService;
         private readonly IPreferencesService _preferencesService;
 
-        public SettingsDataService(ICollectionDataService collectionDataService, IPreferencesService preferencesService)
+        public SettingsDataService(ISQLiteAsyncConnection db,  IPreferencesService preferencesService, ICollectionDataService collectionDataService)
         {
-            _collectionDataService = collectionDataService;
+            _db = db;
             _preferencesService = preferencesService;
+            _collectionDataService = collectionDataService;
         }
 
         public async Task<bool> UpdateCollection()
@@ -39,13 +42,13 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 _preferencesService.Set(PreferencesConstant.DiscogsUsername, userName);
             }
-            await _collectionDataService.PurgeEntireCollection();
+            await PurgeEntireDb();
             return true;
         }
 
         public async Task<bool> PurgeEntireDb()
         {
-            await _collectionDataService.PurgeEntireDatabase();
+            await _db.PurgeEntireDb();
             return true;
         }
 
