@@ -1,5 +1,4 @@
-﻿using AndroidX.Lifecycle;
-using DiscogsInsight.DataAccess.Contract;
+﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Collection;
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
@@ -58,6 +57,9 @@ namespace DiscogsInsight.Service.Collection
         {
             try
             {
+                //just get them all in a dataacessmodel like releasedatamodel and just map it here
+                //write raw sql query to do the join
+
                 var releases = await _collectionDataService.GetReleases();
                 var releaseList = releases.ToList();
 

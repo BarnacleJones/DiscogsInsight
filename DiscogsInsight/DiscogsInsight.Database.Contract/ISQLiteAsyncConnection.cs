@@ -9,6 +9,7 @@ namespace DiscogsInsight.Database.Contract
         Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : new();
         Task<HashSet<int>> AllDiscogsArtistIdsInDb();
         Task<HashSet<int>> AllDiscogsReleaseIdsInDb();
+        Task<HashSet<string>> AllDiscogsGenreTagsInDb();
         Task<T> FindAsync<T>(object pk) where T : new();
         Task<T> GetAsync<T>(object pk) where T : new();
         Task<int> InsertAsync(object obj);

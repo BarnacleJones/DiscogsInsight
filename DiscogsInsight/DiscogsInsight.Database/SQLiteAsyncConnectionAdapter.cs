@@ -146,13 +146,21 @@ namespace DiscogsInsight.Database
             var artistsIdsInDbAlreadyInterim = await QueryAsync<DiscogsReleaseIdClass>(discogsReleasesInTheDbQuery);
 
             return artistsIdsInDbAlreadyInterim.Select(x => x.DiscogsReleaseId).ToHashSet();
-
-
         }
 
         public Task<int> InsertAllAsync<T>(IEnumerable<T> objects, bool runInTransaction = true) where T : IDatabaseEntity
         {
             return InsertAllAsync(objects, runInTransaction);
+        }
+
+        public async Task<HashSet<string>> AllDiscogsGenreTagsInDb()
+        {
+            var discogsReleasesInTheDbQuery = @$"SELECT DISTINCT DiscogsTag FROM DiscogsGenreTags";
+
+            var artistsIdsInDbAlreadyInterim = await QueryAsync<DiscogsTags>(discogsReleasesInTheDbQuery);
+
+            return artistsIdsInDbAlreadyInterim.Select(x => x.DiscogsTag).ToHashSet();
+
         }
     }
 }

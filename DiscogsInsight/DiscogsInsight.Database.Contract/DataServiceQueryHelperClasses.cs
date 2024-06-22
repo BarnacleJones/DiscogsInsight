@@ -5,6 +5,10 @@ namespace DiscogsInsight.Database.Contract
     {
         public int DiscogsReleaseId { get; set; }
     }
+    public class DiscogsTags
+    {
+        public string DiscogsTag { get; set; }
+    }
     public class DiscogsArtistIdClass
     {
         public int DiscogsArtistId { get; set; }

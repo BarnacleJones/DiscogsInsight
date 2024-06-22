@@ -1,11 +1,9 @@
 using DiscogsInsight.ApiIntegration.Contract;
 using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database.Entities;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -22,28 +20,10 @@ namespace DiscogsInsight.DataAccess.Services
             _logger = logger;
         }
 
-        public async Task<List<DiscogsArtistIdAndName>> GetArtistsIdsAndNames()
-        {
-            var artistList = await _db.Table<Artist>().ToListAsync();
-
-            return artistList.Select(x =>
-            new DiscogsArtistIdAndName
-            {
-                DiscogsArtistId = x.DiscogsArtistId,
-                Name = x.Name
-            }).ToList();
-        }
-
-        public async Task<List<DiscogsInsight.Database.Entities.Release>> GetReleases()
-        {
-            return await _db.Table<DiscogsInsight.Database.Entities.Release>().ToListAsync();
-        }
-
         public async Task<bool> UpdateCollectionFromDiscogs()
         {
             return await MakeCollectionApiCallAndSaveDiscogsCollectionResponse();
         }
-
         public async Task<bool> CheckCollectionIsSeededOrSeed()
         {
             var oneRecordQuery = @$"SELECT DiscogsReleaseId FROM Release LIMIT 1;";
@@ -60,33 +40,34 @@ namespace DiscogsInsight.DataAccess.Services
             var data = await _discogsApiService.GetCollectionFromDiscogsApi();
             if (data != null)
             {
-                return await SaveDiscogsCollectionResponse(data);
+                return await SaveDiscogsCollectionResponseAndRemoveDataNotInCollection(data);
             }
             return false;
         }
 
-
-        private async Task<bool> SaveDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
+        #region Saving Collection from API Reponse
+        private async Task<bool> SaveDiscogsCollectionResponseAndRemoveDataNotInCollection(DiscogsCollectionResponse collectionResponse)
         {
             await SaveCollectionDataFromDiscogsCollectionResponse(collectionResponse);
-
-            await RemoveReleasesNoLongerInCollection(collectionResponse);
-            await RemoveArtistsNoLongerInCollection(collectionResponse);
+            await RemoveDataNoLongerInCollection(collectionResponse);
 
             return true;
         }
 
-
-        //single function that loops through the releases, makes an entry of artist (just id and name) and same for release doing SaveReleasesWithArtistIds but simpler
         private async Task SaveCollectionDataFromDiscogsCollectionResponse(DiscogsCollectionResponse collectionResponse)
         {
             if (collectionResponse.releases != null && collectionResponse.releases.Count > 0)
-            {          
-                var discogsArtistIdToArtistToInsert = new Dictionary<int, Artist>();
-                var discogsArtistIdToReleaseToInsert = new Dictionary<int, Release>();
+            {
+                var discogsArtistIdToArtistToInsert = new List<Artist>();
+                var discogsArtistIdToReleaseToInsert = new List<Release>();
+                var genreTagsToInsert = new List<DiscogsGenreTags>();
+
+                var discogsGenreTagToDiscogsReleaseDataToInsert = new List<TempGenreStorageHelper>();
+
 
                 var existingArtistIds = await _db.AllDiscogsArtistIdsInDb();
                 var existingReleaseIds = await _db.AllDiscogsReleaseIdsInDb();
+                var existingGenreTags = await _db.AllDiscogsGenreTagsInDb();
 
                 var apiReleases = collectionResponse.releases.Where(x => x.id.HasValue).ToList();
 
@@ -96,8 +77,8 @@ namespace DiscogsInsight.DataAccess.Services
                     {
                         var artistDataForThisRelease = release.basic_information?.artists?.FirstOrDefault();//only will save first artist for release, even though there may be many
 
-                        //Save to Release
-                        discogsArtistIdToReleaseToInsert[release.id.Value] = new DiscogsInsight.Database.Entities.Release
+                        //Add Release Data
+                        discogsArtistIdToReleaseToInsert.Add(new Release
                         {
                             DiscogsArtistId = artistDataForThisRelease?.id ?? 0,
                             DiscogsReleaseId = release.id,//this id is the same as basicinformation.id
@@ -105,134 +86,115 @@ namespace DiscogsInsight.DataAccess.Services
                             Title = release.basic_information.title,
                             Year = release.basic_information.year,
                             DateAdded = release.date_added
-                        };
+                        });
+                        existingReleaseIds.Add(release.id.Value);
 
-                        //Save to Artist
+                        //Add Artist Data
                         if (artistDataForThisRelease.id.HasValue && !existingArtistIds.Contains(artistDataForThisRelease.id.Value))
-                        {                            
-                            discogsArtistIdToArtistToInsert[artistDataForThisRelease.id.Value] = new Artist 
+                        {
+                            discogsArtistIdToArtistToInsert.Add(new Artist
                             {
                                 DiscogsArtistId = artistDataForThisRelease.id.Value,
                                 Name = artistDataForThisRelease.name,
-                            };
+                            });
+
+                            existingArtistIds.Add(artistDataForThisRelease.id.Value);//wont error if already in hashset
                         }
 
-                        //Save to DiscogsGenres
+                        var releaseGenresFromReleaseResponse = release.basic_information.genres;
 
-                        //Save to DiscogsGenresToDiscogsRelease
+                        //Add Genre Data
+                        foreach (var genre in releaseGenresFromReleaseResponse)
+                        {
+                            if (string.IsNullOrEmpty(genre))
+                                continue;
 
-                        //save genres
+                            if (!existingGenreTags.Contains(genre))
+                            {
+                                genreTagsToInsert.Add(new DiscogsGenreTags { DiscogsTag = genre });
+                                existingGenreTags.Add(genre);
+                            }
 
-                        //this is what it was doing before removing the service 
-                        //var success = await _genresAndTagsDataService.SaveGenresFromDiscogsRelease(release, release.id, artistIdForThisRelease);
-
-
-                        //public async Task<bool> SaveGenresFromDiscogsRelease(ResponseRelease responseRelease, int? discogsReleaseId, int? discogsArtistId)
-                        //{
-                        //    try
-                        //    {
-                        //        var discogsGenreTagsList = await _db.Table<DiscogsGenreTags>().ToListAsync();
-
-                        //        if (responseRelease == null) return true;//dont think this is possible
-
-                        //        var releaseGenresFromReleaseResponse = responseRelease.basic_information.genres;
-
-                        //        if (releaseGenresFromReleaseResponse == null) return true;//dont want to error, there may just be no genres associated
-
-                        //        var stylesNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(discogsGenreTagsList.Select(y => y.DiscogsTag)).ToList();
-
-                        //        if (stylesNotInDatabaseAlready != null && stylesNotInDatabaseAlready.Count != 0)
-                        //        {
-                        //            foreach (var style in stylesNotInDatabaseAlready)
-                        //            {
-                        //                await _db.InsertAsync(new DiscogsGenreTags { DiscogsTag = style });
-                        //            }
-
-                        //            discogsGenreTagsList = await _db.Table<DiscogsGenreTags>().ToListAsync();
-                        //        }
-
-                        //        foreach (var style in releaseGenresFromReleaseResponse)
-                        //        {
-                        //            var genreTagId = discogsGenreTagsList.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
-
-                        //            await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
-                        //            {
-                        //                DiscogsReleaseId = discogsReleaseId,
-                        //                DiscogsArtistId = discogsArtistId,
-                        //                DiscogsGenreTagId = genreTagId
-                        //            });
-                        //        }
-
-                        //        return true;
-                        //    }
-                        //    catch (Exception)
-                        //    {
-                        //        throw;
-                        //    }
-
-
-
+                            discogsGenreTagToDiscogsReleaseDataToInsert.Add(new TempGenreStorageHelper
+                            {
+                                DiscogsReleaseId = release.id.Value,
+                                DiscogsArtistId = artistDataForThisRelease?.id ?? 0,
+                                DiscogsTag = genre
+                            });
+                        }
                     }
-                    else
-                    {
-                        //do some logic to
-                        //add to list to remove it from the collection
-                    }
-                  
                 }
 
-                await _db.InsertAllAsync<Artist>(discogsArtistIdToArtistToInsert.Values);
-                await _db.InsertAllAsync<Release>(discogsArtistIdToReleaseToInsert.Values);
-            }
-        
-        }
-        private async Task RemoveReleasesNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
-        {
-            try
-            {
-                var releaseTable = await _db.Table<DiscogsInsight.Database.Entities.Release>().ToListAsync();
-                // Get the DiscogsReleaseId values from the response
-                var releasesInResponse = collectionResponse.releases.Select(r => r.id).ToList();
+                //insert all new genres
+                await _db.InsertAllAsync<DiscogsGenreTags>(genreTagsToInsert);
+                await _db.InsertAllAsync<Artist>(discogsArtistIdToArtistToInsert);
+                await _db.InsertAllAsync<Release>(discogsArtistIdToReleaseToInsert);
 
-                // Identify releases in the database that are not in the response
-                var releasesToRemove = releaseTable.Where(r => !releasesInResponse.Contains(r.DiscogsReleaseId)).ToList();
+                //Add DiscogsGenreTagToDiscogsRelease Data
+                var updatedGenreTags = await _db.Table<DiscogsGenreTags>().ToListAsync();
 
-                // Remove the identified releases from the database
-                foreach (var releaseToRemove in releasesToRemove)
+                var genreTagIdMap = updatedGenreTags.ToDictionary(tag => tag.DiscogsTag, tag => tag.Id);
+
+                var genreTagToReleaseInsertList = discogsGenreTagToDiscogsReleaseDataToInsert.Select(g => new DiscogsGenreTagToDiscogsRelease
                 {
-                    await _db.DeleteAsync(releaseToRemove);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at RemoveReleasesNoLongerInCollection:{ex.Message} ");
-                throw;
+                    DiscogsArtistId = g.DiscogsArtistId,
+                    DiscogsGenreTagId = genreTagIdMap[g.DiscogsTag],
+                    DiscogsReleaseId = g.DiscogsReleaseId,
+                }).ToList();
+
+                await _db.InsertAllAsync<DiscogsGenreTagToDiscogsRelease>(genreTagToReleaseInsertList);
             }
         }
-        private async Task RemoveArtistsNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
+
+        private async Task RemoveDataNoLongerInCollection(DiscogsCollectionResponse collectionResponse)
         {
-            try
+            var artistsInResponse = collectionResponse.releases
+               .SelectMany(r => r.basic_information.artists.Select(a => a.id))
+               .ToList();
+
+            await RemoveArtistsNoLongerInCollection(artistsInResponse);
+
+            var releaseIdsFromResponse = collectionResponse.releases.Where(x => x.id.HasValue).Select(x => x.id).ToList();
+
+            await RemoveReleasesNoLongerInCollection(releaseIdsFromResponse);
+        }
+
+        private async Task RemoveReleasesNoLongerInCollection(List<int?> releaseIdsFromCollectionResponse)
+        {
+            var releaseTable = await _db.Table<Release>().ToListAsync();
+
+            // Identify releases in the database that are not in the response
+            var releasesToRemove = releaseTable.Where(r => r.DiscogsReleaseId.HasValue)
+                .Where(r => !releaseIdsFromCollectionResponse
+                .Contains(r.DiscogsReleaseId.Value))
+                .ToList();
+
+            // Remove the identified releases from the database
+            foreach (var releaseToRemove in releasesToRemove)
             {
-                // Get the DiscogsArtistId values from the response
-                var artistsInResponse = collectionResponse.releases
-                    .SelectMany(r => r.basic_information.artists.Select(a => a.id))
-                    .ToList();
-
-                var artistsTable = await _db.GetAllEntitiesAsListAsync<DiscogsInsight.Database.Entities.Artist>();
-                // Identify artists in the database that are not in the response
-                var artistsToRemove = artistsTable.Where(a => !artistsInResponse.Contains(a.DiscogsArtistId)).ToList();
-
-                foreach (var artistToRemove in artistsToRemove)
-                {
-                    await _db.DeleteAsync(artistToRemove);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception at RemoveReleasesNoLongerInCollection:{ex.Message} ");
-                throw;
+                await _db.DeleteAsync(releaseToRemove);
             }
         }
+
+        private async Task RemoveArtistsNoLongerInCollection(List<int?> artistIdsFromResponse)
+        {
+            var artistsTable = await _db.Table<Artist>().ToListAsync();
+            // Identify artists in the database that are not in the response
+            var artistsToRemove = artistsTable.Where(a => !artistIdsFromResponse.Contains(a.DiscogsArtistId)).ToList();
+
+            foreach (var artistToRemove in artistsToRemove)
+            {
+                await _db.DeleteAsync(artistToRemove);
+            }
+        }
+        public class TempGenreStorageHelper
+        {
+            public string DiscogsTag { get; set; }
+            public int DiscogsArtistId { get; set; }
+            public int DiscogsReleaseId { get; set; }
+        }
+
+        #endregion
+
     }
 }
