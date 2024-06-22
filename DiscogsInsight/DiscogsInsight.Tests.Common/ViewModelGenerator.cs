@@ -21,10 +21,10 @@ namespace DiscogsInsight.Tests.Common
                 ReleaseCountry = "France",
                 DiscogsArtistId = 1,
                 DiscogsReleaseId = 1,
-                Genres = new List<(string? Name, int Id)>()
+                Genres = new List<ReleaseGenres>()
                 {
-                    new("Psych", 1),
-                    new("Rock", 2)
+                    new ReleaseGenres(){ Name = "Psych", Id = 1},
+                    new ReleaseGenres() { Name = "Rock", Id = 2 }
                 },
                 DiscogsReleaseUrl = "www.psych.com",
                 Tracks = new List<TracksItemViewModel>
@@ -64,10 +64,10 @@ namespace DiscogsInsight.Tests.Common
                 ReleaseCountry = "France",
                 DiscogsArtistId = 1,
                 DiscogsReleaseId = 2,
-                Genres = new List<(string? Name, int Id)>()
+                Genres = new List<ReleaseGenres>()
                 {
-                    new("Psych", 1),
-                    new("Rock", 2)
+                    new ReleaseGenres() { Name = "Psych", Id = 1 },
+                    new ReleaseGenres() { Name = "Rock", Id = 2 }
                 },
                 DiscogsReleaseUrl = "www.psych.com",
                 Tracks = new List<TracksItemViewModel>
@@ -106,10 +106,10 @@ namespace DiscogsInsight.Tests.Common
                 ReleaseCountry = "New Zealand",
                 DiscogsArtistId = 2,
                 DiscogsReleaseId = 3,
-                Genres = new List<(string? Name, int Id)>()
+                Genres = new List<ReleaseGenres>()
                 {
-                    new("Reggae", 3),
-                    new("Dub", 4)
+                    new ReleaseGenres() { Name = "Reggae", Id = 3 },
+                    new ReleaseGenres() { Name = "Dub", Id = 4 }
                 },
                 DiscogsReleaseUrl = "www.reggae.com",
                 Tracks = new List<TracksItemViewModel>
@@ -162,11 +162,11 @@ namespace DiscogsInsight.Tests.Common
                 ReleaseCountry = "France",
                 DiscogsArtistId = 100,
                 DiscogsReleaseId = 100,
-                Genres = new List<(string? Name, int Id)>()
+                Genres = new List<ReleaseGenres>()
                 {
-                    new("Psych", 1),
-                    new("Rock", 2),
-                    new("Alternative", 3)
+                    new ReleaseGenres(){ Name = "Psych", Id =  1},
+                    new ReleaseGenres(){ Name = "Rock", Id =  2},
+                    new ReleaseGenres(){ Name = "Alternative", Id =  3 }
                 },
                 DiscogsReleaseUrl = "www.psych.com",
                 Tracks = new List<TracksItemViewModel>
@@ -206,11 +206,12 @@ namespace DiscogsInsight.Tests.Common
                 ReleaseCountry = "New Zealand",
                 DiscogsArtistId = 300,
                 DiscogsReleaseId = 300,
-                Genres = new List<(string? Name, int Id)>()
+                Genres = new List<ReleaseGenres>()
                 {
-                    new("Reggae", 3),
-                    new("Dub", 4),
-                    new("Alternative", 3)
+                    new ReleaseGenres { Name = "Reggae", Id =  3},
+                    new ReleaseGenres { Name = "Dub", Id =  4},
+                    new ReleaseGenres { Name = "Alternative", Id =  3 }
+
                 },
                 DiscogsReleaseUrl = "www.reggae.com",
                 Tracks = new List<TracksItemViewModel>

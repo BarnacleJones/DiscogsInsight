@@ -2,16 +2,28 @@
 using DiscogsInsight.Service.Models.Collection;
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
+using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.Service.Collection
 {
     public class CollectionViewService
     {
         private readonly ICollectionDataService _collectionDataService;
+        private readonly ILogger<CollectionViewService> _logger;
 
-        public CollectionViewService(ICollectionDataService collectionDataService)
+        public CollectionViewService(ICollectionDataService collectionDataService, ILogger<CollectionViewService> logger)
         {
             _collectionDataService = collectionDataService;
+            _logger = logger;
+        }
+
+        public void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
+            }
         }
 
         public async Task<ViewResult<DiscogsCollectionViewModel>> GetCollection()
@@ -42,6 +54,7 @@ namespace DiscogsInsight.Service.Collection
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<DiscogsCollectionViewModel>
                 {
                     Data = null,
@@ -80,6 +93,7 @@ namespace DiscogsInsight.Service.Collection
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<DiscogsCollectionViewModel>
                 {
                     Data = null,

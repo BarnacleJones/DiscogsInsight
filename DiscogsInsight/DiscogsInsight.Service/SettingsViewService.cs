@@ -1,17 +1,29 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.Results;
+using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.Service
 {
     public class SettingsViewService
     {
         private readonly ISettingsDataService _settingsDataService;
+        private readonly ILogger<SettingsViewService> _logger;
 
-        public SettingsViewService(ISettingsDataService settingsDataService)
+        public SettingsViewService(ISettingsDataService settingsDataService, ILogger<SettingsViewService> logger)
         {
             _settingsDataService = settingsDataService;
+            _logger = logger;
         }
 
+        public void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
+            }
+
+        }
         public async Task<ViewResult<bool>> UpdateCollection()
         {
             try
@@ -28,6 +40,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
@@ -35,7 +48,6 @@ namespace DiscogsInsight.Service
         {
             return _settingsDataService.GetDiscogsUsername();
         }
-
         public bool HasSavedDiscogsUsername()
         {
             return _settingsDataService.ContainsKey(PreferencesConstant.DiscogsUsername);
@@ -67,6 +79,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
@@ -85,6 +98,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
@@ -103,6 +117,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }

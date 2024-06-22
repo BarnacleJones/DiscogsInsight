@@ -37,6 +37,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<ReleaseViewModel>
                 {
                     Data = null,
@@ -63,6 +64,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<List<ReleaseViewModel>>
                 {
                     Data = null,
@@ -87,8 +89,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.StackTrace);
-                _logger.LogError(ex.Message);
+                LogError(ex);
                 return new ViewResult<ReleaseViewModel>
                 {
                     Data = null,
@@ -119,6 +120,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<List<ReleaseViewModel>>
                 {
                     Data = null,
@@ -144,6 +146,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<List<ReleaseViewModel>>
                 {
                     Data = null,
@@ -168,13 +171,22 @@ namespace DiscogsInsight.Service
                 DiscogsArtistId = release.DiscogsArtistId,
                 DiscogsReleaseId = release.DiscogsReleaseId,
                 DiscogsReleaseUrl = release.DiscogsReleaseUrl,
-                Genres = release.Genres,
                 IsFavourited = release.IsFavourited,
                 OriginalReleaseYear = release.OriginalReleaseYear,
                 ReleaseNotes = release.ReleaseNotes,
                 Title = release.Title,
                 Year = release.Year
             };
+            releaseViewModel.Genres = new List<ReleaseGenres>();
+
+            foreach (var genre in release.Genres)
+            {
+                releaseViewModel.Genres.Add(new ReleaseGenres
+                {
+                    Id = genre.Id,
+                    Name = genre.Name,
+                });
+            }
 
             releaseViewModel.Tracks = new List<TracksItemViewModel>();
 
@@ -220,6 +232,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<List<CorrectArtistDataViewModel>>
                 {
                     Data = null,
@@ -256,6 +269,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<List<CorrectReleaseDataViewModel>>
                 {
                     Data = null,
@@ -272,5 +286,13 @@ namespace DiscogsInsight.Service
 
         #endregion
 
+        public void LogError(Exception ex)
+        {
+            if (ex != null) 
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
+            }
+        }
     }
 }

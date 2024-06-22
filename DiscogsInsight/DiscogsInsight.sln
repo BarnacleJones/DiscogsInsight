@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.DataAccess.M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.DataAccess.Contract", "DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj", "{73BD1ECE-9B58-4B71-85C0-200DC860F1DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscogsInsight.Tests.Common", "DiscogsInsight.Tests.Common\DiscogsInsight.Tests.Common.csproj", "{98FEB1F6-3290-48F3-B81B-18E155AEC9F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscogsInsight.Tests.Common", "DiscogsInsight.Tests.Common\DiscogsInsight.Tests.Common.csproj", "{98FEB1F6-3290-48F3-B81B-18E155AEC9F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

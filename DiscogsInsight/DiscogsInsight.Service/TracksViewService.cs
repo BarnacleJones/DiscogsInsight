@@ -19,6 +19,14 @@ namespace DiscogsInsight.Service
             _artistDataService = artistDataService;
         }
 
+        public void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
+            }
+        }
 
         public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
         {
@@ -123,6 +131,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<TracksGridViewModel>
                 {
                     Data = null,

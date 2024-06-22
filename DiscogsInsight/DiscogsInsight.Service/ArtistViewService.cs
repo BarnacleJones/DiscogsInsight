@@ -1,24 +1,49 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Service.Models.EntityViewModels;
 using DiscogsInsight.Service.Models.Results;
+using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.Service
 {
     public class ArtistViewService
     {
         private readonly IArtistDataService _artistDataService;
-        public ArtistViewService(IArtistDataService artistDataService)
+        private readonly ILogger<ArtistViewService> _logger;
+        public ArtistViewService(IArtistDataService artistDataService, ILogger<ArtistViewService> logger)
         {
             _artistDataService = artistDataService;
+            _logger = logger;
+        }
+
+        public void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
+            }
         }
 
         public async Task<ViewResult<ArtistViewModel>> GetRandomArtist()
         {
-            var allArtists = await _artistDataService.GetAllArtistsFromDatabase();
+            try
+            {
+                var allArtists = await _artistDataService.GetAllArtistsFromDatabase();
 
-            var randomArtistId = allArtists.Select(x => x.DiscogsArtistId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
+                var randomArtistId = allArtists.Select(x => x.DiscogsArtistId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
 
-            return await GetArtist(randomArtistId);
+                return await GetArtist(randomArtistId);
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                return new ViewResult<ArtistViewModel>
+                {
+                    Data = null,
+                    ErrorMessage = ex.Message,
+                    Success = false
+                };
+            }
         }
 
         public async Task<ViewResult<ArtistViewModel>> GetArtist(int? discogsArtistId)
@@ -104,6 +129,7 @@ namespace DiscogsInsight.Service
             }
             catch (Exception ex)
             {
+                LogError(ex);
                 return new ViewResult<ArtistViewModel>
                 {
                     Data = null,
