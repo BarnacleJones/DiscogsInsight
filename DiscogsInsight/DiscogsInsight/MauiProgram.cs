@@ -65,23 +65,24 @@ namespace DiscogsInsight
 
             //Data Access
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
+            builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
             builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
             builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
             builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
             builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
             builder.Services.AddSingleton<IInsightsDataService, InsightsDataService>();
 
-            //view layer
-            builder.Services.AddSingleton<UserNotificationService>();
-            builder.Services.AddSingleton<CollectionViewService>();
-            builder.Services.AddSingleton<CollectionStatisticsViewService>();
-            builder.Services.AddSingleton<SettingsViewService>();
+            //service layer
             builder.Services.AddSingleton<ArtistViewService>();
-            builder.Services.AddSingleton<TracksViewService>();
+            builder.Services.AddSingleton<CollectionViewService>();
             builder.Services.AddSingleton<ReleaseViewService>();
-
-            builder.Services.AddSingleton<ReleaseInsightsViewService>();
+            builder.Services.AddSingleton<SettingsViewService>();
+            builder.Services.AddSingleton<UserNotificationService>();
+            builder.Services.AddSingleton<TracksViewService>();
+            //service.insights
             builder.Services.AddSingleton<ArtistInsightsViewService>();
+            builder.Services.AddSingleton<CollectionStatisticsViewService>();
+            builder.Services.AddSingleton<ReleaseInsightsViewService>();
             builder.Services.AddSingleton<TracksInsightsViewService>();
 
 

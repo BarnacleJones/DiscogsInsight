@@ -15,19 +15,16 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ISQLiteAsyncConnection _db;
         private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly ILogger<ArtistDataService> _logger;
-        private readonly ITagsDataService _tagsDataService;
 
         public ArtistDataService(IDiscogsApiService discogsApiService,
             ISQLiteAsyncConnection db,
             ILogger<ArtistDataService> logger, 
-            IMusicBrainzApiService musicBrainzApiService,
-            ITagsDataService tagsDataService)
+            IMusicBrainzApiService musicBrainzApiService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
             _logger = logger;
             _musicBrainzApiService = musicBrainzApiService;
-            _tagsDataService = tagsDataService;
         }
 
         private async Task<Artist?> GetArtistByDiscogsIdFromDb(int discogsArtistId)
