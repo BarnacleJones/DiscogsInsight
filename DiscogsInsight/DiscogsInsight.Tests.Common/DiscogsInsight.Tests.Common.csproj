@@ -28,6 +28,6 @@
 	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Models\DiscogsInsight.DataAccess.Models.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.Database\DiscogsInsight.Database.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.Service.Models\DiscogsInsight.Service.Models.csproj" />
-	  <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.Service.Models.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.Service.Models\DiscogsInsight.Service.Models.csproj" />
 	</ItemGroup>
 </Project>

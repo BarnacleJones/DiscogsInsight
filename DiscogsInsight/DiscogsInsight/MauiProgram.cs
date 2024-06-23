@@ -4,15 +4,11 @@ using MudBlazor.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.ApiIntegration.Contract;
-using DiscogsInsight.Service.Tracks;
 using DiscogsInsight.Service.Collection;
-using DiscogsInsight.Service.Notifications;
-using DiscogsInsight.Service.Artist;
 using DiscogsInsight.Service.Insights;
-using DiscogsInsight.Service.Settings;
-using DiscogsInsight.Service.Releases;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database;
+using DiscogsInsight.Service;
 
 namespace DiscogsInsight
 {

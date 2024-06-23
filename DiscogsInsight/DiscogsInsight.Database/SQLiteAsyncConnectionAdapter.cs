@@ -13,6 +13,7 @@ namespace DiscogsInsight.Database
         public SQLiteAsyncConnectionAdapter(ILogger<SQLiteAsyncConnectionAdapter> logger)
         {
             _logger = logger;
+            var a = FileSystem.AppDataDirectory;//helped stop an error below accessing constants.database path but who knows
             _connection = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
             _ = InitializeAsync();
         }
@@ -56,6 +57,8 @@ namespace DiscogsInsight.Database
         {
             try
             {
+                //if (_connection is not null)//removed at start of big rewrite might need it when things are running again?
+                //    return;
                 var a = Constants.DatabasePath;//handy for debugging figuring out where the db is
 
                 await _connection.CreateTableAsync<Artist>();

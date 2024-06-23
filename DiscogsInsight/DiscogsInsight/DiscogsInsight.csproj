@@ -89,11 +89,10 @@
       <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
       <ProjectReference Include="..\DiscogsInsight.DataAccess.Models\DiscogsInsight.DataAccess.Models.csproj" />
       <ProjectReference Include="..\DiscogsInsight.DataAccess\DiscogsInsight.DataAccess.csproj" />
+      <ProjectReference Include="..\DiscogsInsight.Database.Contract\DiscogsInsight.Database.Contract.csproj" />
       <ProjectReference Include="..\DiscogsInsight.Database\DiscogsInsight.Database.csproj" />
       <ProjectReference Include="..\DiscogsInsight.Service.Models\DiscogsInsight.Service.Models.csproj" />
       <ProjectReference Include="..\DiscogsInsight.Service\DiscogsInsight.Service.csproj" />
-      <ProjectReference Include="..\DiscogsInsight.View\DiscogsInsight.Service.csproj" />
-      <ProjectReference Include="..\DiscogsInsight.ViewModels\DiscogsInsight.Service.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>
