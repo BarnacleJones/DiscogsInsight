@@ -21,5 +21,16 @@ namespace DiscogsInsight.Database.Contract
     {
         public string MusicBrainzReleaseId { get; set; }
     }
+
+    public class SimpleReleaseData
+    {
+        public string Name { get; set; }
+        public int DiscogsArtistId { get; set; }
+        public int DiscogsReleaseId { get; set; }
+        public int Year { get; set; }
+        public string Title { get; set; }
+        public DateTime DateAdded { get; set; }
+
+    }
 }
 

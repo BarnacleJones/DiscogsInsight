@@ -13,7 +13,7 @@
 }
 else{  
     <MudText Typo="Typo.h6">Collection</MudText>
-    <MudDataGrid T="@ReleaseViewModel" MultiSelection="true" Items="@_collectionViewModel.Releases?.OrderBy(x => x.Artist)" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+    <MudDataGrid T="@SimpleCollectionViewData" MultiSelection="true" Items="@_collectionViewModel.OrderBy(x => x.ArtistName).ToList()" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
                  Hideable="true" Groupable="true" GroupExpanded="false" Class="custom-mud-datagrid" RowsPerPage="50" FixedHeader="true">
         <ToolBarContent>
             <MudSpacer />
@@ -21,9 +21,9 @@ else{
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <Columns>            
-            <PropertyColumn Property="x => x.Artist" SortBy="@_sortBy" Grouping GroupBy="@_groupBy">
+            <PropertyColumn Property="x => x.ArtistName" SortBy="@_sortBy" Grouping GroupBy="@_groupBy">
                 <CellTemplate>
-                    <MudText onclick="@(() => GoToArtist(context.Item.DiscogsArtistId))">@context.Item.Artist</MudText>
+                    <MudText onclick="@(() => GoToArtist(context.Item.DiscogsArtistId))">@context.Item.ArtistName</MudText>
                 </CellTemplate>
             </PropertyColumn>            
             <PropertyColumn Property="x => x.Title" Title="Album:   " SortBy="@_sortBy">
@@ -33,15 +33,15 @@ else{
             </PropertyColumn>
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="ReleaseViewModel" />
+            <MudDataGridPager T="SimpleCollectionViewData" />
         </PagerContent>
     </MudDataGrid>
 }
 
 
 @code {
-    public static DiscogsCollectionViewModel? _collectionViewModel;
-    private IEnumerable<ReleaseViewModel> Elements = new List<ReleaseViewModel>();
+    public static List<SimpleCollectionViewData>? _collectionViewModel;
+    private List<SimpleCollectionViewData> Elements = new List<SimpleCollectionViewData>();
     private string? _searchString;
 
     protected override async Task OnInitializedAsync()
@@ -66,7 +66,7 @@ else{
         NavigationManager.NavigateTo($"release/{releaseId}");
     }
     
-    private async void HandleResult(ViewResult<DiscogsCollectionViewModel> result)
+    private async void HandleResult(ViewResult<List<SimpleCollectionViewData>> result)
     {
         if (result.Success)
             _collectionViewModel = result.Data;
@@ -74,17 +74,17 @@ else{
            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
     }
        
-    private Func<ReleaseViewModel, object> _sortBy => x => x.Artist ?? "";
+    private Func<SimpleCollectionViewData, object> _sortBy => x => x.ArtistName ?? "";
 
-    private Func<ReleaseViewModel, object> _groupBy => x => x.Artist ?? "";
+    private Func<SimpleCollectionViewData, object> _groupBy => x => x.ArtistName ?? "";
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<ReleaseViewModel, bool> _quickFilter => x =>
+    private Func<SimpleCollectionViewData, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Artist.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.ArtistName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         if (x.Title.Contains(_searchString, StringComparison.OrdinalIgnoreCase))

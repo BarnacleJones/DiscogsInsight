@@ -9,24 +9,15 @@ namespace DiscogsInsight.Service.Collection
     public class CollectionViewService
     {
         private readonly ICollectionDataService _collectionDataService;
+        private readonly IReleaseDataService _releaseDataService;
         private readonly ILogger<CollectionViewService> _logger;
 
-        public CollectionViewService(ICollectionDataService collectionDataService, ILogger<CollectionViewService> logger)
+        public CollectionViewService(ICollectionDataService collectionDataService, IReleaseDataService releaseDataService, ILogger<CollectionViewService> logger)
         {
             _collectionDataService = collectionDataService;
+            _releaseDataService = releaseDataService;
             _logger = logger;
         }
-
-        private void LogError(Exception ex)
-        {
-            if (ex != null)
-            {
-                _logger.LogError(ex.StackTrace);
-                _logger.LogError(ex.Message);
-            }
-        }
-
-
 
         public async Task<ViewResult<bool>> ConfirmDataIsSeededAndSeedIfNot()
         {
@@ -53,21 +44,15 @@ namespace DiscogsInsight.Service.Collection
             
         }
 
-        public async Task<ViewResult<DiscogsCollectionViewModel>> GetCollection()
+        public async Task<ViewResult<List<SimpleCollectionViewData>>> GetCollection()
         {
             try
             {
-                //just get them all in a dataacessmodel like releasedatamodel and just map it here
-                //write raw sql query to do the join
+                var releaseList = await _collectionDataService.GetSimpleReleaseDataForWholeCollection();
 
-                var releases = await _collectionDataService.GetReleases();
-                var releaseList = releases.ToList();
-
-                var artistIdsList = await _collectionDataService.GetArtistsIdsAndNames();
-
-                var viewModel = releaseList.Select(x => new ReleaseViewModel
+                var viewModel = releaseList.Select(x => new SimpleCollectionViewData
                 {
-                    Artist = artistIdsList.Where(y => y.DiscogsArtistId == x.DiscogsArtistId).Select(x => x.Name).FirstOrDefault() ?? "No Name",
+                    ArtistName = x.Name,
                     DiscogsArtistId = x.DiscogsArtistId,
                     DiscogsReleaseId = x.DiscogsReleaseId,
                     Year = x.Year.ToString(),
@@ -75,9 +60,9 @@ namespace DiscogsInsight.Service.Collection
                     DateAdded = x.DateAdded
                 }).ToList();
 
-                return new ViewResult<DiscogsCollectionViewModel>
+                return new ViewResult<List<SimpleCollectionViewData>>
                 {
-                    Data = new DiscogsCollectionViewModel { Releases = viewModel },
+                    Data = viewModel,
                     ErrorMessage = "",
                     Success = true
                 };
@@ -85,7 +70,7 @@ namespace DiscogsInsight.Service.Collection
             catch (Exception ex)
             {
                 LogError(ex);
-                return new ViewResult<DiscogsCollectionViewModel>
+                return new ViewResult<List<SimpleCollectionViewData>>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -94,19 +79,15 @@ namespace DiscogsInsight.Service.Collection
             }
         }
 
-        public async Task<ViewResult<DiscogsCollectionViewModel>> GetUntaggedCollection()
+        public async Task<ViewResult<List<SimpleCollectionViewData>>> GetUntaggedCollection()
         {
             try
             {
-                var releases = await _collectionDataService.GetReleases();
+                var releaseList = await _collectionDataService.GetSimpleReleaseDataForCollectionDataWithoutAllApiData();
 
-                var releaseList = releases.Where(x => !x.HasAllApiData).ToList();
-
-                var artistIdsList = await _collectionDataService.GetArtistsIdsAndNames();
-
-                var viewModel = releaseList.Select(x => new ReleaseViewModel
+                var viewModel = releaseList.Select(x => new SimpleCollectionViewData
                 {
-                    Artist = artistIdsList.Where(y => y.DiscogsArtistId == x.DiscogsArtistId).Select(x => x.Name).FirstOrDefault() ?? "No Name",
+                    ArtistName = x.Name,
                     DiscogsArtistId = x.DiscogsArtistId,
                     DiscogsReleaseId = x.DiscogsReleaseId,
                     Year = x.Year.ToString(),
@@ -114,9 +95,9 @@ namespace DiscogsInsight.Service.Collection
                     DateAdded = x.DateAdded
                 }).ToList();
 
-                return new ViewResult<DiscogsCollectionViewModel>
+                return new ViewResult<List<SimpleCollectionViewData>>
                 {
-                    Data = new DiscogsCollectionViewModel { Releases = viewModel },
+                    Data = viewModel,
                     ErrorMessage = "",
                     Success = true
                 };
@@ -124,12 +105,21 @@ namespace DiscogsInsight.Service.Collection
             catch (Exception ex)
             {
                 LogError(ex);
-                return new ViewResult<DiscogsCollectionViewModel>
+                return new ViewResult<List<SimpleCollectionViewData>>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
                     Success = false
                 };
+            }          
+        }
+
+        private void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
             }
         }
     }

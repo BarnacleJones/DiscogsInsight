@@ -19,6 +19,42 @@ namespace DiscogsInsight.DataAccess.Services
             _discogsApiService = discogsApiService;
             _logger = logger;
         }
+        public async Task<List<SimpleReleaseData>> GetSimpleReleaseDataForWholeCollection()
+        {
+            var query = $@"
+                        SELECT
+                        Artist.Name,
+                        Release.DiscogsArtistId,
+                        Release.DiscogsReleaseId,
+                        Release.Year,
+                        Release.Title,
+                        Release.DateAdded
+                        FROM Release
+                        INNER JOIN Artist on Release.DiscogsArtistId = Artist.DiscogsArtistId;";
+            var data = await _db.QueryAsync<SimpleReleaseData>(query);
+            
+            return data;
+
+        }
+         public async Task<List<SimpleReleaseData>> GetSimpleReleaseDataForCollectionDataWithoutAllApiData()
+        {
+            var query = $@"
+                        SELECT
+                        Artist.Name,
+                        Release.DiscogsArtistId,
+                        Release.DiscogsReleaseId,
+                        Release.Year,
+                        Release.Title,
+                        Release.DateAdded
+                        FROM Release
+                        INNER JOIN Artist on Release.DiscogsArtistId = Artist.DiscogsArtistId
+                        WHERE Release.HasAllApiData = 0;";
+
+            var data = await _db.QueryAsync<SimpleReleaseData>(query);
+            
+            return data;
+
+        }
 
         public async Task<bool> UpdateCollectionFromDiscogs()
         {
@@ -187,6 +223,8 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.DeleteAsync(artistToRemove);
             }
         }
+
+
         public class TempGenreStorageHelper
         {
             public string DiscogsTag { get; set; }
