@@ -15,21 +15,21 @@ namespace DiscogsInsight.Service.Insights
             _insightsDataService = trackDataService;
         }
 
-        public async Task<ViewResult<TracksInsightsStatsModel>> GetTracksStatistics()
+        public async Task<ViewResult<TracksInsightsStatsViewModel>> GetTracksStatistics()
         {
             try
             {
                 var tracks = await _insightsDataService.GetTrackInsightData();
 
-                var averageTrackLengthFormatted = GetAverageTrackLengthStringFormatted(tracks);
-                var averageTracksPerReleaseText = GetAverageTracksPerReleaseStringFormatted(tracks);
+                var averageTrackLengthString = TimeSpan.FromMilliseconds(tracks.AverageTrackLength).ToString(@"mm\:ss");
+                var averageTacksPerRelease = Math.Round(tracks.AverageTracksPerRelease.Average(), 0, MidpointRounding.AwayFromZero).ToString();
 
-                var data = new TracksInsightsStatsModel
+                var data = new TracksInsightsStatsViewModel
                 {
-                    AverageTrackLength = averageTrackLengthFormatted,
-                    AverageTracksPerRelease = averageTracksPerReleaseText
+                    AverageTrackLength = tracks.AverageTrackLength,
+                    AverageTracksPerRelease = tracks.AverageTracksPerRelease
                 };
-                return new ViewResult<TracksInsightsStatsModel>
+                return new ViewResult<TracksInsightsStatsViewModel>
                 {
                     Data = data,
                     ErrorMessage = "",
@@ -38,7 +38,7 @@ namespace DiscogsInsight.Service.Insights
             }
             catch (Exception ex)
             {
-                return new ViewResult<TracksInsightsStatsModel>
+                return new ViewResult<TracksInsightsStatsViewModel>
                 {
                     Data = null,
                     ErrorMessage = ex.Message,
@@ -47,31 +47,5 @@ namespace DiscogsInsight.Service.Insights
             }
         }
 
-        private static string GetAverageTracksPerReleaseStringFormatted(List<Track> tracks)
-        {
-            var releasesToTracks = tracks.GroupBy(x => x.DiscogsReleaseId).ToList();
-
-            var tracksPerReleaseCount = new List<int>();
-            foreach (var release in releasesToTracks)
-            {
-                tracksPerReleaseCount.Add(release.Count());
-            }
-            var averageTracksPerReleaseText = Math.Round(tracksPerReleaseCount.Average(), 0, MidpointRounding.AwayFromZero).ToString();
-            return averageTracksPerReleaseText;
-        }
-
-        private static string GetAverageTrackLengthStringFormatted(List<Track> tracks)
-        {
-            var unformattedAverageTrackLength = tracks
-                                                .Where(x => x.MusicBrainzTrackLength != null)
-                                                .Average(x => x.MusicBrainzTrackLength);
-            var averageTrackLengthFormatted = "";
-            if (unformattedAverageTrackLength.HasValue)
-            {
-                averageTrackLengthFormatted = $"{TimeSpan.FromMilliseconds(unformattedAverageTrackLength.Value).ToString(@"mm\:ss")}";
-            }
-
-            return averageTrackLengthFormatted;
-        }
     }
 }

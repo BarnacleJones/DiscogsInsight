@@ -66,7 +66,7 @@ namespace DiscogsInsight.Service
                 //    return musicBrainzTagsList.Where(x => tagsIdsListForArtist.Contains(x.Id)).ToList();
                 //}
 
-                var tagsList = tags.Select(x => x.Tag).ToList();
+                //var tagsList = tags.Select(x => x.Tag).ToList();
 
                 var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
 
@@ -115,9 +115,9 @@ namespace DiscogsInsight.Service
                     StartYear = artist.StartYear,
                     EndYear = artist.EndYear,
                     MusicBrainzArtistId = artist.MusicBrainzArtistId,
-                    Tags = tagsList,
+                    //Tags = tagsList,
                     ArtistsReleases = releasesViewModel,
-                    ReleasesInCollection = releasesInCollection
+                    //ReleasesInCollection = releasesInCollection
                 };
 
                 return new ViewResult<ArtistViewModel>
