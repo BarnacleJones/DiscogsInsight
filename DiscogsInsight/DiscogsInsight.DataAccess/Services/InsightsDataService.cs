@@ -13,14 +13,27 @@ namespace DiscogsInsight.DataAccess.Services
             _db = db;
         }
 
-        public Task<CollectionStatisticData> GetCollectionStatisticData()
+        public async Task<List<CollectionStatisticData>> GetCollectionStatisticData()
         {
-            throw new NotImplementedException();
+            var collectionDataQuery = @$"SELECT HasAllApiData, DateAdded FROM Release;";
+            var collectionData = await _db.QueryAsync<CollectionStatisticData>(collectionDataQuery);
+
+            return collectionData;
         }
 
-        public Task<List<ReleaseStatisticData>> GetReleaseStatisticData()
+        public async Task<List<ReleaseStatisticData>> GetReleaseStatisticData()
         {
-            throw new NotImplementedException();
+            var collectionDataQuery = @$"SELECT
+                                         OriginalReleaseYear,
+                                         DateAdded,
+                                         ReleaseCountry,
+                                         Title,
+                                         Year
+                                         FROM Release;";
+
+            var collectionData = await _db.QueryAsync<ReleaseStatisticData>(collectionDataQuery);
+
+            return collectionData;
         }
 
         #region Track Insight Data Unused
