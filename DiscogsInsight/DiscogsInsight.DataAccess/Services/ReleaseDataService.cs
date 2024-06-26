@@ -698,7 +698,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
 
         }
-        private async Task MakeMusicBrainzReleaseCallAndSaveTracks(Database.Entities.Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
+        private async Task MakeMusicBrainzReleaseCallAndSaveTracks(Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
         {
             if (!isAReleaseGroupUrl)
             {
@@ -737,7 +737,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
             else
             {
-                //just save year
+                //just save year - todo remember what release group was exactly...it is more generic but cant remember exactly
                 var releaseGroupData = await _musicBrainzApiService.GetReleaseGroupFromMusicBrainzApiUsingMusicBrainsReleaseId(musicBrainzReleaseId);
                 release.OriginalReleaseYear = releaseGroupData.FirstReleaseDate;
                 await _db.UpdateAsync(release);

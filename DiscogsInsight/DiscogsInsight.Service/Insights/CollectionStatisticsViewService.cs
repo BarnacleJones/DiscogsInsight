@@ -40,17 +40,12 @@ namespace DiscogsInsight.Service.Collection
 
         private async Task<CollectionStatsViewModel> GetCollectionStatsViewModel()
         {
-            var releases = await _insightsDataService.GetAllReleasesDataModelsAsList();
-            var releasesCount = releases.Count();
+            var data = await _insightsDataService.GetCollectionStatisticData();
 
-            var tracks = await _insightsDataService.GetTrackInsightData();
-            var tracksCount = tracks.Count();
-            var tracksReleasesList = tracks.Select(x => x.DiscogsReleaseId).ToList();
-
-            var releasesWithoutAllApiData = releases.Where(x => !x.HasAllApiData).ToList().Count;
+            var releasesWithoutAllApiData = data.Releases.Where(x => !x.HasAllApiData).ToList().Count;
 
             var month = DateTime.Now.Month;
-            var tracksNewThisMonth = releases.Where(x => x.DateAdded.Value.Month == month).Count();
+            var releasesNewThisMonth = data.Releases.Where(x => x.DateAdded.HasValue && x.DateAdded.Value.Month == month).Count();
 
             //get last 6 months albums 
             var lastSixMonths = new List<double>();
@@ -58,17 +53,17 @@ namespace DiscogsInsight.Service.Collection
             {
                 var thisParticularMonth = DateTime.Today.AddMonths(-i).Month;
                 var thisParticularYear = DateTime.Today.AddMonths(-i).Year;
-                var tracksNewThisParticularMonth = releases.Where(x => x.DateAdded.Value.Month == thisParticularMonth && x.DateAdded.Value.Year == thisParticularYear).Count();
-                lastSixMonths.Add(tracksNewThisParticularMonth);
+                var newToCollectionThisMonth = data.Releases.Where(x => x.DateAdded.Value.Month == thisParticularMonth && x.DateAdded.Value.Year == thisParticularYear).Count();
+                lastSixMonths.Add(newToCollectionThisMonth);
             }
 
 
             return new CollectionStatsViewModel
             {
-                AlbumsInCollection = releasesCount,
+                AlbumsInCollection = data.ReleaseCount,
                 AlbumsInCollectionWithoutTracksInfo = releasesWithoutAllApiData,
-                TracksInCollection = tracksCount,
-                AlbumsNewToCollectionThisMonth = tracksNewThisMonth,
+                TracksInCollection = data.TracksCount,
+                AlbumsNewToCollectionThisMonth = releasesNewThisMonth,
                 AlbumsNewLastSixMonths = lastSixMonths.ToArray()
             };
         }

@@ -1,8 +1,6 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.Database.Contract;
-using DiscogsInsight.Database.Entities;
-using Intents;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -15,54 +13,71 @@ namespace DiscogsInsight.DataAccess.Services
             _db = db;
         }
 
-        public Task<List<Release>> GetAllReleasesDataModelsAsList()
+        public Task<CollectionStatisticData> GetCollectionStatisticData()
         {
             throw new NotImplementedException();
         }
 
+        public Task<List<ReleaseStatisticData>> GetReleaseStatisticData()
+        {
+            throw new NotImplementedException();
+        }
+
+        #region Track Insight Data Unused
         public async Task<TracksInsightDataModel> GetTrackInsightData()
         {
-            //todo refactor this to return just the needed track data. use a query
-            var tracks = await _db.Table<Track>().ToListAsync();
+            //No point in these metrics. The number of releases actually getting musicbrainz track data and lengths is low
+            //Keeping code bones for when the idea of what to do here comes
 
 
-            var averageTrackLengthFormatted = GetAverageTrackLengthStringFormatted(tracks);
-            var averageTracksPerReleaseText = GetAverageTracksPerReleaseStringFormatted(tracks);
+            //refactor this to return just the needed track data. use a query
+            //var tracks = await _db.Table<Track>().ToListAsync();
+
+
+            //var averageTrackLengthFormatted = GetAverageTrackLengthStringFormatted(tracks);
+            //var averageTracksPerReleaseText = GetAverageTracksPerReleaseStringFormatted(tracks);
 
             return new TracksInsightDataModel
             {
-                AverageTrackLength = averageTrackLengthFormatted,//in progress dont use entire table to do this calculation
-                AverageTracksPerRelease = averageTracksPerReleaseText//see above
+                //AverageTrackLength = averageTrackLengthFormatted,//in progress dont use entire table to do this calculation
+                //AverageTracksPerRelease = averageTracksPerReleaseText//see above,
+                //another property to indicate how many releases/tracks have musicbrainz data - as the averages are pretty loose figures
             };
         }
-        
-        //taken from tracksinsightviewservice and now returning just a model and doign the conversions in view layer
 
-        private static string GetAverageTracksPerReleaseStringFormatted(List<Track> tracks)
-        {
-            var releasesToTracks = tracks.GroupBy(x => x.DiscogsReleaseId).ToList();
 
-            var tracksPerReleaseCount = new List<int>();
-            foreach (var release in releasesToTracks)
-            {
-                tracksPerReleaseCount.Add(release.Count());
-            }
-            var averageTracksPerReleaseText = Math.Round(tracksPerReleaseCount.Average(), 0, MidpointRounding.AwayFromZero).ToString();
-            return averageTracksPerReleaseText;
-        }
+        //No point in these metrics. The number of releases actually getting musicbrainz track data and lengths is low
+        //Keeping code bones for when the idea of what to do here comes
 
-        private static string GetAverageTrackLengthStringFormatted(List<Track> tracks)
-        {
-            var unformattedAverageTrackLength = tracks
-                                                .Where(x => x.MusicBrainzTrackLength != null)
-                                                .Average(x => x.MusicBrainzTrackLength);
-            var averageTrackLengthFormatted = "";
-            if (unformattedAverageTrackLength.HasValue)
-            {
-                averageTrackLengthFormatted = $"{TimeSpan.FromMilliseconds(unformattedAverageTrackLength.Value).ToString(@"mm\:ss")}";
-            }
+        //private static string GetAverageTracksPerReleaseStringFormatted(List<Track> tracks)
+        //{
+        //    var releasesToTracks = tracks.GroupBy(x => x.DiscogsReleaseId).ToList();
 
-            return averageTrackLengthFormatted;
-        }
+        //    var tracksPerReleaseCount = new List<int>();
+        //    foreach (var release in releasesToTracks)
+        //    {
+        //        tracksPerReleaseCount.Add(release.Count());
+        //    }
+        //    var averageTracksPerReleaseText = Math.Round(tracksPerReleaseCount.Average(), 0, MidpointRounding.AwayFromZero).ToString();
+        //    return averageTracksPerReleaseText;
+        //}
+
+        //private static string GetAverageTrackLengthStringFormatted(List<Track> tracks)
+        //{
+        //    //discogs release tracks are strings - so only getting 
+
+        //    var unformattedAverageTrackLength = tracks
+        //                                        .Where(x => x.MusicBrainzTrackLength != null)
+        //                                        .Average(x => x.MusicBrainzTrackLength);
+        //    var averageTrackLengthFormatted = "";
+        //    if (unformattedAverageTrackLength.HasValue)
+        //    {
+        //        averageTrackLengthFormatted = $"{TimeSpan.FromMilliseconds(unformattedAverageTrackLength.Value).ToString(@"mm\:ss")}";
+        //    }
+
+        //    return averageTrackLengthFormatted;
+        //}
+
+        #endregion
     }
 }

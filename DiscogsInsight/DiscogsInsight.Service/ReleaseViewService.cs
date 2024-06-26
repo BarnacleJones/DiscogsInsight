@@ -73,7 +73,6 @@ namespace DiscogsInsight.Service
                 };
             }
         }
-
         public async Task<ViewResult<ReleaseViewModel>> GetRandomRelease()
         {
             try

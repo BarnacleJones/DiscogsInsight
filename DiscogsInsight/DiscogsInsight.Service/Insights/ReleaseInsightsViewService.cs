@@ -1,5 +1,5 @@
 ﻿using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.Database.Entities;
+using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.Service.Models.Insights;
 using DiscogsInsight.Service.Models.Results;
 
@@ -17,10 +17,8 @@ namespace DiscogsInsight.Service.Insights
         public async Task<ViewResult<ReleaseInsightsStatsModel>> GetReleaseStatistics()
         {
             try
-            {
-                //get data
-                //var releases = await _releaseDataService.GetAllReleasesAsList();
-                var releases = await _insightsDataService.GetAllReleasesDataModelsAsList();
+            { 
+                var releases = await _insightsDataService.GetReleaseStatisticData();
 
                 var earliestRelease = releases.Where(x => !string.IsNullOrWhiteSpace(x.OriginalReleaseYear))
                                               .OrderBy(x => x.OriginalReleaseYear)
@@ -69,7 +67,7 @@ namespace DiscogsInsight.Service.Insights
             }
         }
 
-        private (string[], double[]) GenerateDataForReleasesByPressingCountry(List<Release>? releases)
+        private (string[], double[]) GenerateDataForReleasesByPressingCountry(List<ReleaseStatisticData>? releases)
         {
             var releasesGroupedByCountryOfRelease = releases
                 .GroupBy(x => x.ReleaseCountry)
@@ -93,7 +91,7 @@ namespace DiscogsInsight.Service.Insights
             return (labels, countryCounts);
         }
 
-        private static List<(string, double)> GenerateDataForReleasesOverTimeGraph(List<Release> releases)
+        private static List<(string, double)> GenerateDataForReleasesOverTimeGraph(List<ReleaseStatisticData> releases)
         {
             var releasesOverTimeLineChartSeriesData = new List<(string, double)>();
 

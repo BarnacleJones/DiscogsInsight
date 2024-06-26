@@ -1,4 +1,11 @@
 ﻿@page "/tracksInsights"
+@* 
+
+                //No point in these metrics. The number of releases actually getting musicbrainz track data and lengths is low
+                //Keeping code bones for when the idea of what to do here comes
+
+
+
 @using DiscogsInsight.Service.Collection
 @using DiscogsInsight.Service.Insights
 @using DiscogsInsight.Service.Models
@@ -6,10 +13,10 @@
 @using DiscogsInsight.Service.Models.Results
 @inject TracksInsightsViewService TrackInsightsViewService
 @inject UserNotificationService UserNotificationService
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavigationManager *@
 
         
-@if (_tracksInsightsStats != null)
+@* @if (_tracksInsightsStats != null)
 {
     <MudStack AlignItems="MudBlazor.AlignItems.Center" Elevation="0">
         <MudText Typo="Typo.h5">Tracks Insights</MudText>
@@ -29,25 +36,25 @@
     </MudStack>
 }
 else
-{
+{ *@
     <LoadingComponent />
-}
+@* } *@
 
 @code{
-    private TracksInsightsStatsViewModel? _tracksInsightsStats;
+    //private TracksInsightsStatsViewModel? _tracksInsightsStats;
 
 
-    protected override async Task OnInitializedAsync()
-    {        
-        HandleStatisticsResult(await TrackInsightsViewService.GetTracksStatistics());
+    // protected override async Task OnInitializedAsync()
+    // {        
+    //     //HandleStatisticsResult(await TrackInsightsViewService.GetTracksStatistics());
 
-    }
+    // }
 
-    private async void HandleStatisticsResult(ViewResult<TracksInsightsStatsViewModel> result)
-    {
-        if (result.Success)
-            _tracksInsightsStats = result.Data;
-        else
-            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
-    }
+    // private async void HandleStatisticsResult(ViewResult<TracksInsightsStatsViewModel> result)
+    // {
+    //     if (result.Success)
+    //         _tracksInsightsStats = result.Data;
+    //     else
+    //         await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+    // }
 }

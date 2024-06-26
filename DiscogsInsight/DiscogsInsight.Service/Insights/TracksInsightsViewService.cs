@@ -1,6 +1,4 @@
-﻿using DiscogsInsight.Database.Entities;
-using DiscogsInsight.DataAccess.Contract;
-using DiscogsInsight.Service.Models.Insights;
+﻿using DiscogsInsight.Service.Models.Insights;
 using DiscogsInsight.Service.Models.Results;
 using DiscogsInsight.DataAccess.Services;
 
@@ -19,15 +17,19 @@ namespace DiscogsInsight.Service.Insights
         {
             try
             {
-                var tracks = await _insightsDataService.GetTrackInsightData();
+                //No point in these metrics. The number of releases actually getting musicbrainz track data and lengths is low
+                //Keeping code bones for when the idea of what to do here comes
 
-                var averageTrackLengthString = TimeSpan.FromMilliseconds(tracks.AverageTrackLength).ToString(@"mm\:ss");
-                var averageTacksPerRelease = Math.Round(tracks.AverageTracksPerRelease.Average(), 0, MidpointRounding.AwayFromZero).ToString();
+
+                //var tracks = await _insightsDataService.GetTrackInsightData();
+
+                //var averageTrackLengthString = TimeSpan.FromMilliseconds(tracks.AverageTrackLength).ToString(@"mm\:ss");
+                //var averageTacksPerRelease = Math.Round(tracks.AverageTracksPerRelease.Average(), 0, MidpointRounding.AwayFromZero).ToString();
 
                 var data = new TracksInsightsStatsViewModel
                 {
-                    AverageTrackLength = tracks.AverageTrackLength,
-                    AverageTracksPerRelease = tracks.AverageTracksPerRelease
+                    //AverageTrackLength = tracks.AverageTrackLength,
+                    //AverageTracksPerRelease = tracks.AverageTracksPerRelease
                 };
                 return new ViewResult<TracksInsightsStatsViewModel>
                 {
