@@ -28,10 +28,7 @@ namespace DiscogsInsight.Service
         {
             try
             {
-                var allArtists = await _artistDataService.GetAllArtistsFromDatabase();
-
-                var randomArtistId = allArtists.Select(x => x.DiscogsArtistId).OrderBy(r => Guid.NewGuid()).FirstOrDefault();//new GUID as key, will be random
-
+                var randomArtistId = await _artistDataService.GetARandomDiscogsArtistId();
                 return await GetArtist(randomArtistId);
             }
             catch (Exception ex)

@@ -11,13 +11,13 @@ namespace DiscogsInsight.Service
     public class ReleaseViewService
     {
         private readonly IReleaseDataService _releaseDataService;
-        private readonly IArtistDataService _artistDataService;
+        private readonly IArtistDataCorrectionService _artistDataCorrectionService;
         private readonly ILogger<ReleaseViewService> _logger;
 
-        public ReleaseViewService(IReleaseDataService releaseDataService, IArtistDataService artistDataService, ILogger<ReleaseViewService> logger)
+        public ReleaseViewService(IReleaseDataService releaseDataService, IArtistDataCorrectionService artistDataCorrectionService, ILogger<ReleaseViewService> logger)
         {
             _releaseDataService = releaseDataService;
-            _artistDataService = artistDataService;
+            _artistDataCorrectionService = artistDataCorrectionService;
             _logger = logger;
         }
         public async Task<ViewResult<ReleaseViewModel>> GetRelease(int? discogsReleaseId)
@@ -159,6 +159,7 @@ namespace DiscogsInsight.Service
             await _releaseDataService.SetFavouriteBooleanOnRelease(favourited, discogsReleaseId);
             return true;
         }
+
         private ReleaseViewModel GetReleaseViewModel(ReleaseDataModel release)
         {
             var releaseViewModel = new ReleaseViewModel
@@ -212,7 +213,7 @@ namespace DiscogsInsight.Service
             try
             {
 
-                var data = await _artistDataService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
+                var data = await _artistDataCorrectionService.GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(discogsReleaseId);
 
                 var viewModel = data.Select(x => new CorrectArtistDataViewModel
                 {
@@ -242,7 +243,7 @@ namespace DiscogsInsight.Service
         }
         public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseId, string musicBrainzId)
         {
-            var success = await _artistDataService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, musicBrainzId);
+            var success = await _artistDataCorrectionService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, musicBrainzId);
             return success;
         }
         public async Task<ViewResult<List<CorrectReleaseDataViewModel>>> GetPossibleReleasesBasedOnDiscogsReleaseId(int? discogsReleaseId)

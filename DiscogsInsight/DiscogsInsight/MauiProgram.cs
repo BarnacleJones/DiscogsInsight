@@ -66,6 +66,7 @@ namespace DiscogsInsight
             //Data Access
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
             builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
+            builder.Services.AddSingleton<IArtistDataCorrectionService,ArtistDataCorrectionService>();
             builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
             builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
             builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
