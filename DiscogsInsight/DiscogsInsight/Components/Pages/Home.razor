@@ -1,8 +1,5 @@
 ﻿@page "/"
 @using DiscogsInsight.Service.Collection
-@using DiscogsInsight.Service.Notifications
-@using DiscogsInsight.Service.Releases
-@using DiscogsInsight.Service.Settings
 @using DiscogsInsight.Service.Models
 @using DiscogsInsight.Service.Models.Collection
 @using DiscogsInsight.Service.Models.EntityViewModels
@@ -63,7 +60,7 @@ else
         _hasKey = SettingsViewService.HasSavedDiscogsUsername();
         if (_hasKey)
         {
-            var ensureCollectionIsSeeded = await CollectionViewService.GetCollection();
+            HandleSeedResult(await CollectionViewService.ConfirmDataIsSeededAndSeedIfNot());
             HandleRandomResult(await ReleaseViewService.GetRandomRelease());
             HandleStatisticsResult(await CollectionStatisticsViewService.GetHomePageStatistics());
         }
@@ -75,6 +72,12 @@ else
             _randomRelease = result.Data;        
         else
             await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");       
+    }
+    
+    private async void HandleSeedResult(ViewResult<bool> result)
+    {
+        if (!result.Success)
+            await UserNotificationService.DisplayNotification("Error seeding", $"{result.ErrorMessage}", "OK", "Cancel");       
     }
 
     private async void HandleStatisticsResult(ViewResult<CollectionStatsViewModel> result)

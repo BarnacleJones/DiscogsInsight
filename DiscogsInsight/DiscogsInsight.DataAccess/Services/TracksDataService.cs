@@ -1,23 +1,40 @@
-﻿using Microsoft.Extensions.Logging;
-using DiscogsInsight.Database.Entities;
+﻿using DiscogsInsight.Database.Entities;
 using DiscogsInsight.DataAccess.Contract;
+using DiscogsInsight.DataAccess.Models;
+using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.DataAccess.Services
 {
     public class TracksDataService : ITracksDataService
     {
-        private readonly Database.Contract.ISQLiteAsyncConnection _db;
-        private readonly ILogger<TracksDataService> _logger;
+        private readonly ISQLiteAsyncConnection _db;
 
-        public TracksDataService(Database.Contract.ISQLiteAsyncConnection db, ILogger<TracksDataService> logger)
+        public TracksDataService(ISQLiteAsyncConnection db)
         {
             _db = db;
-            _logger = logger;
         }
 
-        public async Task<List<Track>> GetAllTracks()
+        public async Task<List<TrackGridModel>> GetAllTracksForGrid()
         {
-            return await _db.Table<Track>().ToListAsync();
+            var tracksGridModelItemsQuery = $@"SELECT
+                                               Track.Id,
+                                               Track.DiscogsArtistId,
+                                               Track.DiscogsReleaseId,
+                                               Track.DiscogsMasterId,
+                                               Track.Title,
+                                               Track.Duration,
+                                               Track.MusicBrainzTrackLength,
+                                               Track.Position,
+                                               Track.Rating,
+                                               Artist.Name as ArtistName,
+                                               Release.Title as ReleaseName
+                                               FROM Track
+                                               INNER JOIN Release on Track.DiscogsReleaseId = Release.DiscogsReleaseId
+                                               INNER JOIN Artist on Track.DiscogsArtistId = Artist.DiscogsArtistId;";
+
+            var data = await _db.QueryAsync<TrackGridModel>(tracksGridModelItemsQuery);
+
+            return data;
         }
 
         public async Task<bool> SetRatingOnTrack(int? rating, int discogsReleaseId, string title)
@@ -29,8 +46,7 @@ namespace DiscogsInsight.DataAccess.Services
             track.Rating = rating;
             await _db.UpdateAsync(track);
 
-            return true;           
-            
+            return true;
         }
     }
 }
