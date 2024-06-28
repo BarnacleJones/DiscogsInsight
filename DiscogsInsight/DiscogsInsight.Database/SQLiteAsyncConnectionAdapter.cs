@@ -140,7 +140,7 @@ namespace DiscogsInsight.Database
         {
             var discogsArtistIdsQuery = @$"SELECT DISTINCT DiscogsArtistId FROM Artist";
 
-            var discogsArtistIdsInterim = await QueryAsync<DiscogsArtistIdClass>(discogsArtistIdsQuery);
+            var discogsArtistIdsInterim = await _connection.QueryAsync<DiscogsArtistIdClass>(discogsArtistIdsQuery);
 
             return discogsArtistIdsInterim.Select(artist => artist.DiscogsArtistId).ToHashSet();
         } 
@@ -149,21 +149,21 @@ namespace DiscogsInsight.Database
         {
             var discogsReleasesInTheDbQuery = @$"SELECT DISTINCT DiscogsReleaseId FROM Release";
 
-            var artistsIdsInDbAlreadyInterim = await QueryAsync<DiscogsReleaseIdClass>(discogsReleasesInTheDbQuery);
+            var artistsIdsInDbAlreadyInterim = await _connection.QueryAsync<DiscogsReleaseIdClass>(discogsReleasesInTheDbQuery);
 
             return artistsIdsInDbAlreadyInterim.Select(x => x.DiscogsReleaseId).ToHashSet();
         }
 
         public Task<int> InsertAllAsync<T>(IEnumerable<T> objects, bool runInTransaction = true) where T : IDatabaseEntity
         {
-            return InsertAllAsync(objects, runInTransaction);
+            return _connection.InsertAllAsync(objects, runInTransaction);
         }
 
         public async Task<HashSet<string>> AllDiscogsGenreTagsInDb()
         {
             var discogsReleasesInTheDbQuery = @$"SELECT DISTINCT DiscogsTag FROM DiscogsGenreTags";
 
-            var artistsIdsInDbAlreadyInterim = await QueryAsync<DiscogsTags>(discogsReleasesInTheDbQuery);
+            var artistsIdsInDbAlreadyInterim = await _connection.QueryAsync<DiscogsTags>(discogsReleasesInTheDbQuery);
 
             return artistsIdsInDbAlreadyInterim.Select(x => x.DiscogsTag).ToHashSet();
 

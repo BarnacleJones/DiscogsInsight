@@ -370,7 +370,7 @@ namespace DiscogsInsight.DataAccess.Services
                 return [];
 
             var record = await _db.Table<MusicBrainzReleaseToCoverImage>().Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).FirstOrDefaultAsync();
-            return record.MusicBrainzCoverImage;
+            return record?.MusicBrainzCoverImage;
 
         }
 
