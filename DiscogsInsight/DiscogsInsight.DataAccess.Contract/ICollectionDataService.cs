@@ -1,14 +1,12 @@
-﻿using DiscogsInsight.DataAccess.Models;
-using DiscogsInsight.Database.Entities;
+﻿using DiscogsInsight.Database.Contract;
 
 namespace DiscogsInsight.DataAccess.Contract
 {
     public interface ICollectionDataService
     {
-        Task<List<DiscogsArtistIdAndName>> GetArtistsIdsAndNames();
-        Task<List<Release>> GetReleases();
-        Task PurgeEntireCollection();
-        Task PurgeEntireDatabase();
-        Task<bool> CollectionSavedOrUpdatedFromDiscogs();
+        Task<List<SimpleReleaseData>> GetSimpleReleaseDataForWholeCollection();
+        Task<List<SimpleReleaseData>> GetSimpleReleaseDataForCollectionDataWithoutAllApiData();
+        Task<bool> UpdateCollectionFromDiscogs();
+        Task<bool> CheckCollectionIsSeededOrSeed();
     }
 }

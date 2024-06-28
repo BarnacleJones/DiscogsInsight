@@ -10,7 +10,7 @@
         public string? ReleaseCountry { get; set; }
         public int? DiscogsArtistId { get; set; }
         public int? DiscogsReleaseId { get; set; }
-        public List<(string? Name, int Id)>? Genres { get; set; }
+        public List<GenreDto>? Genres { get; set; }
         public string? DiscogsReleaseUrl { get; set; }
         public DateTime? DateAdded { get; set; }
         public List<TrackDto>? Tracks { get; set; }
@@ -19,6 +19,12 @@
         public string ReleaseGenre { get; set; }
     }
 
+    public class GenreDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+    }
     public class TrackDto
     {
         public string? Title { get; set; }

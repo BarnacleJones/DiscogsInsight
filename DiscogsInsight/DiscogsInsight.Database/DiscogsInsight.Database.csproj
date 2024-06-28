@@ -26,6 +26,11 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DiscogsInsight.Database.Contract\DiscogsInsight.Database.Contract.csproj" />
 	</ItemGroup>
 </Project>
 

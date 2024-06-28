@@ -20,16 +20,14 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
         private readonly ICollectionDataService _collectionDataService;
         private readonly ILogger<ReleaseDataService> _logger;
-        private readonly IDiscogsGenresAndTagsDataService _discogsGenresAndTagsDataService;
 
-        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsGenresAndTagsDataService discogsGenresAndTags,IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
             _collectionDataService = collectionDataService;
             _coverArchiveApiService = coverArchiveApiService;
             _discogsApiService = discogsApiService;
-            _discogsGenresAndTagsDataService = discogsGenresAndTags;
             _logger = logger;
         }
 
@@ -47,7 +45,33 @@ namespace DiscogsInsight.DataAccess.Services
                 DiscogsReleaseId = x.DiscogsReleaseId ?? 0
             }).ToList();
 
-            var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
+            //var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
+
+            //public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)
+            //{
+            //    if (discogsReleaseId == null) { return new List<(string?, int)>(); };
+
+            //    var discogsGenreJoiningTableList = await GetDiscogsGenreTagToDiscogsReleaseAsList();
+
+            //    var genreIdsForThisRelease = discogsGenreJoiningTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).Select(x => x.DiscogsGenreTagId).ToList();
+
+            //    var genreTable = await GetAllGenreTagsAsList();
+
+            //    return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => (x.DiscogsTag, x.Id)).ToList();
+
+            //}
+
+
+            //var existingMusicBrainzReleaseIdIdsForThisArtistQuery = @$"
+            //SELECT MusicBrainzReleaseId
+            //FROM MusicBrainzArtistToMusicBrainzRelease
+            //WHERE MusicBrainzArtistToMusicBrainzRelease.MusicBrainzArtistId = ?;";
+
+            //var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, musicBrainzArtistId);
+
+
+
+            var genres = new List<GenreDto>();//todo write query to populate this given a discogsreleaseid
 
             return new ReleaseDataModel
             {
@@ -175,12 +199,7 @@ namespace DiscogsInsight.DataAccess.Services
         public async Task<ReleaseDataModel> GetRandomRelease()
         {
             var releases = await _db.Table<Release>().ToListAsync();
-            //This is called on home page so it seeds data if its empty. Todo confirm this isnt happening on the home page first
-            if (releases.Count < 1)
-            {
-                releases = await _collectionDataService.GetReleases();
-            }
-
+           
             var randomReleaseId = releases.Where(x => x.DiscogsArtistId.HasValue)
                                           .Select(x => x.DiscogsReleaseId.Value)
                                           .OrderBy(r => Guid.NewGuid())
@@ -351,7 +370,7 @@ namespace DiscogsInsight.DataAccess.Services
                 return [];
 
             var record = await _db.Table<MusicBrainzReleaseToCoverImage>().Where(x => x.MusicBrainzReleaseId == musicBrainzReleaseId).FirstOrDefaultAsync();
-            return record.MusicBrainzCoverImage;
+            return record?.MusicBrainzCoverImage;
 
         }
 
@@ -496,17 +515,23 @@ namespace DiscogsInsight.DataAccess.Services
         /// <param name="existingRelease"></param>
         /// <param name="releaseResponse"></param>
         /// <returns></returns>
-        private async Task SaveInformationFromDiscogsReleaseResponse(Database.Entities.Release existingRelease, DiscogsReleaseResponse releaseResponse)
+        private async Task SaveInformationFromDiscogsReleaseResponse(Release existingRelease, DiscogsReleaseResponse releaseResponse)
         {
-            var tracksAlreadySavedForThisRelease = await _db.Table<Database.Entities.Track>().Where(x => x.DiscogsReleaseId == existingRelease.DiscogsReleaseId).CountAsync() > 0;
-                
             await UpdateAdditionalReleaseProperties(releaseResponse, existingRelease);
 
+            var countQuery = @$"SELECT COUNT(*)
+                                FROM Track
+                                WHERE DiscogsReleaseId = ?;";
+
+            var count = await _db.ExecuteScalarAsync<int>(countQuery, existingRelease.DiscogsReleaseId);
+
+            var tracksAlreadySavedForThisRelease = count > 0;
+                
             if (!tracksAlreadySavedForThisRelease && releaseResponse.tracklist != null)
             {
                 foreach (var track in releaseResponse.tracklist)
                 {
-                    await _db.InsertAsync(new Database.Entities.Track
+                    await _db.InsertAsync(new Track
                     {
                         DiscogsArtistId = existingRelease.DiscogsArtistId,
                         DiscogsMasterId = existingRelease.DiscogsMasterId,
@@ -517,48 +542,59 @@ namespace DiscogsInsight.DataAccess.Services
                     });
                 }
             }
+                        
+            //save genres (and styles) from response if there are any
+            var responseGenres = new List<string>();
+            if (releaseResponse.styles != null) responseGenres.AddRange(releaseResponse.styles);
+            if (releaseResponse.genres != null) responseGenres.AddRange(releaseResponse.genres);
+
+            if (responseGenres.Count > 0) 
+            {
+                var quotedGenres = string.Join(", ", responseGenres.Select(tag => $"'{tag}'"));
+
+                var discogsTagsInTheDbAlreadyQuery = @$"SELECT Id, DiscogsTag
+                                                   FROM DiscogsGenreTags
+                                                   WHERE DiscogsTag IN ({quotedGenres});
+                                                        ";
+                var discogsGenreTagsInDbAlready = await _db.QueryAsync<DiscogsGenreTags>(discogsTagsInTheDbAlreadyQuery);
+
+                var genresNotInDatabaseAlready = responseGenres
+                                                .Except(discogsGenreTagsInDbAlready.Select(x => x.DiscogsTag ?? ""))
+                                                .ToList();
                 
-            //save genres (styles) from response if there are any
-            if (releaseResponse.styles == null || releaseResponse.styles.Count == 0)
-                return;
+                bool needToRequeryGenreTable = false;
 
-            var releaseGenresFromReleaseResponse = releaseResponse.styles;
-            //todo have a think about how to further optimise this
-            //when coming from all releases by genre - still getting the whole table per release
-            //not as bad if just loading a single release
-            var genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
-            var genresNotInDatabaseAlready = releaseGenresFromReleaseResponse.Except(genreInDatabaseAlready.Select(y => y.DiscogsTag)).ToList();
-
-            bool needToRequeryGenreTable = false;
-
-            //save to genre table 
-            if (genresNotInDatabaseAlready != null && genresNotInDatabaseAlready.Count != 0)
-            {
-                needToRequeryGenreTable = true;
-                foreach (var genreName in genresNotInDatabaseAlready)
+                //save to genre table 
+                if (genresNotInDatabaseAlready != null && genresNotInDatabaseAlready.Count != 0)
                 {
-                    await _db.InsertAsync(new DiscogsGenreTags { DiscogsTag = genreName });
-                }                    
-            }
+                    needToRequeryGenreTable = true;
+                    foreach (var genreName in genresNotInDatabaseAlready)
+                    {
+                        await _db.InsertAsync(new DiscogsGenreTags { DiscogsTag = genreName });
+                    }
+                }
 
-            if (needToRequeryGenreTable)
-            {
-                genreInDatabaseAlready = await _db.Table<DiscogsGenreTags>().ToListAsync();
-            }
-
-            //save to genre/release joining table
-            foreach (var style in releaseGenresFromReleaseResponse)
-            {
-                var genreTagId = genreInDatabaseAlready.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
-
-                await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
+                if (needToRequeryGenreTable)
                 {
-                    DiscogsReleaseId = existingRelease.DiscogsReleaseId,
-                    DiscogsArtistId = existingRelease.DiscogsArtistId,
-                    DiscogsGenreTagId = genreTagId
-                });
-            }          
+                    discogsGenreTagsInDbAlready = await _db.QueryAsync<DiscogsGenreTags>(discogsTagsInTheDbAlreadyQuery);
+
+                }
+
+                //save to genre/release joining table
+                foreach (var style in responseGenres)
+                {
+                    var genreTagId = discogsGenreTagsInDbAlready.Where(x => x.DiscogsTag == style).Select(x => x.Id).FirstOrDefault();
+
+                    await _db.InsertAsync(new DiscogsGenreTagToDiscogsRelease
+                    {
+                        DiscogsReleaseId = existingRelease.DiscogsReleaseId,
+                        DiscogsArtistId = existingRelease.DiscogsArtistId,
+                        DiscogsGenreTagId = genreTagId
+                    });
+                }
+            }
         }
+
         private async Task UpdateAdditionalReleaseProperties(DiscogsReleaseResponse releaseResponse, Database.Entities.Release existingRelease)
         {
             //update existing release entity with additional properties
@@ -662,7 +698,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
 
         }
-        private async Task MakeMusicBrainzReleaseCallAndSaveTracks(Database.Entities.Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
+        private async Task MakeMusicBrainzReleaseCallAndSaveTracks(Release release, string? musicBrainzReleaseId, bool isAReleaseGroupUrl)
         {
             if (!isAReleaseGroupUrl)
             {
@@ -701,7 +737,7 @@ namespace DiscogsInsight.DataAccess.Services
             }
             else
             {
-                //just save year
+                //just save year - todo remember what release group was exactly...it is more generic but cant remember exactly
                 var releaseGroupData = await _musicBrainzApiService.GetReleaseGroupFromMusicBrainzApiUsingMusicBrainsReleaseId(musicBrainzReleaseId);
                 release.OriginalReleaseYear = releaseGroupData.FirstReleaseDate;
                 await _db.UpdateAsync(release);
@@ -797,39 +833,6 @@ namespace DiscogsInsight.DataAccess.Services
         #endregion
     }
 
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-
-    //HIGHEST PRIORITY TODO - See if you can swap classes out for objects once things are running, or if not store these somewhere logical
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    //------------------------------------------------------------------------------------------------------------------------------------
-    public class DiscogsReleaseIdClass
-    {
-        public int DiscogsReleaseId { get; set; }
-    }
-    public class DiscogsArtistIdClass
-    {
-        public int DiscogsArtistId { get; set; }
-    }
-    public class TagDbResponse
-    {
-        public string Tag { get; set; }
-    }
-    public class MusicBrainzReleaseIdResponse
-    {
-        public string MusicBrainzReleaseId { get; set; }
-    }
     public class ReleaseInterimData
     {
         public string? Year { get; set; }

@@ -1,11 +1,9 @@
 ﻿@page "/artist/{artistId:int?}"
 
 @using System.Collections.ObjectModel
-@using DiscogsInsight.Service.Artist
 @using DiscogsInsight.Service.Models
 @using DiscogsInsight.Service.Models.EntityViewModels
 @using DiscogsInsight.Service.Models.Results
-@using DiscogsInsight.Service.Notifications
 @inject UserNotificationService UserNotificationService
 @inject ArtistViewService ArtistViewService
 @inject NavigationManager _navigationManager

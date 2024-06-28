@@ -39,6 +39,7 @@
 	  <ProjectReference Include="..\DiscogsInsight.ApiIntegration.Models\DiscogsInsight.ApiIntegration.Models.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Contract\DiscogsInsight.DataAccess.Contract.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.DataAccess.Models\DiscogsInsight.DataAccess.Models.csproj" />
+	  <ProjectReference Include="..\DiscogsInsight.Database.Contract\DiscogsInsight.Database.Contract.csproj" />
 	  <ProjectReference Include="..\DiscogsInsight.Database\DiscogsInsight.Database.csproj" />
 	</ItemGroup>
 

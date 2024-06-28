@@ -4,15 +4,11 @@ using MudBlazor.Services;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.ApiIntegration.Services;
 using DiscogsInsight.ApiIntegration.Contract;
-using DiscogsInsight.Service.Tracks;
 using DiscogsInsight.Service.Collection;
-using DiscogsInsight.Service.Notifications;
-using DiscogsInsight.Service.Artist;
 using DiscogsInsight.Service.Insights;
-using DiscogsInsight.Service.Settings;
-using DiscogsInsight.Service.Releases;
 using DiscogsInsight.Database.Contract;
-using DiscogsInsight.Database.Services;
+using DiscogsInsight.Database;
+using DiscogsInsight.Service;
 
 namespace DiscogsInsight
 {
@@ -60,7 +56,6 @@ namespace DiscogsInsight
 
             //Database layer
             builder.Services.AddSingleton<ISQLiteAsyncConnection, SQLiteAsyncConnectionAdapter>();
-            builder.Services.AddSingleton<IDiscogsInsightDb, DiscogsInsightDb>();
 
             //Api layer
             builder.Services.AddSingleton<IDiscogsApiService, DiscogsApiService>();
@@ -70,25 +65,25 @@ namespace DiscogsInsight
 
             //Data Access
             builder.Services.AddSingleton<ICollectionDataService,CollectionDataService>();
-            builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
-            builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
-            builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
-            builder.Services.AddSingleton<ITagsDataService,TagsDataService>();
-            builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
             builder.Services.AddSingleton<IArtistDataService,ArtistDataService>();
-            builder.Services.AddSingleton<IDiscogsGenresAndTagsDataService, DiscogsGenresAndTagsDataService>();
+            builder.Services.AddSingleton<IArtistDataCorrectionService,ArtistDataCorrectionService>();
+            builder.Services.AddSingleton<IReleaseDataService,ReleaseDataService>();
+            builder.Services.AddSingleton<IPreferencesService,PreferencesService>();
+            builder.Services.AddSingleton<ISettingsDataService, SettingsDataService>();
+            builder.Services.AddSingleton<ITracksDataService,TracksDataService>();
+            builder.Services.AddSingleton<IInsightsDataService, InsightsDataService>();
 
-            //view layer
-            builder.Services.AddSingleton<UserNotificationService>();
-            builder.Services.AddSingleton<CollectionViewService>();
-            builder.Services.AddSingleton<CollectionStatisticsViewService>();
-            builder.Services.AddSingleton<SettingsViewService>();
+            //service layer
             builder.Services.AddSingleton<ArtistViewService>();
-            builder.Services.AddSingleton<TracksViewService>();
+            builder.Services.AddSingleton<CollectionViewService>();
             builder.Services.AddSingleton<ReleaseViewService>();
-
-            builder.Services.AddSingleton<ReleaseInsightsViewService>();
+            builder.Services.AddSingleton<SettingsViewService>();
+            builder.Services.AddSingleton<UserNotificationService>();
+            builder.Services.AddSingleton<TracksViewService>();
+            //service.insights
             builder.Services.AddSingleton<ArtistInsightsViewService>();
+            builder.Services.AddSingleton<CollectionStatisticsViewService>();
+            builder.Services.AddSingleton<ReleaseInsightsViewService>();
             builder.Services.AddSingleton<TracksInsightsViewService>();
 
 
