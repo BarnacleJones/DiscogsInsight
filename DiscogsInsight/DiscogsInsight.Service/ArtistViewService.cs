@@ -65,7 +65,7 @@ namespace DiscogsInsight.Service
 
                 //var tagsList = tags.Select(x => x.Tag).ToList();
 
-                var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+                //var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
 
                 var releasesViewModel = releasesByThisArtist.GroupBy(x => x.Status)
                     .Select(x => new MusicBrainzArtistsReleasesViewModel

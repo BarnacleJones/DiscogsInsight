@@ -33,12 +33,10 @@ namespace DiscogsInsight.DataAccess.Services
 
             return artistId.FirstOrDefault().DiscogsArtistId;
         }
-
-       
-
-        public async Task<Artist?> GetArtistByDiscogsId(int? discogsArtistId, bool fetchAndSaveApiData = true)
+            
+        public async Task<ArtistDataModel?> GetArtistByDiscogsId(int? discogsArtistId)
         {
-            if (discogsArtistId == null) { return new Artist { Name = "No Artist Id Supplied" }; }
+            if (discogsArtistId == null) { return new ArtistDataModel { Name = "No Artist Id Supplied" }; }
             
             var existingArtist = await GetArtistByDiscogsIdFromDb(discogsArtistId.Value);
 
@@ -48,11 +46,23 @@ namespace DiscogsInsight.DataAccess.Services
                 throw new Exception($"Unhandled exception: Artist {discogsArtistId} not in db. It might be a 'various artist' issue, or refresh your database");
             }
             if (existingArtist.Name?.ToLower() == "various")
-            {
+            {                
                 //dont fetch api data - 'Various' 404s for discogs, and causes bad data with MusicBrainz. 
-                return existingArtist;
+                return new ArtistDataModel
+                {
+                    Name = existingArtist.Name,
+                    City = existingArtist.City,
+                    Country = existingArtist.Country,
+                    DiscogsArtistId = discogsArtistId.Value,
+                    EndYear = existingArtist.EndYear,
+                    HasAllApiData = existingArtist.HasAllApiData,
+                    Id = existingArtist.Id,
+                    MusicBrainzArtistId = existingArtist.MusicBrainzArtistId,
+                    Profile = existingArtist.Profile,
+                    StartYear = existingArtist.StartYear
+                };
             }
-            if (fetchAndSaveApiData && !existingArtist.HasAllApiData)
+            if (!existingArtist.HasAllApiData)
             {
                 if (string.IsNullOrWhiteSpace(existingArtist.Profile))
                 {
@@ -66,12 +76,45 @@ namespace DiscogsInsight.DataAccess.Services
                     var musicBrainzResult = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(existingArtist.Name);
                     await SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(musicBrainzResult, existingArtist);
                 }
-
                 existingArtist.HasAllApiData = true;
                 await _db.UpdateAsync(existingArtist);
+                existingArtist = await _db.GetAsync<Artist>(existingArtist.Id);
             }
 
-            return existingArtist;
+            //add list of tags for the artist
+            //add list of releases add that data model to this datamodel
+
+            //was this function
+            //var releasesByThisArtist = await GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+            
+            //which was this
+
+            //var allReleasesTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
+
+            //var allReleasesByArtist = allReleasesTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId).ToList();
+
+            //return allReleasesByArtist.Select(x => new MusicBrainzArtistRelease
+            //{
+            //    MusicBrainzReleaseName = x.MusicBrainzReleaseName ?? " ",
+            //    ReleaseYear = x.ReleaseYear ?? " ",
+            //    Status = x.Status ?? " ",
+            //}).ToList();
+            //
+
+
+            var dataModelToReturn = new ArtistDataModel
+            {
+                Name = existingArtist.Name,
+                City = existingArtist.City,
+                Country = existingArtist.Country,
+                DiscogsArtistId = discogsArtistId.Value,
+                EndYear = existingArtist.EndYear,
+                HasAllApiData = existingArtist.HasAllApiData,
+                Id = existingArtist.Id,
+                MusicBrainzArtistId = existingArtist.MusicBrainzArtistId,
+                Profile = existingArtist.Profile,
+                StartYear = existingArtist.StartYear
+            }; ;
             //used down on artist view service
             //it was then doing this after this call:
 
@@ -95,7 +138,6 @@ namespace DiscogsInsight.DataAccess.Services
 
             //var tagsList = tags.Select(x => x.Tag).ToList();
 
-            //var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
 
             //__________________________________________________________________________________________________________________________
         }
@@ -111,10 +153,6 @@ namespace DiscogsInsight.DataAccess.Services
 
             return artist;
         }
-
-        #region still to rewrite
-
-
         private async Task SetMusicBrainzArtistDataForSavingAndSaveTagsFromArtistResponse(MusicBrainzInitialArtist artistResponse, Artist existingArtist)
         {               
             //**this makes an assumption that can cause bad data**
@@ -174,7 +212,7 @@ namespace DiscogsInsight.DataAccess.Services
                                                     .FirstOrDefault();
 
             //save tags - yes it is saving to joining table too before saving the actual artist table information, but its saving writes to the db....
-            var success = await SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
+            await SaveTagsByMusicBrainzArtistId(artistResponse, musicBrainsArtistId ?? "");
         }
         private async Task SaveTagsByMusicBrainzArtistId(MusicBrainzInitialArtist artistResponse, string musicBrainzArtistId)
         {
@@ -184,77 +222,65 @@ namespace DiscogsInsight.DataAccess.Services
 
             var tagsInResponse = artistFromResponse.Tags == null ? new List<Tag>() : artistFromResponse.Tags.Where(x => x.Count >= 1).ToList();
 
-            if (tagsInResponse != null && tagsInResponse.Any())
-            {
-
-                //query to go to get just tag names from musicbrainztags
-                //make it a where not IN statement
-                //var tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
-                // existingTagNamesInDb = tagsTable.Count != 0 ? tagsTable.Select(x => x.Tag).ToList() : new List<string?>();
-                
-                var data = string.Join(",", tagsInResponse);//need to make this add single commas dudoy
-
-                var releasesByReleaseIdsQuery = @$"
+            if (tagsInResponse == null || !tagsInResponse.Any())
+                return;
+            
+            var formattedStringListForQuery = string.Join(", ", tagsInResponse.Select(s => $"'{s}'"));
+            var tagsFromResponseAlreadyInDbListQuery = @$"
                             SELECT 
                             Tag
                             FROM MusicBrainzTags
-                            WHERE NOT TAG IN ({data});";
+                            WHERE TAG IN ({formattedStringListForQuery});";
 
-                var tagsNotInList = await _db.QueryAsync<TagNameQueryClass>(releasesByReleaseIdsQuery);
-
-                var tagsNotInDatabase = new List<string>();
-                var tagsToSave = new List<MusicBrainzTags>();
-
-                foreach (var tag in tagsInResponse)
+            var tagsFromResponseAlreadyInDb = await _db.QueryAsync<TagNameQueryClass>(tagsFromResponseAlreadyInDbListQuery);
+            
+            var tagsToSave = new List<MusicBrainzTags>();
+            //if there are tags in db already then dont save those ones
+            if (tagsFromResponseAlreadyInDb != null)
+            {
+                var tagStringsInDb = tagsFromResponseAlreadyInDb.Select(x => x.Tag).ToList();
+                foreach (var responseTag in tagsInResponse)
                 {
-                    if (!tagsNotInDatabase.Contains(tag.Name))
+                    if (!tagStringsInDb.Contains(responseTag.Name))
                     {
-                        var tagToSave = new MusicBrainzTags { Tag = tag.Name };
+                        var tagToSave = new MusicBrainzTags { Tag = responseTag.Name };
                         tagsToSave.Add(tagToSave);
                     }
                 }
-
-                await _db.InsertAllAsync(tagsToSave);
             }
+            //otherwise save them all
+            else
+            {
+                foreach (var responseTag in tagsInResponse)
+                {
+                    var tagToSave = new MusicBrainzTags { Tag = responseTag.Name };
+                    tagsToSave.Add(tagToSave);
+                }
+            }
+            if (tagsToSave != null && tagsToSave.Count > 0)
+                await _db.InsertAllAsync(tagsToSave);            
 
-            //get table again with newly saved tags to save to joining table 
-            tagsTable = await _db.Table<MusicBrainzTags>().ToListAsync();
+            var tagsFromResponseStrings = tagsInResponse.Select(x => x.Name).ToList();
 
+            var tagRecordsForThisArtistsTags = await _db.Table<MusicBrainzTags>()
+                                            .Where(x => tagsFromResponseStrings.Contains(x.Tag))
+                                            .ToListAsync();
+
+            var artistToTagRecordsToSave = new List<MusicBrainzArtistToMusicBrainzTags>();
             foreach (var tag in tagsInResponse)
             {
-                var tagId = tagsTable.Where(x => x.Tag == tag.Name).FirstOrDefault()?.Id;
+                var tagId = tagRecordsForThisArtistsTags.Where(x => x.Tag == tag.Name).FirstOrDefault()?.Id;
                 if (tagId != null)
                 {
                     var tagToArtist = new MusicBrainzArtistToMusicBrainzTags { TagId = tagId.Value, MusicBrainzArtistId = musicBrainzArtistId };
-                    await _db.InsertAsync(tagToArtist);
+                    artistToTagRecordsToSave.Add(tagToArtist);
                 }
             }
-
-            return true;
-           
-        }
-
-        public async Task<List<MusicBrainzArtistRelease>> GetArtistsReleasesByMusicBrainzArtistId(string musicBrainzArtistId)
-        {
-           
-                var allReleasesTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
-
-                var allReleasesByArtist = allReleasesTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId).ToList();
-
-                return allReleasesByArtist.Select(x => new MusicBrainzArtistRelease
-                {
-                    MusicBrainzReleaseName = x.MusicBrainzReleaseName ??  " " ,
-                    ReleaseYear = x.ReleaseYear ?? " ",
-                    Status = x.Status ?? " ",
-                }).ToList();
-
-         
-        }
-
-
-        #endregion
-
-       
+            if (artistToTagRecordsToSave != null && artistToTagRecordsToSave.Count > 0)
+            {
+                await _db.InsertAllAsync(artistToTagRecordsToSave);
+            }
+        }       
     }
 
 }

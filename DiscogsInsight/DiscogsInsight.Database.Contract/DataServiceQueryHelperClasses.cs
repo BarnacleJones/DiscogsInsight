@@ -22,6 +22,10 @@ namespace DiscogsInsight.Database.Contract
         public string MusicBrainzReleaseId { get; set; }
     }
 
+    public class TagNameQueryClass
+    {
+        public string Tag { get; set; }
+    }
     public class SimpleReleaseData
     {
         public string Name { get; set; }
