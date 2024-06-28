@@ -19,6 +19,17 @@ else
             <MudSelectItem Value="item.CorrectArtistMusicBrainzId">@item.ArtistName @item.Country @item.Disambiguation</MudSelectItem>
         }
     </MudSelect>
+    <MudSpacer />
+    <MudSpacer />
+    <MudSpacer />
+    <MudText>Not here? Know the MusicBrainzArtistId? Enter it here:</MudText>
+    <MudSpacer />
+    <MudSpacer />
+    <MudSpacer />
+    <MudTextField @bind-Value="_manualArtistId" Label="Correct MusicBrainzArtistId" Variant="MudBlazor.Variant.Filled"></MudTextField>
+    <MudSpacer />
+    <MudSpacer />
+    <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="HandleManualArtistSelection">Save Manual Name</MudButton>
 }
 
 @code
@@ -27,7 +38,7 @@ else
     public int? releaseId { get; set; }
 
     private List<CorrectArtistDataViewModel>? _potentialArtists;
-    // private string? _selectedArtist;
+    private string? _manualArtistId { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,6 +63,26 @@ else
         else
         {
             await UserNotificationService.DisplayNotification("Error", $"Error updating artist", "OK", "Cancel");
+        }
+    }
+
+    private async Task HandleManualArtistSelection()
+    {
+        if (!string.IsNullOrWhiteSpace(_manualArtistId))
+        {
+            var success = await ReleaseViewService.UpdateArtistWithCorrectMusicBrainzId(releaseId, _manualArtistId);
+            if (success)
+            {
+                NavigationManager.NavigateTo($"/release/{releaseId}");
+            }
+            else
+            {
+                await UserNotificationService.DisplayNotification("Error", $"Error updating artist", "OK", "Cancel");
+            }
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"Enter an Id", "OK", "Cancel");            
         }
     }
 

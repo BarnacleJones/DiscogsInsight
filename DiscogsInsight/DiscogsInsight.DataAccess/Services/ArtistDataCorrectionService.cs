@@ -181,7 +181,7 @@ namespace DiscogsInsight.DataAccess.Services
                 release.HasAllApiData = false;
                 release.ArtistHasBeenManuallyCorrected = true;
                 //todo: test if this can be called after the foreach and batch update recordsForThisRelease
-                await _db.UpdateAsync(recordsForThisRelease);
+                await _db.UpdateAsync(release);
             }
 
             var artistId = recordsForThisRelease.FirstOrDefault().DiscogsArtistId;
