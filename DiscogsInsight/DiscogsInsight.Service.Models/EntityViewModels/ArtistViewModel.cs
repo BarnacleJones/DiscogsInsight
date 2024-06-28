@@ -11,7 +11,7 @@
         public string? StartYear { get; set; }
         public string? EndYear { get; set; }
         public List<string> Tags { get; set; }
-        public List<ReleaseViewModel> ReleasesInCollection { get; set; }
+        public List<SimpleReleaseViewModel> ReleasesInCollection { get; set; }
         public List<MusicBrainzArtistsReleasesViewModel> ArtistsReleases { get; set; }
     }
 
