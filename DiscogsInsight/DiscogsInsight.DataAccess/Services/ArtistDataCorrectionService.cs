@@ -21,16 +21,16 @@ namespace DiscogsInsight.DataAccess.Services
 
         public async Task<List<PossibleArtistsFromMusicBrainzApi>> GetPossibleArtistsForDataCorrectionFromDiscogsReleaseId(int? discogsReleaseId)
         {
-            //get artist name from release id
-            var allReleases = await _db.Table<Database.Entities.Release>().ToListAsync();
-            var thisRelease = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault();//there could be more than one
+            //Both of these _db calls could be more efficient but its minimal just grabbing one record two times in the rare instance of correcting data
 
-
-            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
-            var recordForThisArtist = allArtists.Where(x => x.DiscogsArtistId == thisRelease.DiscogsArtistId).FirstOrDefault();//could be more than one
-
-
-            var musicBrainzApiCall = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(recordForThisArtist.Name);
+            var singleReleaseRecordForAnArtist = await _db.Table<Database.Entities.Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefaultAsync();
+            if (singleReleaseRecordForAnArtist.DiscogsArtistId == null)
+            {
+                throw new Exception($"Unhandled Exception: No DiscogsArtistId for artist of the release: {singleReleaseRecordForAnArtist.Title}");
+            }
+            var singleArtistRecordForThisArtist = await _db.Table<Database.Entities.Artist>().Where(x => x.DiscogsArtistId == singleReleaseRecordForAnArtist.DiscogsArtistId).FirstOrDefaultAsync();
+            
+            var musicBrainzApiCall = await _musicBrainzApiService.GetInitialArtistFromMusicBrainzApi(singleArtistRecordForThisArtist.Name);
 
             if (musicBrainzApiCall != null && musicBrainzApiCall.Artists != null)
             {
@@ -43,88 +43,32 @@ namespace DiscogsInsight.DataAccess.Services
                 }).ToList();
                 return potentialArtists;
             }
-
             return [];
         }
 
-        public async Task<bool> DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(int? discogsReleaseId, string newAritstMusicBrainzId)
+        public async Task DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(int? discogsReleaseId, string newArtistMusicBrainzId)
         {
-            await DeleteAllBadArtistAndReleaseData(discogsReleaseId, newAritstMusicBrainzId);
+            await DeleteAllBadArtistAndReleaseData(discogsReleaseId, newArtistMusicBrainzId);
 
-            var releaseTableList = await _db.Table<Database.Entities.Release>().ToListAsync();
-            var discogsArtistFromReleaseId = releaseTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefault().DiscogsArtistId;
+            var release = await _db.Table<Database.Entities.Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).FirstOrDefaultAsync();
+            var discogsArtistFromReleaseId = release.DiscogsArtistId;
 
-            if (newAritstMusicBrainzId == null)
+            if (newArtistMusicBrainzId == null)
             {
-                return false;//this shouldnt happen?
+                throw new Exception("Unhandled Exception: newArtistMusicBrainzId was null");
             }
 
-            var artistCallResponse = await _musicBrainzApiService.GetArtistFromMusicBrainzApiUsingArtistId(newAritstMusicBrainzId);
+            var artistCallResponse = await _musicBrainzApiService.GetArtistFromMusicBrainzApiUsingArtistId(newArtistMusicBrainzId);
 
-            await UpdateArtistTableWithCorrectedData(newAritstMusicBrainzId, artistCallResponse);
+            await UpdateArtistTableWithCorrectedData(newArtistMusicBrainzId, artistCallResponse);
 
-            await UpdateMusicBrainzTablesWithCorrectedData(newAritstMusicBrainzId, discogsArtistFromReleaseId, artistCallResponse);
-
-            return true;
-        }
-
-        private async Task UpdateMusicBrainzTablesWithCorrectedData(string newAritstMusicBrainzId, int? discogsArtistFromReleaseId, MusicBrainzArtist artistCallResponse)
-        {
-            var releasesByArtist = artistCallResponse.Releases?.ToList();
-            var releaseGroupsByArtist = artistCallResponse.ReleaseGroups?.ToList();
-            var existingJoins = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
-            var existingReleasesForThisArtistList = existingJoins.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).Select(x => x.MusicBrainzReleaseId).ToList();
-
-            if (releasesByArtist != null && releasesByArtist.Count != 0)
-            {
-                foreach (var artistsRelease in releasesByArtist)
-                {
-                    if (existingReleasesForThisArtistList.Contains(artistsRelease.Id))
-                    {
-                        continue;//already exists
-                    }
-                    var artistIdToReleaseId = new MusicBrainzArtistToMusicBrainzRelease
-                    {
-                        MusicBrainzArtistId = newAritstMusicBrainzId,
-                        DiscogsArtistId = discogsArtistFromReleaseId ?? 0,
-                        MusicBrainzReleaseId = artistsRelease.Id,
-                        MusicBrainzReleaseName = artistsRelease.Title,
-                        ReleaseYear = artistsRelease.Date,
-                        Status = artistsRelease.Status,
-                        IsAReleaseGroupGroupId = false //different cover art endpoint for release group id vs release id
-                    };
-                    await _db.InsertAsync(artistIdToReleaseId);
-                }
-
-            }
-            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Count != 0)
-            {
-                foreach (var artistsReleaseGroup in releaseGroupsByArtist)
-                {
-                    if (existingReleasesForThisArtistList.Contains(artistsReleaseGroup.Id))
-                    {
-                        continue;//already exists
-                    }
-                    var artistIdToReleaseId = new MusicBrainzArtistToMusicBrainzRelease
-                    {
-                        MusicBrainzArtistId = newAritstMusicBrainzId,
-                        DiscogsArtistId = discogsArtistFromReleaseId ?? 0,
-                        MusicBrainzReleaseId = artistsReleaseGroup.Id,
-                        MusicBrainzReleaseName = artistsReleaseGroup.Title,
-                        ReleaseYear = artistsReleaseGroup.FirstReleaseDate,
-                        Status = artistsReleaseGroup.PrimaryType,
-                        IsAReleaseGroupGroupId = true //different cover art endpoint for release group id vs release id
-                    };
-                    await _db.InsertAsync(artistIdToReleaseId);
-                }
-            }
+            await UpdateMusicBrainzTablesWithCorrectedData(newArtistMusicBrainzId, discogsArtistFromReleaseId, artistCallResponse);
         }
 
         private async Task UpdateArtistTableWithCorrectedData(string newAritstMusicBrainzId, MusicBrainzArtist artistCallResponse)
         {
-            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
-            var recordForThisArtist = allArtists.Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).ToList();//could be more than one
-
+            var recordForThisArtist = await _db.Table<Database.Entities.Artist>().Where(x => x.MusicBrainzArtistId == newAritstMusicBrainzId).ToListAsync();
+           
             var artistBeginArea = artistCallResponse.BeginArea;
             var artistArea = artistCallResponse.Area;
             foreach (var artist in recordForThisArtist)
@@ -173,24 +117,76 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(artist);
             }
         }
+        
+        private async Task UpdateMusicBrainzTablesWithCorrectedData(string newArtistMusicBrainzId, int? discogsArtistFromReleaseId, MusicBrainzArtist artistCallResponse)
+        {
+            var releasesByArtist = artistCallResponse.Releases?.ToList();
+            var releaseGroupsByArtist = artistCallResponse.ReleaseGroups?.ToList();
+
+            var releasesQuery = $@"SELECT MusicBrainzReleaseId FROM MusicBrainzArtistToMusicBrainzRelease WHERE MusicBrainzArtistId = ?";
+            var existingReleasesForThisArtistObjectList = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(releasesQuery, newArtistMusicBrainzId);
+            var existingReleasesForThisArtistList = existingReleasesForThisArtistObjectList.Select(x => x.MusicBrainzReleaseId);
+
+            if (releasesByArtist != null && releasesByArtist.Count != 0)
+            {
+                foreach (var artistsRelease in releasesByArtist)
+                {
+                    if (existingReleasesForThisArtistList.Contains(artistsRelease.Id))
+                    {
+                        continue;//already exists
+                    }
+                    var artistIdToReleaseId = new MusicBrainzArtistToMusicBrainzRelease
+                    {
+                        MusicBrainzArtistId = newArtistMusicBrainzId,
+                        DiscogsArtistId = discogsArtistFromReleaseId ?? 0,
+                        MusicBrainzReleaseId = artistsRelease.Id,
+                        MusicBrainzReleaseName = artistsRelease.Title,
+                        ReleaseYear = artistsRelease.Date,
+                        Status = artistsRelease.Status,
+                        IsAReleaseGroupGroupId = false //different cover art endpoint for release group id vs release id
+                    };
+                    await _db.InsertAsync(artistIdToReleaseId);
+                }
+            }
+            if (releaseGroupsByArtist != null && releaseGroupsByArtist.Count != 0)
+            {
+                foreach (var artistsReleaseGroup in releaseGroupsByArtist)
+                {
+                    if (existingReleasesForThisArtistList.Contains(artistsReleaseGroup.Id))
+                    {
+                        continue;//already exists
+                    }
+                    var artistIdToReleaseId = new MusicBrainzArtistToMusicBrainzRelease
+                    {
+                        MusicBrainzArtistId = newArtistMusicBrainzId,
+                        DiscogsArtistId = discogsArtistFromReleaseId ?? 0,
+                        MusicBrainzReleaseId = artistsReleaseGroup.Id,
+                        MusicBrainzReleaseName = artistsReleaseGroup.Title,
+                        ReleaseYear = artistsReleaseGroup.FirstReleaseDate,
+                        Status = artistsReleaseGroup.PrimaryType,
+                        IsAReleaseGroupGroupId = true //different cover art endpoint for release group id vs release id
+                    };
+                    await _db.InsertAsync(artistIdToReleaseId);
+                }
+            }
+        }
 
         private async Task DeleteAllBadArtistAndReleaseData(int? discogsReleaseId, string newAritstMusicBrainzId)
         {
-            var allReleases = await _db.Table<Database.Entities.Release>().ToListAsync();
-            var thisReleaseList = allReleases.Where(x => x.DiscogsReleaseId == discogsReleaseId).ToList();//there could be more than one
-
-            foreach (var release in thisReleaseList)
+            var recordsForThisRelease = await _db.Table<Database.Entities.Release>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
+            
+            foreach (var release in recordsForThisRelease)
             {
                 release.MusicBrainzReleaseId = null;
                 release.HasAllApiData = false;
                 release.ArtistHasBeenManuallyCorrected = true;
-                await _db.UpdateAsync(release);
+                //todo: test if this can be called after the foreach and batch update recordsForThisRelease
+                await _db.UpdateAsync(recordsForThisRelease);
             }
 
-            var allArtists = await _db.Table<Database.Entities.Artist>().ToListAsync();
-            var artistId = thisReleaseList.FirstOrDefault().DiscogsArtistId;
-            var recordsForThisArtist = allArtists.Where(x => x.DiscogsArtistId == artistId).ToList();//could be more than one
-
+            var artistId = recordsForThisRelease.FirstOrDefault().DiscogsArtistId;
+            var recordsForThisArtist = await _db.Table<Database.Entities.Artist>().Where(x => x.DiscogsArtistId == artistId).ToListAsync();
+            
             var badMusicBrainzArtistId = recordsForThisArtist.FirstOrDefault().MusicBrainzArtistId;
 
             foreach (var artist in recordsForThisArtist)
@@ -203,29 +199,28 @@ namespace DiscogsInsight.DataAccess.Services
                 await _db.UpdateAsync(artist);
             }
 
-            var artistToTagsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
-            var artistsToTagsToRemove = artistToTagsTable.Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToList();
+            var artistsToTagsToRemove = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToListAsync();
+            
             foreach (var artistToTag in artistsToTagsToRemove)
             {
                 await _db.DeleteAsync(artistToTag);
             }
 
-            var artistToReleaseTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
-            var artistsToReleasesToRemove = artistToReleaseTable.Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToList();
+            var artistsToReleasesToRemove = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().Where(x => x.MusicBrainzArtistId == badMusicBrainzArtistId).ToListAsync();
             var listOfReleaseIdsTiedToThisArtist = new List<string>();
             foreach (var artistRecord in artistsToReleasesToRemove)
             {
                 listOfReleaseIdsTiedToThisArtist.Add(artistRecord.MusicBrainzReleaseId);
                 await _db.DeleteAsync(artistRecord);
             }
-
-
-            var coverImageTable = await _db.Table<MusicBrainzReleaseToCoverImage>().ToListAsync();
-            var coverImagesForThisRelease = thisReleaseList.FirstOrDefault().MusicBrainzReleaseId;
-            var coverImagesStoredForBadReleases = coverImageTable.Where(x => listOfReleaseIdsTiedToThisArtist.Contains(x.MusicBrainzReleaseId)).ToList();
-            foreach (var coverImageRecord in coverImagesStoredForBadReleases)
+            if (listOfReleaseIdsTiedToThisArtist != null && listOfReleaseIdsTiedToThisArtist.Count > 0)
             {
-                await _db.DeleteAsync(coverImageRecord);
+                var coverImagesStoredForBadReleases = await _db.Table<MusicBrainzReleaseToCoverImage>().Where(x => listOfReleaseIdsTiedToThisArtist.Contains(x.MusicBrainzReleaseId)).ToListAsync();
+
+                foreach (var coverImageRecord in coverImagesStoredForBadReleases)
+                {
+                    await _db.DeleteAsync(coverImageRecord);
+                }
             }
         }
     }

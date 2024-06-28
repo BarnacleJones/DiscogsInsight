@@ -249,8 +249,8 @@ namespace DiscogsInsight.Service
         }
         public async Task<bool> UpdateArtistWithCorrectMusicBrainzId(int? discogsReleaseId, string musicBrainzId)
         {
-            var success = await _artistDataCorrectionService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, musicBrainzId);
-            return success;
+            await _artistDataCorrectionService.DeleteExistingArtistDataAndUpdateToChosenMusicBrainzArtistFromMusicBrainzId(discogsReleaseId, musicBrainzId);
+            return true;
         }
         public async Task<ViewResult<List<CorrectReleaseDataViewModel>>> GetPossibleReleasesBasedOnDiscogsReleaseId(int? discogsReleaseId)
         {
