@@ -4,7 +4,6 @@ using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database.Entities;
-using Microsoft.Extensions.Logging;
 
 namespace DiscogsInsight.DataAccess.Services
 {

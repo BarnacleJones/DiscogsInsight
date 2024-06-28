@@ -97,7 +97,7 @@
                 </MudCollapse>
             </MudStack>            
         }
-        @if (Artist.ReleasesInCollection.Any())
+        @if (Artist.ReleasesInCollection != null && Artist.ReleasesInCollection.Any())
         {
             <MudStack>
                 <MudButton OnClick="OnCollectionReleasesExpandCollapseClick">
@@ -125,7 +125,7 @@
                 </MudCollapse>
             </MudStack>
         }
-        @if (Artist.Tags.Any())
+        @if (Artist.Tags != null && Artist.Tags.Any())
         {
             <MudStack>
                 <MudButton OnClick="OnTagsExpandCollapseClick">
@@ -155,7 +155,7 @@
                 </MudCollapse>
             </MudStack>
         }
-        @if (Artist.ArtistsReleases.Any())
+        @if (Artist.ArtistsReleases != null && Artist.ArtistsReleases.Any())
         {
             <MudStack>
                 <MudButton OnClick="OnReleasesExpandCollapseClick">

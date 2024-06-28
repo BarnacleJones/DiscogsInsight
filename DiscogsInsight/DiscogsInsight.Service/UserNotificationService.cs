@@ -7,5 +7,4 @@
             return await Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
         }
     }
-
 }

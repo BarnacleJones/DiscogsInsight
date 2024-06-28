@@ -5,7 +5,6 @@ namespace DiscogsInsight.DataAccess.Contract
     public interface IArtistDataService
     {
         Task<int?> GetARandomDiscogsArtistId();
-        Task<ArtistDataModel?> GetArtistByDiscogsId(int? discogsArtistId);
-       
+        Task<ArtistDataModel?> GetArtistDataModelByDiscogsId(int? discogsArtistId);
     }
 }

@@ -4,7 +4,6 @@ using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database.Entities;
-using System.Formats.Asn1;
 using Artist = DiscogsInsight.Database.Entities.Artist;
 
 namespace DiscogsInsight.DataAccess.Services
@@ -22,9 +21,7 @@ namespace DiscogsInsight.DataAccess.Services
             _db = db;
             _discogsApiService = discogsApiService;
             _musicBrainzApiService = musicBrainzApiService;
-        }
-
-       
+        }       
 
         public async Task<int?> GetARandomDiscogsArtistId()
         {
@@ -34,7 +31,7 @@ namespace DiscogsInsight.DataAccess.Services
             return artistId.FirstOrDefault().DiscogsArtistId;
         }
             
-        public async Task<ArtistDataModel?> GetArtistByDiscogsId(int? discogsArtistId)
+        public async Task<ArtistDataModel?> GetArtistDataModelByDiscogsId(int? discogsArtistId)
         {
             if (discogsArtistId == null) { return new ArtistDataModel { Name = "No Artist Id Supplied" }; }
             
@@ -53,13 +50,10 @@ namespace DiscogsInsight.DataAccess.Services
                     Name = existingArtist.Name,
                     City = existingArtist.City,
                     Country = existingArtist.Country,
-                    DiscogsArtistId = discogsArtistId.Value,
                     EndYear = existingArtist.EndYear,
-                    HasAllApiData = existingArtist.HasAllApiData,
-                    Id = existingArtist.Id,
                     MusicBrainzArtistId = existingArtist.MusicBrainzArtistId,
                     Profile = existingArtist.Profile,
-                    StartYear = existingArtist.StartYear
+                    StartYear = existingArtist.StartYear,
                 };
             }
             if (!existingArtist.HasAllApiData)
@@ -83,10 +77,25 @@ namespace DiscogsInsight.DataAccess.Services
 
             //add list of tags for the artist
             //add list of releases add that data model to this datamodel
+            //_______________________________________________________________________________________________________________________
+            //var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
+            //TagsDataService moved from here only used here - will get fixed with rewrite
+            //var tagsList = tags.Select(x => x.Tag).ToList();
+            //public async Task<List<string>> GetTagsByMusicBrainzArtistId(string musicBrainzArtistId)
+            //{
+            //    var musicBrainzTagsList = await _db.Table<MusicBrainzTags>().ToListAsync();
+            //    var musicBrainzTagsToArtistsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
 
+            //    var musicBrainzTagsToArtistsList = musicBrainzTagsToArtistsTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId);
+            //    var tagsIdsListForArtist = musicBrainzTagsToArtistsList.Select(x => x.TagId).ToList();
+
+            //    return musicBrainzTagsList.Where(x => tagsIdsListForArtist.Contains(x.Id)).ToList();
+
+
+            //__________________________________________________________________________________________________________________________
             //was this function
             //var releasesByThisArtist = await GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
-            
+
             //which was this
 
             //var allReleasesTable = await _db.Table<MusicBrainzArtistToMusicBrainzRelease>().ToListAsync();
@@ -100,53 +109,31 @@ namespace DiscogsInsight.DataAccess.Services
             //    Status = x.Status ?? " ",
             //}).ToList();
             //
+            var artistReleaseDataModels = new List<ArtistReleaseDataModel>();
+            var artistReleaseInCollectionDataModels = new List<SimpleReleaseDataModel>();
+            var tags = new List<string>();
 
 
-            var dataModelToReturn = new ArtistDataModel
+            return new ArtistDataModel
             {
                 Name = existingArtist.Name,
                 City = existingArtist.City,
                 Country = existingArtist.Country,
-                DiscogsArtistId = discogsArtistId.Value,
                 EndYear = existingArtist.EndYear,
-                HasAllApiData = existingArtist.HasAllApiData,
-                Id = existingArtist.Id,
                 MusicBrainzArtistId = existingArtist.MusicBrainzArtistId,
                 Profile = existingArtist.Profile,
-                StartYear = existingArtist.StartYear
-            }; ;
-            //used down on artist view service
-            //it was then doing this after this call:
-
-
-            //__________________________________________________________________________________________________________________________
-            //var artist = await _artistDataService.GetArtistByDiscogsId(discogsArtistId);
-
-            //var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
-            //TagsDataService moved from here only used here - will get fixed with rewrite
-
-            //public async Task<List<MusicBrainzTags>> GetTagsByMusicBrainzArtistId(string musicBrainzArtistId)
-            //{
-            //    var musicBrainzTagsList = await _db.Table<MusicBrainzTags>().ToListAsync();
-            //    var musicBrainzTagsToArtistsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
-
-            //    var musicBrainzTagsToArtistsList = musicBrainzTagsToArtistsTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId);
-            //    var tagsIdsListForArtist = musicBrainzTagsToArtistsList.Select(x => x.TagId).ToList();
-
-            //    return musicBrainzTagsList.Where(x => tagsIdsListForArtist.Contains(x.Id)).ToList();
-            //}
-
-            //var tagsList = tags.Select(x => x.Tag).ToList();
-
-
-            //__________________________________________________________________________________________________________________________
+                StartYear = existingArtist.StartYear,
+                ArtistReleaseDataModels = artistReleaseDataModels,
+                ArtistReleaseInCollectionDataModels = artistReleaseInCollectionDataModels,
+                ArtistTags = tags
+            };            
         }
 
-        private async Task<Artist?> GetArtistByDiscogsIdFromDb(int discogsArtistId)
+        private async Task<Artist?> GetArtistByDiscogsIdFromDb(int discogsArtistId)//keep this here
         {
             var discogsArtistIdsQuery = @$"SELECT * FROM Artist WHERE DiscogsArtistId = ?";
 
-            var discogsArtistIdsInterim = await _db.QueryAsync<Artist>(discogsArtistIdsQuery);
+            var discogsArtistIdsInterim = await _db.QueryAsync<Artist>(discogsArtistIdsQuery, discogsArtistId);
 
             var artist = discogsArtistIdsInterim.FirstOrDefault();
             if (artist == null) return null;

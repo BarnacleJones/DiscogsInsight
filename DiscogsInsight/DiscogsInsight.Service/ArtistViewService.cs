@@ -15,15 +15,6 @@ namespace DiscogsInsight.Service
             _logger = logger;
         }
 
-        private void LogError(Exception ex)
-        {
-            if (ex != null)
-            {
-                _logger.LogError(ex.StackTrace);
-                _logger.LogError(ex.Message);
-            }
-        }
-
         public async Task<ViewResult<ArtistViewModel>> GetRandomArtist()
         {
             try
@@ -47,74 +38,52 @@ namespace DiscogsInsight.Service
         {
             try
             {
-                var artist = await _artistDataService.GetArtistByDiscogsId(discogsArtistId);
+                var artistData = await _artistDataService.GetArtistDataModelByDiscogsId(discogsArtistId);
 
-                //var tags = await _tagsDataService.GetTagsByMusicBrainzArtistId(artist.MusicBrainzArtistId);
-                //TagsDataService moved from here only used here - will get fixed with rewrite
+                var releasesViewModel = artistData?.ArtistReleaseDataModels != null 
+                    ? artistData.ArtistReleaseDataModels.GroupBy(x => x.Status)
+                                                        .Select(x => new MusicBrainzArtistsReleasesViewModel
+                                                        {
+                                                            Status = x.Key,
+                                                            Releases = x.OrderBy(y => y.ReleaseYear)
+                                                                        .ThenBy(y => y.MusicBrainzReleaseName)
+                                                                        .Select(y => new MusicBrainzReleaseViewModel
+                                                                        {
+                                                                            Title = y.MusicBrainzReleaseName,
+                                                                            Year = y.ReleaseYear
+                                                                        }).ToList()
+                                                        }).ToList()
+                    : null;
 
-                //public async Task<List<MusicBrainzTags>> GetTagsByMusicBrainzArtistId(string musicBrainzArtistId)
-                //{
-                //    var musicBrainzTagsList = await _db.Table<MusicBrainzTags>().ToListAsync();
-                //    var musicBrainzTagsToArtistsTable = await _db.Table<MusicBrainzArtistToMusicBrainzTags>().ToListAsync();
-
-                //    var musicBrainzTagsToArtistsList = musicBrainzTagsToArtistsTable.Where(x => x.MusicBrainzArtistId == musicBrainzArtistId);
-                //    var tagsIdsListForArtist = musicBrainzTagsToArtistsList.Select(x => x.TagId).ToList();
-
-                //    return musicBrainzTagsList.Where(x => tagsIdsListForArtist.Contains(x.Id)).ToList();
-                //}
-
-                //var tagsList = tags.Select(x => x.Tag).ToList();
-
-                //var releasesByThisArtist = await _artistDataService.GetArtistsReleasesByMusicBrainzArtistId(artist.MusicBrainzArtistId);
-
-                var releasesViewModel = releasesByThisArtist.GroupBy(x => x.Status)
-                    .Select(x => new MusicBrainzArtistsReleasesViewModel
-                    {
-                        Status = x.Key,
-                        Releases = x.OrderBy(y => y.ReleaseYear)
-                                    .ThenBy(y => y.MusicBrainzReleaseName)
-                                    .Select(y => new MusicBrainzReleaseViewModel
-                                    {
-                                        Title = y.MusicBrainzReleaseName,
-                                        Year = y.ReleaseYear
-                                    }).ToList()
-                    }).ToList();
-
-
-
-
-                //old line was calling to release view service
-                //var releasesInCollection = await _releaseViewService.GetAllReleaseViewModelsForArtistByDiscogsArtistId(artist.DiscogsArtistId);
-
-                //below
-                //public async Task<List<ReleaseViewModel>> GetAllReleaseViewModelsForArtistByDiscogsArtistId(int? discogsArtistId)
-                //{
-                //    if (discogsArtistId == null) { throw new ArgumentNullException(nameof(discogsArtistId)); }
-                //    var releaseData = await _releaseDataService.GetAllReleaseDataModelsForArtist(discogsArtistId.Value);
-
-                //    var returnedReleases = new List<ReleaseViewModel>();
-
-                //    foreach (var release in releaseData)
-                //    {
-                //        if (release is null) continue;
-                //        returnedReleases.Add(GetReleaseViewModel(release));
-                //    }
-                //    return returnedReleases;
-                //}
+                var mappedReleaseDataToReleaseViewModel = artistData?.ArtistReleaseInCollectionDataModels != null
+                    ? artistData.ArtistReleaseInCollectionDataModels.Select(x => new SimpleReleaseViewModel
+                                                        {
+                                                            Artist = x.Artist,
+                                                            CoverImage = x.CoverImage,
+                                                            DateAdded = x.DateAdded,
+                                                            DiscogsArtistId = discogsArtistId,
+                                                            DiscogsReleaseId = x.DiscogsReleaseId,
+                                                            DiscogsReleaseUrl = x.DiscogsReleaseUrl,
+                                                            IsFavourited = x.IsFavourited,
+                                                            OriginalReleaseYear = x.OriginalReleaseYear,
+                                                            ReleaseCountry = x.ReleaseCountry,
+                                                            ReleaseNotes = x.ReleaseNotes,
+                                                            Title = x.Title,
+                                                            Year = x.Year
+                                                        }).ToList()
+                    : null;
 
                 var data = new ArtistViewModel
                 {
-                    Artist = artist.Name,
-                    ArtistDescription = artist.Profile,
-                    DiscogsArtistId = artist.DiscogsArtistId,
-                    City = artist.City,
-                    Country = artist.Country,
-                    StartYear = artist.StartYear,
-                    EndYear = artist.EndYear,
-                    MusicBrainzArtistId = artist.MusicBrainzArtistId,
-                    //Tags = tagsList,
+                    Artist = artistData.Name,
+                    ArtistDescription = artistData.Profile,
+                    City = artistData.City,
+                    Country = artistData.Country,
+                    StartYear = artistData.StartYear,
+                    EndYear = artistData.EndYear,
+                    Tags = artistData.ArtistTags,
                     ArtistsReleases = releasesViewModel,
-                    //ReleasesInCollection = releasesInCollection
+                    ReleasesInCollection = mappedReleaseDataToReleaseViewModel
                 };
 
                 return new ViewResult<ArtistViewModel>
@@ -133,6 +102,15 @@ namespace DiscogsInsight.Service
                     ErrorMessage = ex.Message,
                     Success = false
                 };
+            }
+        }
+
+        private void LogError(Exception ex)
+        {
+            if (ex != null)
+            {
+                _logger.LogError(ex.StackTrace);
+                _logger.LogError(ex.Message);
             }
         }
     }

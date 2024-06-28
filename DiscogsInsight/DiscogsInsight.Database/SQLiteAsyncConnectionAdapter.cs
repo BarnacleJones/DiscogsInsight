@@ -18,6 +18,9 @@ namespace DiscogsInsight.Database
             _ = InitializeAsync();
         }
 
+
+
+
         public async Task Purge()
         {
             try

@@ -20,6 +20,7 @@ namespace DiscogsInsight.Service
             _artistDataCorrectionService = artistDataCorrectionService;
             _logger = logger;
         }
+
         public async Task<ViewResult<ReleaseViewModel>> GetRelease(int? discogsReleaseId)
         {
             try
@@ -46,6 +47,7 @@ namespace DiscogsInsight.Service
                 };
             }
         }
+
         public async Task<ViewResult<List<ReleaseViewModel>>> GetNewestReleases()
         {
             try
@@ -73,6 +75,7 @@ namespace DiscogsInsight.Service
                 };
             }
         }
+
         public async Task<ViewResult<ReleaseViewModel>> GetRandomRelease()
         {
             try
@@ -97,6 +100,7 @@ namespace DiscogsInsight.Service
                 };
             }
         }
+
         public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByDiscogsGenreTagId(int discogsGenreTagId)
         {
             try
@@ -128,6 +132,7 @@ namespace DiscogsInsight.Service
                 };
             }
         }
+
         public async Task<ViewResult<List<ReleaseViewModel>>> GetReleasesByYear(int? releaseYear)
         {
             try
@@ -154,6 +159,7 @@ namespace DiscogsInsight.Service
                 };
             }
         }
+
         public async Task<bool> SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
         {
             await _releaseDataService.SetFavouriteBooleanOnRelease(favourited, discogsReleaseId);
