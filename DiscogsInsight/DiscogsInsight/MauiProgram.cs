@@ -54,6 +54,12 @@ namespace DiscogsInsight
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
     
+            builder.Services.AddHttpClient("LastFmApiClient", hc => 
+            {
+                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+    
 
             //Database layer
             builder.Services.AddSingleton<ISQLiteAsyncConnection, SQLiteAsyncConnectionAdapter>();
