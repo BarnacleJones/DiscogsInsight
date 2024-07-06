@@ -49,6 +49,7 @@ namespace DiscogsInsight.Database
                 await _connection.DeleteAllAsync<MusicBrainzTags>();
                 await _connection.DeleteAllAsync<Release>();
                 await _connection.DeleteAllAsync<Track>();
+                await _connection.DeleteAllAsync<LastFmTrackInformation>();
             }
             catch (Exception ex)
             {
@@ -73,6 +74,7 @@ namespace DiscogsInsight.Database
                 await _connection.CreateTableAsync<MusicBrainzReleaseToCoverImage>();
                 await _connection.CreateTableAsync<DiscogsGenreTagToDiscogsRelease>();
                 await _connection.CreateTableAsync<DiscogsGenreTags>();
+                await _connection.CreateTableAsync<LastFmTrackInformation>();
             }
             catch (Exception ex)
             {

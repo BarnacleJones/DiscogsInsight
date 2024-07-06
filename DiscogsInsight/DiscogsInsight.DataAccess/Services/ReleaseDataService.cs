@@ -794,48 +794,34 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
-        public async Task<string> ScrobbleRelease(int discogsReleaseId)
+        public async Task<string> ScrobbleRelease(int discogsReleaseId, string artistName, string albumName)
         {
-            //use release to get the album name and artist name and if its lastfm tracks have been stored
-            var albumInfo = await _lastFmApiService.GetAlbumInformation("King Gizzard And The Lizard Wizard", "Murder Of The Universe");
-            if (albumInfo == null)
-            {
-                throw new Exception("BAD");
-            }
-
-            
-            //if stored - get all the track lengths and names for the release
-
-            //if not stored
-            //query the release from last fm
-            //get all the tracks by name and duration
-            //store them in table LastFmTracks
-            //DiscogsReleaseId, LastFmTrackName, LastFmDuration
-            //Set LastFmUrl on Release - can be what is checked?
-            //Save db
-            //Use tracks list to use name and duration for scrobble
-
-            //foreach through the list of tracks
-            //var scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, playedTime);        
-            //scrobbleList.Add(scrobble);
-
-            //authenticate and send the scrobbles
-            //var authenticationResponse = await client.Auth.GetSessionTokenAsync(username, pass);
-
-            //if (client.Auth.Authenticated)
-            //{
-            //    var scorbbled = await client.Scrobbler.ScrobbleAsync(scrobbleList);
-
-            //    if (scorbbled.Success)
-            //    {
-            //        Console.WriteLine(scorbbled.Status.ToString());
-            //    }
-            //}
-
-
             var scrobbles = new List<Scrobble>();
+            
+            var storedLastFmTracksForThisRelease = await _db.Table<LastFmTrackInformation>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
 
+            if (storedLastFmTracksForThisRelease != null && storedLastFmTracksForThisRelease.Count > 0)
+            {
+                CreateScrobblesWithTimeAlgorithmFromStoredTracks(scrobbles, storedLastFmTracksForThisRelease);
+            }
+            else
+            {
+                var albumInfo = await _lastFmApiService.GetAlbumInformation(artistName, albumName);
+                if (albumInfo == null)
+                {
+                    return "Album not found in Last.Fm Album call.";
+                }
 
+                var tracks = albumInfo.Tracks.ToList();
+
+                if (tracks != null && tracks.Count > 0)
+                {
+                    await SaveTracksToDbFromLastFmAlbumQuery(discogsReleaseId, tracks);
+
+                    CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(scrobbles, tracks);
+                }
+                else return $"No Tracks on the Last.Fm Release request for Album: {albumName}.";
+            }
 
             var scrobbleResponse = await _lastFmApiService.ScrobbleReleases(scrobbles);
 
@@ -848,6 +834,81 @@ namespace DiscogsInsight.DataAccess.Services
                 return "Error: No Response";
             }
 
+        }
+
+        private static void CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(List<Scrobble> scrobbles, List<LastTrack> tracks)
+        {
+            DateTimeOffset playedTime = DateTimeOffset.Now;//assuming that when you push scrobble you are putting on the record - could make a setting for how its calculated
+            foreach (var track in tracks)
+            {
+                Scrobble scrobble;
+
+                if (track.Duration != null)
+                {
+                    var trackDuration = TimeSpan.FromMilliseconds(track.Duration.Value.TotalMilliseconds);
+                    // Calculate the time the track started playing - from now: if this is the first one
+                    var timePlayed = playedTime + trackDuration;
+
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, timePlayed);
+                    //increment the time played for next track
+                    playedTime += trackDuration;
+
+                }
+                else
+                {
+                    //if there arent durations, could use the db duration or just send them all at once, it allows it
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, playedTime);
+                }
+                scrobbles.Add(scrobble);
+            }
+        }
+
+        private async Task SaveTracksToDbFromLastFmAlbumQuery(int discogsReleaseId, List<LastTrack> tracks)
+        {
+            var tracksToSave = new List<LastFmTrackInformation>();
+
+            foreach (var track in tracks)
+            {
+                tracksToSave.Add(new LastFmTrackInformation
+                {
+                    Rank = track.Rank.HasValue ? track.Rank : 0,
+                    TrackName = track.Name,
+                    Duration = track.Duration.HasValue ? track.Duration.Value.TotalMilliseconds : null,
+                    AlbumName = track.AlbumName,
+                    ArtistName = track.ArtistName,
+                    DiscogsReleaseId = discogsReleaseId
+                });
+            }
+            if (tracksToSave.Count > 0)
+            {
+                await _db.InsertAllAsync(tracksToSave);
+            }
+        }
+
+        private static void CreateScrobblesWithTimeAlgorithmFromStoredTracks(List<Scrobble> scrobbles, List<LastFmTrackInformation> storedLastFmTracksForThisRelease)
+        {
+            DateTimeOffset playedTime = DateTimeOffset.Now;//assuming that when you push scrobble you are putting on the record - could make a setting for how its calculated
+
+            foreach (var track in storedLastFmTracksForThisRelease)
+            {
+                Scrobble scrobble;
+
+                if (track.Duration.HasValue && track.Duration > 0)
+                {
+                    var trackDuration = TimeSpan.FromMilliseconds(track.Duration.Value);
+                    // Calculate the time the track started playing - from now: if this is the first one
+                    var timePlayed = playedTime + trackDuration;
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.TrackName, timePlayed);
+                    //increment the time played for next track
+                    playedTime += trackDuration;
+                }
+                else
+                {
+                    //if there arent durations, just send them all at once
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.TrackName, playedTime);
+                }
+                scrobbles.Add(scrobble);
+            }
         }
 
         #endregion

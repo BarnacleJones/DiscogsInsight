@@ -240,9 +240,9 @@
 
     private async Task ScrobbleRelease()
     {
-        if (Release.DiscogsReleaseId.HasValue)
+        if (Release.DiscogsReleaseId.HasValue && !string.IsNullOrEmpty(Release.Artist) && !string.IsNullOrEmpty(Release.Title))
         {
-            var result = await ReleaseViewService.ScrobbleRelease(Release.DiscogsReleaseId.Value);
+            var result = await ReleaseViewService.ScrobbleRelease(Release.DiscogsReleaseId.Value, Release.Artist, Release.Title);
             HandleResult(result);
         }
 

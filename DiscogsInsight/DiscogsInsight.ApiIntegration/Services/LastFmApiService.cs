@@ -42,7 +42,6 @@ namespace DiscogsInsight.ApiIntegration.Services
 
         public async Task<LastAlbum> GetAlbumInformation(string artistName, string albumName)
         {
-
             var response = await _lastFmClient.Album.GetInfoAsync(artistName, albumName);
             if (response.Status != LastResponseStatus.Successful)
             {

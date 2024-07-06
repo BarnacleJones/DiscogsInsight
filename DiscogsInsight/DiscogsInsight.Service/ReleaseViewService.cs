@@ -166,11 +166,11 @@ namespace DiscogsInsight.Service
             return true;
         }
 
-        public async Task<ViewResult<string>> ScrobbleRelease(int discogsReleaseId)
+        public async Task<ViewResult<string>> ScrobbleRelease(int discogsReleaseId, string artistName, string releaseName)
         {
             try
             {
-                var scrobble = await _releaseDataService.ScrobbleRelease(discogsReleaseId);
+                var scrobble = await _releaseDataService.ScrobbleRelease(discogsReleaseId, artistName, releaseName);
 
                 return new ViewResult<string>
                 {
