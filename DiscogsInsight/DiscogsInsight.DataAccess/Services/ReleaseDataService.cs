@@ -3,12 +3,12 @@ using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Database.Entities;
 using DiscogsInsight.Database.Contract;
-using Microsoft.Extensions.Logging;
 using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using Release = DiscogsInsight.Database.Entities.Release;
 using Track = DiscogsInsight.Database.Entities.Track;
 using Artist = DiscogsInsight.Database.Entities.Artist;
+using IF.Lastfm.Core.Objects;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -17,18 +17,16 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ISQLiteAsyncConnection _db;
         private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly IDiscogsApiService _discogsApiService;
+        private readonly ILastFmApiService _lastFmApiService;
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
-        private readonly ICollectionDataService _collectionDataService;
-        private readonly ILogger<ReleaseDataService> _logger;
 
-        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ILastFmApiService lastFmApiService,ICoverArtArchiveApiService coverArchiveApiService)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
-            _collectionDataService = collectionDataService;
             _coverArchiveApiService = coverArchiveApiService;
             _discogsApiService = discogsApiService;
-            _logger = logger;
+            _lastFmApiService = lastFmApiService;
         }
 
         private async Task<ReleaseDataModel> GetReleaseDataModel(ReleaseInterimData release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
@@ -44,32 +42,6 @@ namespace DiscogsInsight.DataAccess.Services
                 DiscogsArtistId = x.DiscogsArtistId ?? 0,
                 DiscogsReleaseId = x.DiscogsReleaseId ?? 0
             }).ToList();
-
-            //var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
-
-            //public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)
-            //{
-            //    if (discogsReleaseId == null) { return new List<(string?, int)>(); };
-
-            //    var discogsGenreJoiningTableList = await GetDiscogsGenreTagToDiscogsReleaseAsList();
-
-            //    var genreIdsForThisRelease = discogsGenreJoiningTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).Select(x => x.DiscogsGenreTagId).ToList();
-
-            //    var genreTable = await GetAllGenreTagsAsList();
-
-            //    return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => (x.DiscogsTag, x.Id)).ToList();
-
-            //}
-
-
-            //var existingMusicBrainzReleaseIdIdsForThisArtistQuery = @$"
-            //SELECT MusicBrainzReleaseId
-            //FROM MusicBrainzArtistToMusicBrainzRelease
-            //WHERE MusicBrainzArtistToMusicBrainzRelease.MusicBrainzArtistId = ?;";
-
-            //var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, musicBrainzArtistId);
-
-
 
             var genres = new List<GenreDto>();//todo write query to populate this given a discogsreleaseid
 
@@ -93,17 +65,9 @@ namespace DiscogsInsight.DataAccess.Services
         }
         public async Task SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
         {
-            try
-            {
-                var thisRelease = await _db.Table<Release>().FirstOrDefaultAsync(x => x.DiscogsReleaseId == discogsReleaseId);
-                thisRelease.IsFavourited = favourited;
-                await _db.UpdateAsync(thisRelease);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
+            var thisRelease = await _db.Table<Release>().FirstOrDefaultAsync(x => x.DiscogsReleaseId == discogsReleaseId);
+            thisRelease.IsFavourited = favourited;
+            await _db.UpdateAsync(thisRelease);
         }
         public async Task<List<ReleaseDataModel>> GetReleaseDataModelsByDiscogsGenreTagId(int discogsGenreTagId)
         {
@@ -828,6 +792,62 @@ namespace DiscogsInsight.DataAccess.Services
                 return matchingRelease.Item2;
             }
             return null;
+        }
+
+        public async Task<string> ScrobbleRelease(int discogsReleaseId)
+        {
+            //use release to get the album name and artist name and if its lastfm tracks have been stored
+            var albumInfo = await _lastFmApiService.GetAlbumInformation("King Gizzard And The Lizard Wizard", "Murder Of The Universe");
+            if (albumInfo == null)
+            {
+                throw new Exception("BAD");
+            }
+
+            
+            //if stored - get all the track lengths and names for the release
+
+            //if not stored
+            //query the release from last fm
+            //get all the tracks by name and duration
+            //store them in table LastFmTracks
+            //DiscogsReleaseId, LastFmTrackName, LastFmDuration
+            //Set LastFmUrl on Release - can be what is checked?
+            //Save db
+            //Use tracks list to use name and duration for scrobble
+
+            //foreach through the list of tracks
+            //var scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, playedTime);        
+            //scrobbleList.Add(scrobble);
+
+            //authenticate and send the scrobbles
+            //var authenticationResponse = await client.Auth.GetSessionTokenAsync(username, pass);
+
+            //if (client.Auth.Authenticated)
+            //{
+            //    var scorbbled = await client.Scrobbler.ScrobbleAsync(scrobbleList);
+
+            //    if (scorbbled.Success)
+            //    {
+            //        Console.WriteLine(scorbbled.Status.ToString());
+            //    }
+            //}
+
+
+            var scrobbles = new List<Scrobble>();
+
+
+
+            var scrobbleResponse = await _lastFmApiService.ScrobbleReleases(scrobbles);
+
+            if (scrobbleResponse != null)
+            {
+                return scrobbleResponse.Status.ToString();
+            }
+            else
+            {
+                return "Error: No Response";
+            }
+
         }
 
         #endregion

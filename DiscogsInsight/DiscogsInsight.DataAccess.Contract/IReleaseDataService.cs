@@ -15,5 +15,6 @@ namespace DiscogsInsight.DataAccess.Contract
         Task<List<ReleaseDataModel>> GetAllReleaseDataModelsForArtist(int howManyToReturn);
         Task<List<ReleaseDataModel>> GetAllReleaseDataModelsByYear(int year);
         Task<ReleaseDataModel> GetRandomRelease();
+        Task<string> ScrobbleRelease(int discogsReleaseId);
     }
 }

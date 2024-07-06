@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 		<!--Add Maui Controls when adding a new project-->
+		<PackageReference Include="Inflatable.Lastfm" Version="1.2.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 	</ItemGroup>

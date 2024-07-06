@@ -90,6 +90,12 @@ namespace DiscogsInsight.DataAccess.Services
             return key;
         }
 
+        public string GetLastFmApiSecret()
+        {
+            var key = _preferencesService.Get(PreferencesConstant.LastFmApiSecret, "");
+            return key;
+        }
+
         public string GetLastFmUsername()
         {
             var username = _preferencesService.Get(PreferencesConstant.LastFmUserName, "");

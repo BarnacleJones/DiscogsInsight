@@ -52,6 +52,10 @@ namespace DiscogsInsight.Service
         {
             return _settingsDataService.ContainsKey(PreferencesConstant.DiscogsUsername);
         }
+        public string GetLastFmApiSecret()
+        {
+            return _settingsDataService.GetLastFmApiSecret();
+        } 
         public string GetLastFmApiKey()
         {
             return _settingsDataService.GetLastFmApiKey();

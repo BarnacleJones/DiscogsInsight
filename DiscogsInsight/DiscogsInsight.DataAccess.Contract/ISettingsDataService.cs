@@ -9,6 +9,7 @@
         Task<bool> PurgeEntireDb();
         Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey);
         string GetLastFmApiKey();
+        string GetLastFmApiSecret();
         string GetLastFmUsername();
         string GetLastFmPassword();
     }

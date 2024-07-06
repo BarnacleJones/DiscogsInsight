@@ -11,13 +11,11 @@ namespace DiscogsInsight.DataAccess.Services
     {
         private readonly ISQLiteAsyncConnection _db;
         private readonly IDiscogsApiService _discogsApiService;
-        private readonly ILogger<CollectionDataService> _logger;
 
-        public CollectionDataService(ISQLiteAsyncConnection db, IDiscogsApiService discogsApiService, ILogger<CollectionDataService> logger)
+        public CollectionDataService(ISQLiteAsyncConnection db, IDiscogsApiService discogsApiService)
         {
             _db = db;
             _discogsApiService = discogsApiService;
-            _logger = logger;
         }
         public async Task<List<SimpleReleaseData>> GetSimpleReleaseDataForWholeCollection()
         {
