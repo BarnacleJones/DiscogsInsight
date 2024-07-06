@@ -1,7 +1,6 @@
 ﻿using DiscogsInsight.ApiIntegration.Contract;
 using DiscogsInsight.DataAccess.Contract;
 using IF.Lastfm.Core.Api;
-using IF.Lastfm.Core.Api.Enums;
 using IF.Lastfm.Core.Api.Helpers;
 using IF.Lastfm.Core.Objects;
 
@@ -13,102 +12,67 @@ namespace DiscogsInsight.ApiIntegration.Services
     {
         private readonly LastfmClient _lastFmClient;
         private readonly IPreferencesService _preferencesService;
+        private readonly HttpClient _httpClient;
         private string _lastFmUserName;        
         private string _lastFmPassword;        
         private string _lastFmApiKey;
         private string _lastFmApiSecret;
 
-        //-----------------------------------------------------------------------------
-        //Hard coded LastFm API Endpoints. If they ever change this should be the only place they are referenced!
-
-        //private const string whateverisneeded = "blah";
-
-        //-----------------------------------------------------------------------------
-
-        public LastFmApiService(IPreferencesService preferencesService)
+        public LastFmApiService(IPreferencesService preferencesService, IHttpClientFactory httpClientFactory)
         {
             _preferencesService = preferencesService;
-
+            _httpClient = httpClientFactory.CreateClient("LastFmApiClient");
             _lastFmApiKey = _preferencesService.Get(PreferencesConstant.LastFmApiKey, "");
             _lastFmApiSecret = _preferencesService.Get(PreferencesConstant.LastFmApiSecret, "");
             _lastFmUserName = _preferencesService.Get(PreferencesConstant.LastFmUserName, "");
             _lastFmPassword = _preferencesService.Get(PreferencesConstant.LastFmPassword, "");
 
-            HttpClient _httpClient = new HttpClient();
             _lastFmClient = new LastfmClient(_lastFmApiKey, _lastFmApiSecret, _httpClient);
-            //authenticate
-            //_ = _lastFmClient.Auth.GetSessionTokenAsync(_lastFmUserName, _lastFmPassword);
         }
 
         public async Task<LastAlbum> GetAlbumInformation(string artistName, string albumName)
         {
-            var response = await _lastFmClient.Album.GetInfoAsync(artistName, albumName);
-            if (response.Status != LastResponseStatus.Successful)
+            await EnsureAuthenticatedAsync();
+
+            var response = await _lastFmClient.Album.GetInfoAsync(artistName, albumName, true);
+
+            if (!response.Success)
             {
-                throw new Exception("Unsuccessful API connection");
+                throw new Exception($"Unsuccessful API connection: {response.Status}");
             }
 
-            LastAlbum albumInfo = response.Content;
+            return response.Content ?? throw new Exception("Album information is null");
 
-            if (albumInfo != null)
-            {
-                return albumInfo;
-            }
-            throw new Exception("Album information is null");
         }
 
         public async Task<LastResponse> ScrobbleRelease(Scrobble scrobble)
         {
-            if (_lastFmClient.Auth.Authenticated)
-            {
-                var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobble);
+            await EnsureAuthenticatedAsync();
+            var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobble);
 
-                if (scrobbleResponse != null)
-                {
-                    return scrobbleResponse;
-                }
-            }
-            else
-            {
-                var authenticationResponse = await _lastFmClient.Auth.GetSessionTokenAsync(_lastFmUserName, _lastFmPassword);
-                
-                var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobble);
-
-                if (scrobbleResponse != null)
-                {
-                    return scrobbleResponse;
-                }
-            }
-
-            throw new Exception("Error scrobbling release"); 
+            return scrobbleResponse ?? throw new Exception("Error scrobbling release");
         }
 
         public async Task<LastResponse> ScrobbleReleases(List<Scrobble> scrobbles)
         {
-            if (_lastFmClient.Auth.Authenticated)
-            {
-                var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobbles);
+            await EnsureAuthenticatedAsync();
+            var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobbles);
 
-                if (scrobbleResponse != null)
-                {
-                    return scrobbleResponse;
-                }
-            }
-            else
+            return scrobbleResponse ?? throw new Exception("Error scrobbling release");
+        }
+
+        private async Task EnsureAuthenticatedAsync()
+        {
+            if (!_lastFmClient.Auth.Authenticated)
             {
                 var authenticationResponse = await _lastFmClient.Auth.GetSessionTokenAsync(_lastFmUserName, _lastFmPassword);
 
-                var scrobbleResponse = await _lastFmClient.Scrobbler.ScrobbleAsync(scrobbles);
-
-                if (scrobbleResponse != null)
+                if (!authenticationResponse.Success)
                 {
-                    return scrobbleResponse;
+                    throw new Exception($"Authentication failed: {authenticationResponse.Status}");
                 }
             }
-
-            throw new Exception("Error scrobbling release");
         }
-
     }
 }
 

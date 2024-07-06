@@ -38,7 +38,19 @@
 }
 else
 {
-    <EnterUsernameComponent OnStoreUsernameClick="handleButtonClick" />   
+
+    <MudStack AlignItems="MudBlazor.AlignItems.Center">
+        <MudSpacer />
+        <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.body1">Welcome to Discogs Insights</MudText>
+        <MudSpacer />
+        <MudText Color="Color.Primary" Align="Align.Center" Typo="Typo.body2">Please enter your Discogs username to get started.</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="discogsUsername" Label="Discogs Username" Variant="MudBlazor.Variant.Filled"></MudTextField>
+        <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" OnClick="handleButtonClick">Store Username</MudButton>
+        <MudSpacer />
+        <MudImage Fluid="true" Width="200" Src="images/loading.png" />
+    </MudStack>
+
 }
 
 

@@ -794,6 +794,7 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
+        //LastFm 
         public async Task<string> ScrobbleRelease(int discogsReleaseId, string artistName, string albumName)
         {
             var scrobbles = new List<Scrobble>();
@@ -910,7 +911,7 @@ namespace DiscogsInsight.DataAccess.Services
                 scrobbles.Add(scrobble);
             }
         }
-
+        //End lastFm
         #endregion
     }
 
