@@ -841,7 +841,7 @@ namespace DiscogsInsight.DataAccess.Services
 
             if (scrobbleResponse != null)
             {
-                return scrobbleResponse.Status.ToString();
+                return $"Status: {scrobbleResponse.Status}";
             }
             else
             {

@@ -87,11 +87,11 @@ namespace DiscogsInsight.Service
                 return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
             }
         }
-        public async Task<ViewResult<bool>> SaveUpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
+        public async Task<ViewResult<bool>> SaveUpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey, string lastFmApiSecret)
         {
             try
             {
-                var success = await _settingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey);
+                var success = await _settingsDataService.UpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey, lastFmApiSecret);
 
                 if (success)
                 {

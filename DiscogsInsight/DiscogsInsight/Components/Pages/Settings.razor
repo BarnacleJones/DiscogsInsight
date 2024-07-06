@@ -64,7 +64,7 @@
 
     public async void SaveLastFmSettings()
     {
-        HandleResult(await SettingsViewService.SaveUpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey), "Saved Username");
+        HandleResult(await SettingsViewService.SaveUpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey, lastFmApiSecret), "Saved Last Fm Settings");
     }
 
 

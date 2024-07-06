@@ -9,6 +9,7 @@ using DiscogsInsight.Service.Insights;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database;
 using DiscogsInsight.Service;
+using IF.Lastfm.Core.Api;
 
 namespace DiscogsInsight
 {
