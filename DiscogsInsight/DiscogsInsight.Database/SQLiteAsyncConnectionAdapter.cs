@@ -40,16 +40,16 @@ namespace DiscogsInsight.Database
         {
             try
             {
-                await _connection.DeleteAllAsync<Artist>();
-                await _connection.DeleteAllAsync<DiscogsGenreTags>();
-                await _connection.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
-                await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
-                await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
-                await _connection.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
-                await _connection.DeleteAllAsync<MusicBrainzTags>();
-                await _connection.DeleteAllAsync<Release>();
-                await _connection.DeleteAllAsync<Track>();
-                await _connection.DeleteAllAsync<LastFmTrackInformation>();
+                var a = await _connection.DeleteAllAsync<Artist>();
+                var b = await _connection.DeleteAllAsync<DiscogsGenreTags>();
+                var c = await _connection.DeleteAllAsync<DiscogsGenreTagToDiscogsRelease>();
+                var d = await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzRelease>();
+                var e = await _connection.DeleteAllAsync<MusicBrainzArtistToMusicBrainzTags>();
+                var f = await _connection.DeleteAllAsync<MusicBrainzReleaseToCoverImage>();
+                var g = await _connection.DeleteAllAsync<MusicBrainzTags>();
+                var h = await _connection.DeleteAllAsync<Release>();
+                var i = await _connection.DeleteAllAsync<Track>();
+                var j = await _connection.DeleteAllAsync<LastFmTrackInformation>();
             }
             catch (Exception ex)
             {
