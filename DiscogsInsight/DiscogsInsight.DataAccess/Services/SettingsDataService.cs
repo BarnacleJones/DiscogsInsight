@@ -52,7 +52,7 @@ namespace DiscogsInsight.DataAccess.Services
             return true;
         }
 
-        public Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey)
+        public Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey, string lastFmApiSecret)
         {
             if (string.IsNullOrEmpty(lastFmUsername))
             {
@@ -80,6 +80,15 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 _preferencesService.Set(PreferencesConstant.LastFmApiKey, lastFmApiKey);
             }
+            
+            if (string.IsNullOrEmpty(lastFmApiSecret))
+            {
+                _preferencesService.Remove(PreferencesConstant.LastFmApiSecret);
+            }
+            else
+            {
+                _preferencesService.Set(PreferencesConstant.LastFmApiSecret, lastFmApiSecret);
+            }
 
             return Task.FromResult(true);
         }
@@ -87,6 +96,12 @@ namespace DiscogsInsight.DataAccess.Services
         public string GetLastFmApiKey()
         {
             var key = _preferencesService.Get(PreferencesConstant.LastFmApiKey, "");
+            return key;
+        }
+
+        public string GetLastFmApiSecret()
+        {
+            var key = _preferencesService.Get(PreferencesConstant.LastFmApiSecret, "");
             return key;
         }
 

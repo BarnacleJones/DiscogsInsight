@@ -1,9 +1,11 @@
 ﻿@using DiscogsInsight.Service.Models.Collection
 @using DiscogsInsight.Service.Models.EntityViewModels
 @using DiscogsInsight.Service.Models;
+@using DiscogsInsight.Service.Models.Results
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 @inject ReleaseViewService ReleaseViewService
+@inject UserNotificationService UserNotificationService
 @inject IBrowserViewportService ViewportService
 
 <MudCard>
@@ -184,7 +186,8 @@
     <MudSpacer />
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToCorrectImage">Cover image is wrong</MudButton>
 }
-
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ScrobbleRelease">Scrobble Album</MudButton>
+<MudSpacer />
 
 
 @code
@@ -201,6 +204,7 @@
     //data correction message box
     [Inject] 
     private IDialogService DialogService { get; set; }
+
     MudMessageBox mbox { get; set; }
 
     private bool _correctionButtonsShown = false;
@@ -230,6 +234,17 @@
            yesText: "Yes, correct the data.", cancelText: "Cancel");
 
         _correctionButtonsShown = result == null ? false : true;
+
+        StateHasChanged();
+    }
+
+    private async Task ScrobbleRelease()
+    {
+        if (Release.DiscogsReleaseId.HasValue && !string.IsNullOrEmpty(Release.Artist) && !string.IsNullOrEmpty(Release.Title))
+        {
+            var result = await ReleaseViewService.ScrobbleRelease(Release.DiscogsReleaseId.Value, Release.Artist, Release.Title);
+            HandleResult(result);
+        }
 
         StateHasChanged();
     }
@@ -339,5 +354,17 @@
         IsFavourited = newFavouriteValue;
         StateHasChanged();
 
+    }
+
+    private async void HandleResult(ViewResult<string> result)
+    {
+        if (result.Success)
+        {
+            await UserNotificationService.DisplayNotification("Success", $"Scrobbled status: {result.Data}", "OK", "OK");
+        }
+        else
+        {
+            await UserNotificationService.DisplayNotification("Error", $"{result.ErrorMessage}", "OK", "Cancel");
+        }
     }
 }

@@ -20,7 +20,6 @@ namespace DiscogsInsight.Database.Entities
         public string? MusicBrainzReleaseId { get; set; }
         public bool IsAReleaseGroupGroupId { get; set; }
         public string? MusicBrainzCoverUrl { get; set; }
-
         public bool IsFavourited { get; set; }
         public bool HasAllApiData { get; set; }//When musicbrainz info is all fetched
         public bool ArtistHasBeenManuallyCorrected { get; set; }

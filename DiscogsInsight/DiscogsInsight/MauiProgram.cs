@@ -9,6 +9,7 @@ using DiscogsInsight.Service.Insights;
 using DiscogsInsight.Database.Contract;
 using DiscogsInsight.Database;
 using DiscogsInsight.Service;
+using IF.Lastfm.Core.Api;
 
 namespace DiscogsInsight
 {
@@ -50,6 +51,13 @@ namespace DiscogsInsight
             {
                 hc.BaseAddress = new Uri("https://musicbrainz.org");
                 hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+    
+            //Dont need this for Windows but Android Requests must all be Https
+            builder.Services.AddHttpClient("LastFmApiClient", hc => 
+            {
+                hc.BaseAddress = new Uri("https://ws.audioscrobbler.com/2.0/");
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
     

@@ -26,6 +26,7 @@
     {
         if (OnStoreUsernameClick.HasDelegate)
         {
+            //wasnt working just using this whole piece in home.razor
             await OnStoreUsernameClick.InvokeAsync(null);
         }
     }
