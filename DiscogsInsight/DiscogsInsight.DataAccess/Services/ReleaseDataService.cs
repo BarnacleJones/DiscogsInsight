@@ -3,12 +3,16 @@ using DiscogsInsight.ApiIntegration.Models.DiscogsResponseModels;
 using DiscogsInsight.DataAccess.Contract;
 using DiscogsInsight.Database.Entities;
 using DiscogsInsight.Database.Contract;
-using Microsoft.Extensions.Logging;
 using DiscogsInsight.DataAccess.Models;
 using DiscogsInsight.ApiIntegration.Models.MusicBrainzResponseModels;
 using Release = DiscogsInsight.Database.Entities.Release;
 using Track = DiscogsInsight.Database.Entities.Track;
 using Artist = DiscogsInsight.Database.Entities.Artist;
+using IF.Lastfm.Core.Objects;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -17,18 +21,16 @@ namespace DiscogsInsight.DataAccess.Services
         private readonly ISQLiteAsyncConnection _db;
         private readonly IMusicBrainzApiService _musicBrainzApiService;
         private readonly IDiscogsApiService _discogsApiService;
+        private readonly ILastFmApiService _lastFmApiService;
         private readonly ICoverArtArchiveApiService _coverArchiveApiService;
-        private readonly ICollectionDataService _collectionDataService;
-        private readonly ILogger<ReleaseDataService> _logger;
 
-        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ICollectionDataService collectionDataService, ICoverArtArchiveApiService coverArchiveApiService, ILogger<ReleaseDataService> logger)
+        public ReleaseDataService(ISQLiteAsyncConnection db, IMusicBrainzApiService musicBrainzApiService, IDiscogsApiService discogsApiService, ILastFmApiService lastFmApiService,ICoverArtArchiveApiService coverArchiveApiService)
         {
             _db = db;
             _musicBrainzApiService = musicBrainzApiService;
-            _collectionDataService = collectionDataService;
             _coverArchiveApiService = coverArchiveApiService;
             _discogsApiService = discogsApiService;
-            _logger = logger;
+            _lastFmApiService = lastFmApiService;
         }
 
         private async Task<ReleaseDataModel> GetReleaseDataModel(ReleaseInterimData release, List<Track> trackList, string? releaseArtistName, byte[]? imageAsBytes)
@@ -44,32 +46,6 @@ namespace DiscogsInsight.DataAccess.Services
                 DiscogsArtistId = x.DiscogsArtistId ?? 0,
                 DiscogsReleaseId = x.DiscogsReleaseId ?? 0
             }).ToList();
-
-            //var genres = await _discogsGenresAndTagsDataService.GetGenresForDiscogsRelease(release.DiscogsReleaseId);
-
-            //public async Task<List<(string?, int)>> GetGenresForDiscogsRelease(int? discogsReleaseId)
-            //{
-            //    if (discogsReleaseId == null) { return new List<(string?, int)>(); };
-
-            //    var discogsGenreJoiningTableList = await GetDiscogsGenreTagToDiscogsReleaseAsList();
-
-            //    var genreIdsForThisRelease = discogsGenreJoiningTableList.Where(x => x.DiscogsReleaseId == discogsReleaseId).Select(x => x.DiscogsGenreTagId).ToList();
-
-            //    var genreTable = await GetAllGenreTagsAsList();
-
-            //    return genreTable.Where(x => genreIdsForThisRelease.Contains(x.Id)).Select(x => (x.DiscogsTag, x.Id)).ToList();
-
-            //}
-
-
-            //var existingMusicBrainzReleaseIdIdsForThisArtistQuery = @$"
-            //SELECT MusicBrainzReleaseId
-            //FROM MusicBrainzArtistToMusicBrainzRelease
-            //WHERE MusicBrainzArtistToMusicBrainzRelease.MusicBrainzArtistId = ?;";
-
-            //var existingMusicBrainzReleaseIdsForThisArtist = await _db.QueryAsync<MusicBrainzReleaseIdResponse>(existingMusicBrainzReleaseIdIdsForThisArtistQuery, musicBrainzArtistId);
-
-
 
             var genres = new List<GenreDto>();//todo write query to populate this given a discogsreleaseid
 
@@ -93,17 +69,9 @@ namespace DiscogsInsight.DataAccess.Services
         }
         public async Task SetFavouriteBooleanOnRelease(bool favourited, int discogsReleaseId)
         {
-            try
-            {
-                var thisRelease = await _db.Table<Release>().FirstOrDefaultAsync(x => x.DiscogsReleaseId == discogsReleaseId);
-                thisRelease.IsFavourited = favourited;
-                await _db.UpdateAsync(thisRelease);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
+            var thisRelease = await _db.Table<Release>().FirstOrDefaultAsync(x => x.DiscogsReleaseId == discogsReleaseId);
+            thisRelease.IsFavourited = favourited;
+            await _db.UpdateAsync(thisRelease);
         }
         public async Task<List<ReleaseDataModel>> GetReleaseDataModelsByDiscogsGenreTagId(int discogsGenreTagId)
         {
@@ -830,6 +798,152 @@ namespace DiscogsInsight.DataAccess.Services
             return null;
         }
 
+        //LastFm 
+        private string ProcessNameForScrobbling(string album)
+        {
+            // Remove anything within parentheses
+            string withoutParentheses = Regex.Replace(album, @"\s*\(.*?\)\s*", "");
+
+            // Remove punctuation
+            string withoutPunctuation = new string(withoutParentheses.Where(c => !char.IsPunctuation(c)).ToArray());
+
+            // Normalize special characters
+            string normalized = withoutPunctuation.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder();
+
+            foreach (var ch in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(ch);
+                }
+            }
+            string cleaned = builder.ToString().Normalize(NormalizationForm.FormC);
+
+            // Remove leading and trailing whitespace
+            return cleaned.Trim();
+        }
+        public async Task<string> ScrobbleRelease(int discogsReleaseId, string artistName, string albumName)
+        {
+            artistName = ProcessNameForScrobbling(artistName);
+            albumName = ProcessNameForScrobbling(albumName);
+
+            var scrobbles = new List<Scrobble>();
+            
+            var storedLastFmTracksForThisRelease = await _db.Table<LastFmTrackInformation>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
+
+            if (storedLastFmTracksForThisRelease != null && storedLastFmTracksForThisRelease.Count > 0)
+            {
+                storedLastFmTracksForThisRelease.OrderBy(x => x.Rank);
+                CreateScrobblesWithTimeAlgorithmFromStoredTracks(scrobbles, storedLastFmTracksForThisRelease);
+            }
+            else
+            {
+                var albumInfo = await _lastFmApiService.GetAlbumInformation(artistName, albumName);
+                if (albumInfo == null)
+                {
+                    return "Album not found in Last.Fm Album call.";
+                }
+
+                var tracks = albumInfo?.Album.Tracks?.TrackList.ToList();
+
+                if (tracks != null && tracks.Count > 0)
+                {
+                    await SaveTracksToDbFromLastFmAlbumQuery(discogsReleaseId, tracks, albumName, artistName);
+
+                    CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(scrobbles, tracks, artistName, albumName);
+                }
+                else return $"No Tracks on the Last.Fm Release request for Album: {albumName}.";
+            }
+
+            var scrobbleResponse = await _lastFmApiService.ScrobbleReleases(scrobbles);
+
+            if (scrobbleResponse != null)
+            {
+                return $"Status: {scrobbleResponse.Status}";
+            }
+            else
+            {
+                return "Error: No Response";
+            }
+
+        }
+
+        private static void CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(List<Scrobble> scrobbles, List<LastFmTrack> tracks, string artistName, string albumName)
+        {
+            DateTimeOffset playedTime = DateTimeOffset.Now;//assuming that when you push scrobble you are putting on the record - could make a setting for how its calculated
+            foreach (var track in tracks)
+            {
+                Scrobble scrobble;
+
+                if (track.Duration.HasValue && track.Duration > 0)
+                {
+                    var trackDuration = TimeSpan.FromSeconds(track.Duration.Value);
+                    // Calculate the time the track started playing - from now: if this is the first one
+                    var timePlayed = playedTime + trackDuration;
+
+                    scrobble = new Scrobble(artistName, albumName, track.Name, timePlayed);
+                    //increment the time played for next track
+                    playedTime += trackDuration;
+
+                }
+                else
+                {
+                    //if there arent durations, could use the db duration or just send them all at once, it allows it
+                    scrobble = new Scrobble(artistName, albumName, track.Name, playedTime);
+                }
+                scrobbles.Add(scrobble);
+            }
+        }
+
+        private async Task SaveTracksToDbFromLastFmAlbumQuery(int discogsReleaseId, List<LastFmTrack> tracks, string albumName, string artistName)
+        {
+            var tracksToSave = new List<LastFmTrackInformation>();
+
+            foreach (var track in tracks)
+            {
+                tracksToSave.Add(new LastFmTrackInformation
+                {
+                    Rank = track.Attr != null && track.Attr.TryGetValue("rank", out var rank) ? int.Parse(rank) : (int?)null,
+                    TrackName = track.Name,
+                    Duration = track.Duration * 1000, // Convert seconds to milliseconds
+                    AlbumName = albumName,
+                    ArtistName = artistName,
+                    DiscogsReleaseId = discogsReleaseId
+                });
+            }
+            if (tracksToSave.Count > 0)
+            {
+                await _db.InsertAllAsync(tracksToSave);
+            }
+        }
+
+        private static void CreateScrobblesWithTimeAlgorithmFromStoredTracks(List<Scrobble> scrobbles, List<LastFmTrackInformation> storedLastFmTracksForThisRelease)
+        {
+            DateTimeOffset playedTime = DateTimeOffset.Now;//assuming that when you push scrobble you are putting on the record - could make a setting for how its calculated
+
+            foreach (var track in storedLastFmTracksForThisRelease)
+            {
+                Scrobble scrobble;
+
+                if (track.Duration.HasValue && track.Duration > 0)
+                {
+                    var trackDuration = TimeSpan.FromMilliseconds(track.Duration.Value);
+                    // Calculate the time the track started playing - from now: if this is the first one
+                    var timePlayed = playedTime + trackDuration;
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.TrackName, timePlayed);
+                    //increment the time played for next track
+                    playedTime += trackDuration;
+                }
+                else
+                {
+                    //if there arent durations, just send them all at once
+                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.TrackName, playedTime);
+                }
+                scrobbles.Add(scrobble);
+            }
+        }
+        //End lastFm
         #endregion
     }
 

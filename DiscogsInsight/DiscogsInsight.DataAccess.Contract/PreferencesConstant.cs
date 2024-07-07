@@ -8,6 +8,7 @@
         public static string LastFmUserName = "lastFmUsername";
         public static string LastFmPassword = "lastFmPassword";
         public static string LastFmApiKey = "lastFmApiKey";
+        public static string LastFmApiSecret = "lastFmApiSecret";
         public static string DiscogsUsername = "discogsUsername";
     }
 }

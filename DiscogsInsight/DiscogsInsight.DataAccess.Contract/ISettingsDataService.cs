@@ -7,8 +7,9 @@
         string GetDiscogsUsername();
         Task<bool> UpdateDiscogsUsername(string userName);
         Task<bool> PurgeEntireDb();
-        Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey);
+        Task<bool> UpdateLastFmSettings(string lastFmUsername, string lastFmPassword, string lastFmApiKey, string lastFmApiSecret);
         string GetLastFmApiKey();
+        string GetLastFmApiSecret();
         string GetLastFmUsername();
         string GetLastFmPassword();
     }

@@ -166,6 +166,30 @@ namespace DiscogsInsight.Service
             return true;
         }
 
+        public async Task<ViewResult<string>> ScrobbleRelease(int discogsReleaseId, string artistName, string releaseName)
+        {
+            try
+            {
+                var scrobble = await _releaseDataService.ScrobbleRelease(discogsReleaseId, artistName, releaseName);
+
+                return new ViewResult<string>
+                {
+                    Success = true,
+                    Data = scrobble.ToString(),
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ViewResult<string>
+                {
+                    Success = false,
+                    Data = ex.Message,
+                    ErrorMessage = ex.Message
+                };
+            }
+        }
+
         private ReleaseViewModel GetReleaseViewModel(ReleaseDataModel release)
         {
             var releaseViewModel = new ReleaseViewModel
