@@ -50,7 +50,7 @@
 
     public async void SaveUsername()
     {
-        HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername), "Saved Username");
+        HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername), "Saved Username - Restart the app");
     }
 
     public async Task UpdateApiData()
@@ -64,7 +64,7 @@
 
     public async void SaveLastFmSettings()
     {
-        HandleResult(await SettingsViewService.SaveUpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey, lastFmApiSecret), "Saved Last Fm Settings");
+        HandleResult(await SettingsViewService.SaveUpdateLastFmSettings(lastFmUsername, lastFmPassword, lastFmApiKey, lastFmApiSecret), "Saved Last Fm Settings - Restart the app");
     }
 
 
