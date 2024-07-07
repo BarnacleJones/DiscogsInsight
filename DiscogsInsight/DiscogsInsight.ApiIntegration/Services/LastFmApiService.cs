@@ -34,8 +34,12 @@ namespace DiscogsInsight.ApiIntegration.Services
         public async Task<LastAlbumResponseManual> GetAlbumInformation(string artistName, string albumName)
         {
             await EnsureAuthenticatedAsync();
-            //have to use regular method for Android to work - needs to be HTTPS and I dont see a way IF.Lastfm.Core supports that at this stage
-            var response = await _httpClient.GetAsync($"https://ws.audioscrobbler.com/2.0/?method=album.getInfo&api_key={_lastFmApiKey}&artist={artistName}&album={albumName}&format=json");
+            var encodedArtistName = Uri.EscapeDataString(artistName);
+            var encodedAlbumName = Uri.EscapeDataString(albumName);
+            //have to use regular getAsync method (insead of using LastFmClient) for Android to work - needs to be HTTPS.
+            //I dont see a way IF.Lastfm.Core supports that at this stage
+            var url = $"https://ws.audioscrobbler.com/2.0/?method=album.getInfo&api_key={_lastFmApiKey}&artist={encodedArtistName}&album={encodedAlbumName}&format=json";
+            var response = await _httpClient.GetAsync(url);
 
             response.EnsureSuccessStatusCode();
 

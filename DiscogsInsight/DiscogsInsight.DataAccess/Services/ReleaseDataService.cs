@@ -801,35 +801,15 @@ namespace DiscogsInsight.DataAccess.Services
         }
 
         //LastFm 
-        private string ProcessNameForScrobbling(string album)
+        private string ProcessArtistNameForScrobbling(string artist)
         {
-            // Remove anything within parentheses
-            string withoutParentheses = Regex.Replace(album, @"\s*\(.*?\)\s*", "");
-
-            // Remove punctuation
-            string withoutPunctuation = new string(withoutParentheses.Where(c => !char.IsPunctuation(c)).ToArray());
-
-            // Normalize special characters
-            string normalized = withoutPunctuation.Normalize(NormalizationForm.FormD);
-            var builder = new StringBuilder();
-
-            foreach (var ch in normalized)
-            {
-                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
-                {
-                    builder.Append(ch);
-                }
-            }
-            string cleaned = builder.ToString().Normalize(NormalizationForm.FormC);
-
-            // Remove leading and trailing whitespace
-            return cleaned.Trim();
+            // Remove anything within parentheses - Discogs adds those
+            string withoutParentheses = Regex.Replace(artist, @"\s*\(.*?\)\s*", "");
+            return withoutParentheses;
         }
         public async Task<string> ScrobbleRelease(int discogsReleaseId, string artistName, string albumName)
         {
-            artistName = ProcessNameForScrobbling(artistName);
-            albumName = ProcessNameForScrobbling(albumName);
-
+            artistName = ProcessArtistNameForScrobbling(artistName);
             var scrobbles = new List<Scrobble>();
             
             var storedLastFmTracksForThisRelease = await _db.Table<LastFmTrackInformation>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
