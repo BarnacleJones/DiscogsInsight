@@ -208,31 +208,36 @@ namespace DiscogsInsight.Service
                 Year = release.Year
             };
             releaseViewModel.Genres = new List<ReleaseGenres>();
-
-            foreach (var genre in release.Genres)
+            if (release.Genres != null)
             {
-                releaseViewModel.Genres.Add(new ReleaseGenres
+                foreach (var genre in release?.Genres)
                 {
-                    Id = genre.Id,
-                    Name = genre.Name,
-                });
+                    releaseViewModel.Genres.Add(new ReleaseGenres
+                    {
+                        Id = genre.Id,
+                        Name = genre.Name,
+                    });
+                }
             }
 
             releaseViewModel.Tracks = new List<TracksItemViewModel>();
 
-            foreach (var trackDto in release.Tracks)
+            if (release.Tracks != null)
             {
-                releaseViewModel.Tracks.Add(new TracksItemViewModel
+                foreach (var trackDto in release.Tracks)
                 {
-                    Artist = trackDto.Artist,
-                    DiscogsArtistId = trackDto.DiscogsArtistId,
-                    DiscogsReleaseId = trackDto.DiscogsReleaseId,
-                    Duration = trackDto.Duration,
-                    Position = trackDto.Position,
-                    Rating = trackDto.Rating,
-                    Release = trackDto.Release,
-                    Title = trackDto.Title
-                });
+                    releaseViewModel.Tracks.Add(new TracksItemViewModel
+                    {
+                        Artist = trackDto.Artist,
+                        DiscogsArtistId = trackDto.DiscogsArtistId,
+                        DiscogsReleaseId = trackDto.DiscogsReleaseId,
+                        Duration = trackDto.Duration,
+                        Position = trackDto.Position,
+                        Rating = trackDto.Rating,
+                        Release = trackDto.Release,
+                        Title = trackDto.Title
+                    });
+                }                
             }
             return releaseViewModel;
         }

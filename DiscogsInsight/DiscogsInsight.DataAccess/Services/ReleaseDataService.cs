@@ -148,6 +148,9 @@ namespace DiscogsInsight.DataAccess.Services
         }
         public async Task<ReleaseDataModel> GetReleaseDataModelByDiscogsReleaseId(int discogsReleaseId)
         {
+
+            if (discogsReleaseId == 0) return new ReleaseDataModel();
+
             var release = await _db.Table<Release>().FirstOrDefaultAsync(x => x.DiscogsReleaseId == discogsReleaseId);
 
             if (release == null || !release.HasAllApiData)
@@ -373,7 +376,6 @@ namespace DiscogsInsight.DataAccess.Services
         #region Api Fetching and subsequent saving updating of records
         private async Task RetrieveAllApiDataForReleaseAndReleasesArtist(int discogsReleaseId)
         {
-
             var release = await GetReleaseByDiscogsReleaseId(discogsReleaseId);
             //release may have been updated from bad data (which corrects musicbrainz data)
             //so there is potential the release doesnt have all data, but dont want to refetch the discogs data - as that is baseline data that doesnt change in correction
