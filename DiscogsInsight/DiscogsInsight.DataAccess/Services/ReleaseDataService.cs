@@ -9,6 +9,10 @@ using Release = DiscogsInsight.Database.Entities.Release;
 using Track = DiscogsInsight.Database.Entities.Track;
 using Artist = DiscogsInsight.Database.Entities.Artist;
 using IF.Lastfm.Core.Objects;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace DiscogsInsight.DataAccess.Services
 {
@@ -795,14 +799,42 @@ namespace DiscogsInsight.DataAccess.Services
         }
 
         //LastFm 
+        private string ProcessNameForScrobbling(string album)
+        {
+            // Remove anything within parentheses
+            string withoutParentheses = Regex.Replace(album, @"\s*\(.*?\)\s*", "");
+
+            // Remove punctuation
+            string withoutPunctuation = new string(withoutParentheses.Where(c => !char.IsPunctuation(c)).ToArray());
+
+            // Normalize special characters
+            string normalized = withoutPunctuation.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder();
+
+            foreach (var ch in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(ch);
+                }
+            }
+            string cleaned = builder.ToString().Normalize(NormalizationForm.FormC);
+
+            // Remove leading and trailing whitespace
+            return cleaned.Trim();
+        }
         public async Task<string> ScrobbleRelease(int discogsReleaseId, string artistName, string albumName)
         {
+            artistName = ProcessNameForScrobbling(artistName);
+            albumName = ProcessNameForScrobbling(albumName);
+
             var scrobbles = new List<Scrobble>();
             
             var storedLastFmTracksForThisRelease = await _db.Table<LastFmTrackInformation>().Where(x => x.DiscogsReleaseId == discogsReleaseId).ToListAsync();
 
             if (storedLastFmTracksForThisRelease != null && storedLastFmTracksForThisRelease.Count > 0)
             {
+                storedLastFmTracksForThisRelease.OrderBy(x => x.Rank);
                 CreateScrobblesWithTimeAlgorithmFromStoredTracks(scrobbles, storedLastFmTracksForThisRelease);
             }
             else
@@ -813,13 +845,13 @@ namespace DiscogsInsight.DataAccess.Services
                     return "Album not found in Last.Fm Album call.";
                 }
 
-                var tracks = albumInfo.Tracks.ToList();
+                var tracks = albumInfo?.Album.Tracks?.TrackList.ToList();
 
                 if (tracks != null && tracks.Count > 0)
                 {
-                    await SaveTracksToDbFromLastFmAlbumQuery(discogsReleaseId, tracks);
+                    await SaveTracksToDbFromLastFmAlbumQuery(discogsReleaseId, tracks, albumName, artistName);
 
-                    CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(scrobbles, tracks);
+                    CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(scrobbles, tracks, artistName, albumName);
                 }
                 else return $"No Tracks on the Last.Fm Release request for Album: {albumName}.";
             }
@@ -837,20 +869,20 @@ namespace DiscogsInsight.DataAccess.Services
 
         }
 
-        private static void CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(List<Scrobble> scrobbles, List<LastTrack> tracks)
+        private static void CreateScrobblesWithTimeAlgorithmFromLastFmAlbumCallTracks(List<Scrobble> scrobbles, List<LastFmTrack> tracks, string artistName, string albumName)
         {
             DateTimeOffset playedTime = DateTimeOffset.Now;//assuming that when you push scrobble you are putting on the record - could make a setting for how its calculated
             foreach (var track in tracks)
             {
                 Scrobble scrobble;
 
-                if (track.Duration != null)
+                if (track.Duration.HasValue && track.Duration > 0)
                 {
-                    var trackDuration = TimeSpan.FromMilliseconds(track.Duration.Value.TotalMilliseconds);
+                    var trackDuration = TimeSpan.FromSeconds(track.Duration.Value);
                     // Calculate the time the track started playing - from now: if this is the first one
                     var timePlayed = playedTime + trackDuration;
 
-                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, timePlayed);
+                    scrobble = new Scrobble(artistName, albumName, track.Name, timePlayed);
                     //increment the time played for next track
                     playedTime += trackDuration;
 
@@ -858,13 +890,13 @@ namespace DiscogsInsight.DataAccess.Services
                 else
                 {
                     //if there arent durations, could use the db duration or just send them all at once, it allows it
-                    scrobble = new Scrobble(track.ArtistName, track.AlbumName, track.Name, playedTime);
+                    scrobble = new Scrobble(artistName, albumName, track.Name, playedTime);
                 }
                 scrobbles.Add(scrobble);
             }
         }
 
-        private async Task SaveTracksToDbFromLastFmAlbumQuery(int discogsReleaseId, List<LastTrack> tracks)
+        private async Task SaveTracksToDbFromLastFmAlbumQuery(int discogsReleaseId, List<LastFmTrack> tracks, string albumName, string artistName)
         {
             var tracksToSave = new List<LastFmTrackInformation>();
 
@@ -872,11 +904,11 @@ namespace DiscogsInsight.DataAccess.Services
             {
                 tracksToSave.Add(new LastFmTrackInformation
                 {
-                    Rank = track.Rank.HasValue ? track.Rank : 0,
+                    Rank = track.Attr != null && track.Attr.TryGetValue("rank", out var rank) ? int.Parse(rank) : (int?)null,
                     TrackName = track.Name,
-                    Duration = track.Duration.HasValue ? track.Duration.Value.TotalMilliseconds : null,
-                    AlbumName = track.AlbumName,
-                    ArtistName = track.ArtistName,
+                    Duration = track.Duration * 1000, // Convert seconds to milliseconds
+                    AlbumName = albumName,
+                    ArtistName = artistName,
                     DiscogsReleaseId = discogsReleaseId
                 });
             }

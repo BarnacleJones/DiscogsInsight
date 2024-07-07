@@ -3,6 +3,7 @@ using DiscogsInsight.DataAccess.Contract;
 using IF.Lastfm.Core.Api;
 using IF.Lastfm.Core.Api.Helpers;
 using IF.Lastfm.Core.Objects;
+using Newtonsoft.Json;
 
 namespace DiscogsInsight.ApiIntegration.Services
 {
@@ -30,19 +31,25 @@ namespace DiscogsInsight.ApiIntegration.Services
             _lastFmClient = new LastfmClient(_lastFmApiKey, _lastFmApiSecret, _httpClient);
         }
 
-        public async Task<LastAlbum> GetAlbumInformation(string artistName, string albumName)
+        public async Task<LastAlbumResponseManual> GetAlbumInformation(string artistName, string albumName)
         {
             await EnsureAuthenticatedAsync();
+            //have to use regular method for Android to work - needs to be HTTPS and I dont see a way IF.Lastfm.Core supports that at this stage
+            var response = await _httpClient.GetAsync($"https://ws.audioscrobbler.com/2.0/?method=album.getInfo&api_key={_lastFmApiKey}&artist={artistName}&album={albumName}&format=json");
 
-            var response = await _lastFmClient.Album.GetInfoAsync(artistName, albumName, true);
+            response.EnsureSuccessStatusCode();
 
-            if (!response.Success)
+            var json = await response.Content.ReadAsStringAsync();
+            try
             {
-                throw new Exception($"Unsuccessful API connection: {response.Status}");
+                var albumInfo = JsonConvert.DeserializeObject<LastAlbumResponseManual>(json);
+                return albumInfo;
             }
-
-            return response.Content ?? throw new Exception("Album information is null");
-
+            catch (JsonException ex)
+            {
+                throw new Exception($"Error deserializing JSON: {ex.Message}");
+            }
+            
         }
 
         public async Task<LastResponse> ScrobbleRelease(Scrobble scrobble)
@@ -75,4 +82,3 @@ namespace DiscogsInsight.ApiIntegration.Services
         }
     }
 }
-

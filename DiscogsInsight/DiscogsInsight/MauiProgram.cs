@@ -54,9 +54,10 @@ namespace DiscogsInsight
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
     
+            //Dont need this for Windows but Android Requests must all be Https
             builder.Services.AddHttpClient("LastFmApiClient", hc => 
             {
-                hc.DefaultRequestHeaders.Add("User-Agent", $"DiscogsInsight");
+                hc.BaseAddress = new Uri("https://ws.audioscrobbler.com/2.0/");
                 hc.DefaultRequestHeaders.Add("Accept", "application/json");
             });
     
