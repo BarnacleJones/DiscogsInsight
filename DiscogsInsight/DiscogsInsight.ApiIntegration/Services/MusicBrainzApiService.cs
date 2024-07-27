@@ -50,8 +50,8 @@ namespace DiscogsInsight.ApiIntegration.Services
 
                 var encodedArtistName = Uri.EscapeDataString(artistName);
 
-                var fullArtistRequestUrl = InitialArtistRequest + $"'{encodedArtistName}'";
-                
+                var fullArtistRequestUrl = $"{InitialArtistRequest}\"{encodedArtistName}\"";
+
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
 
