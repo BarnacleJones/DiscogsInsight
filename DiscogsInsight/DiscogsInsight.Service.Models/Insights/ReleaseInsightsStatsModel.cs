@@ -9,8 +9,6 @@
 
         public double[] ReleasesPressedCountryValues {get;set;}
         public string[] ReleasesPressedCountryLabels { get; set; }
-
-
     }
 
 }

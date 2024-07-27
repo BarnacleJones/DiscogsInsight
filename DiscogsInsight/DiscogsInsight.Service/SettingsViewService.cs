@@ -68,6 +68,10 @@ namespace DiscogsInsight.Service
         {
             return _settingsDataService.GetLastFmPassword();
         }
+        public string GetReleaseAddedOverTimeInitialExclusionPeriodInDays()
+        {
+            return _settingsDataService.GetReleaseAddedOverTimeInitialExclusionPeriodInDays();
+        }
         public async Task<ViewResult<bool>> UpdateDiscogsUsername(string userName)
         {
             try
@@ -80,6 +84,29 @@ namespace DiscogsInsight.Service
                 }
 
                 return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Discogs Username. " };
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                return new ViewResult<bool>() { Success = false, ErrorMessage = ex.Message };
+            }
+        } 
+        public async Task<ViewResult<bool>> UpdateReleaseAddedOverTimeInitialExclusionPeriodInDays(string exclusionPeriod)
+        {
+            try
+            {
+                bool isNumeric = int.TryParse(exclusionPeriod, out int result);
+                if (!isNumeric)
+                    return new ViewResult<bool> { Success = false, ErrorMessage = "Please enter a numeric value for Exclusion Period." };
+
+                var success = await _settingsDataService.UpdateReleaseAddedOverTimeInitialExclusionPeriodInDays(exclusionPeriod);
+
+                if (success)
+                {
+                    return new ViewResult<bool> { Success = true, ErrorMessage = "" };
+                }
+
+                return new ViewResult<bool> { Success = false, ErrorMessage = "Error Updating Exclusion Period. " };
             }
             catch (Exception ex)
             {

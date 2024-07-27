@@ -8,10 +8,12 @@ namespace DiscogsInsight.Service.Insights
     public class ReleaseInsightsViewService
     {
         private readonly IInsightsDataService _insightsDataService;
+        private readonly ISettingsDataService _settingsDataService;
 
-        public ReleaseInsightsViewService(IInsightsDataService insightsDataService)
+        public ReleaseInsightsViewService(IInsightsDataService insightsDataService, ISettingsDataService settingsDataService)
         {
             _insightsDataService = insightsDataService;
+            _settingsDataService = settingsDataService;
         }
 
         public async Task<ViewResult<ReleaseInsightsStatsModel>> GetReleaseStatistics()
@@ -24,7 +26,7 @@ namespace DiscogsInsight.Service.Insights
                                               .OrderBy(x => x.OriginalReleaseYear)
                                               .FirstOrDefault();
 
-                var earliestReleaseText = $"{earliestRelease.OriginalReleaseYear} - {earliestRelease.Title}";
+                var earliestReleaseText = $"{earliestRelease?.OriginalReleaseYear} - {earliestRelease?.Title}";
 
                 var releasePressingYears = releases.Where(x => x.Year.HasValue && x.Year.Value > 0)
                                                    .OrderBy(x => x.Year)
@@ -91,12 +93,11 @@ namespace DiscogsInsight.Service.Insights
             return (labels, countryCounts);
         }
 
-        private static List<(string, double)> GenerateDataForReleasesOverTimeGraph(List<ReleaseStatisticData> releases)
+        private List<(string, double)> GenerateDataForReleasesOverTimeGraph(List<ReleaseStatisticData> releases)
         {
             var releasesOverTimeLineChartSeriesData = new List<(string, double)>();
 
             var groupedByYearReleases = releases.GroupBy(x => x.DateAdded.Value.Year).ToList().OrderBy(x => x.Key);
-
 
             foreach (var year in groupedByYearReleases)
             {
@@ -104,14 +105,30 @@ namespace DiscogsInsight.Service.Insights
                 bool startOfYear = true;
                 foreach (var monthGroup in yearGroupedByMonth)
                 {
-                    var label = "";
-                    if (startOfYear)
+                    var monthGroupedByDay = monthGroup.GroupBy(x => x.DateAdded.Value.Day).ToList().OrderBy(x => x.Key);
+
+                    foreach (var dayGroup in monthGroupedByDay)
                     {
-                        label = year.Key.ToString();
-                        startOfYear = false;
+                        var label = "";
+                        if (startOfYear)
+                        {
+                            label = year.Key.ToString();
+                            startOfYear = false;
+                        }
+                        releasesOverTimeLineChartSeriesData.Add((label, dayGroup.Count()));
+
                     }
-                    releasesOverTimeLineChartSeriesData.Add((label, monthGroup.Count()));
+
                 }
+            }
+
+            var settingForInitialExclusionPeriod = _settingsDataService.GetReleaseAddedOverTimeInitialExclusionPeriodInDays();
+
+            if (int.TryParse(settingForInitialExclusionPeriod, out int result))
+            {
+                var startYearLabel = releasesOverTimeLineChartSeriesData[0].Item1;
+                releasesOverTimeLineChartSeriesData.RemoveRange(0, result);
+                releasesOverTimeLineChartSeriesData.Insert(0, (startYearLabel, 0));
             }
 
             return releasesOverTimeLineChartSeriesData;
