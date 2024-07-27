@@ -10,5 +10,6 @@
         public static string LastFmApiKey = "lastFmApiKey";
         public static string LastFmApiSecret = "lastFmApiSecret";
         public static string DiscogsUsername = "discogsUsername";
+        public static string ReleaseAddedOverTimeInitialExclusionPeriodInDays = "releaseAddedOverTimeInitialExclusionPeriodInDays";
     }
 }
