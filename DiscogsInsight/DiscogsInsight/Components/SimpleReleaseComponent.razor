@@ -28,7 +28,7 @@
                     @(Release.Artist)
                 </MudText>
             </MudLink>
-            <MudLink OnClick="@(() => OpenDiscogsReleaseLink(@Release.DiscogsReleaseUrl))">
+            <MudLink OnClick="@(() => GoToRelease(@Release.DiscogsReleaseId))">
                 <MudText Typo="Typo.body2">
                     @(Release.Title)
                 </MudText>
@@ -214,14 +214,6 @@
     private void GoToRelease(int? releaseId)
     {
         NavigationManager.NavigateTo($"/release/{releaseId}");
-    }
-
-    private void OpenDiscogsReleaseLink(string? url)
-    {
-        if (!string.IsNullOrWhiteSpace(url))
-        {
-            NavigationManager.NavigateTo(url);            
-        }
     }
 
     private void OnTracksExpandCollapseClick()

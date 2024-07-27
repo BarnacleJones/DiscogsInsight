@@ -282,6 +282,7 @@
             NavigationManager.NavigateTo($"/releasesByYear/{year}");            
         }
     }
+
     private void OpenReleasesByGenre(int genreId, string name)
     {
         NavigationManager.NavigateTo($"/releasesByGenre?genreId={genreId}&name={name}");
@@ -345,7 +346,6 @@
     {
         return $"{(string.IsNullOrWhiteSpace(track.Position) ? "" : track.Position + " - ")}{(string.IsNullOrWhiteSpace(track.Title) ? "" : track.Title)}{(string.IsNullOrWhiteSpace(track.Duration) ? "" : " - " + track.Duration)}";
     }
-
 
     private async Task SetFavourite()
     {
