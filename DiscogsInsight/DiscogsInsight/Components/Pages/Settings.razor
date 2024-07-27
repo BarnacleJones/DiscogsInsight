@@ -20,6 +20,12 @@
         <MudText Typo="Typo.caption">WARNING: Purges All Data</MudText>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh" Color="Color.Warning" OnClick="@PurgeDatabase" Size="Size.Small">Purge Database</MudButton>
     </MudStack>
+    <MudStack Row="true">  
+        <MudText Typo="Typo.caption">Initial Exclusion Period (In Days) For Releases Added Over Time</MudText>
+        <MudText Typo="Typo.caption">If you added many items to collection as part of an initial cataloguing, you can exclude that here.</MudText>
+        <MudTextField @bind-Value="releaseAddedOverTimeInitialExclusionPeriodInDays" Label="Releases added over time" Variant="Variant.Text" Margin="Margin.Dense"></MudTextField>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Girl" Color="Color.Warning" OnClick="@SaveReleaseAddedOverTimeInt" Size="Size.Small">Save Exclusion Period</MudButton>
+    </MudStack>
     <MudSpacer />
     @*LAST FM SETTINGS*@
     <MudText Typo="Typo.h6">Last Fm Settings <MudIcon Icon="@Icons.Material.Filled.QueueMusic"></MudIcon></MudText>
@@ -45,12 +51,18 @@
     private string lastFmApiSecret = string.Empty;
     private string lastFmUsername = string.Empty;
     private string lastFmPassword = string.Empty;
+    private string releaseAddedOverTimeInitialExclusionPeriodInDays = string.Empty;
 
 
 
     public async void SaveUsername()
     {
         HandleResult(await SettingsViewService.UpdateDiscogsUsername(discogsUsername), "Saved Username - Restart the app");
+    }
+
+    public async void SaveReleaseAddedOverTimeInt()
+    {
+        HandleResult(await SettingsViewService.UpdateReleaseAddedOverTimeInitialExclusionPeriodInDays(releaseAddedOverTimeInitialExclusionPeriodInDays), "Saved Exclusion Period.");
     }
 
     public async Task UpdateApiData()
@@ -76,6 +88,7 @@
         lastFmApiSecret = SettingsViewService.GetLastFmApiSecret();
         lastFmUsername = SettingsViewService.GetLastFmUsername();
         lastFmPassword = SettingsViewService.GetLastFmPassword();
+        releaseAddedOverTimeInitialExclusionPeriodInDays = SettingsViewService.GetReleaseAddedOverTimeInitialExclusionPeriodInDays();
 
     }
 

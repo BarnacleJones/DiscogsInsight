@@ -45,6 +45,19 @@ namespace DiscogsInsight.DataAccess.Services
             await PurgeEntireDb();
             return true;
         }
+        public async Task<bool> UpdateReleaseAddedOverTimeInitialExclusionPeriodInDays(string exclusionPeriod)
+        {
+            if (string.IsNullOrEmpty(exclusionPeriod))
+            {
+                _preferencesService.Remove(PreferencesConstant.ReleaseAddedOverTimeInitialExclusionPeriodInDays);
+            }
+            else
+            {
+                _preferencesService.Set(PreferencesConstant.ReleaseAddedOverTimeInitialExclusionPeriodInDays, exclusionPeriod);
+            }
+
+            return true;
+        }
 
         public async Task<bool> PurgeEntireDb()
         {
@@ -115,6 +128,12 @@ namespace DiscogsInsight.DataAccess.Services
         {
             var pass = _preferencesService.Get(PreferencesConstant.LastFmPassword, "");
             return pass;
+        }
+
+        public string GetReleaseAddedOverTimeInitialExclusionPeriodInDays()
+        {
+            var releaseAddedOverTimeInitialExclusionPeriodInDays = _preferencesService.Get(PreferencesConstant.ReleaseAddedOverTimeInitialExclusionPeriodInDays, "");
+            return releaseAddedOverTimeInitialExclusionPeriodInDays;
         }
     }
 }
