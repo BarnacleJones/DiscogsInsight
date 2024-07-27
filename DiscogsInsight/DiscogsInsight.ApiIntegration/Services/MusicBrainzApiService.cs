@@ -46,9 +46,11 @@ namespace DiscogsInsight.ApiIntegration.Services
                 var responseData = new MusicBrainzInitialArtist();
 
                 //get really bad data when artist has discogs (number) (eg conflict(2))
-                var strippedArtistName = RemoveParenthesesAndContents(artistName);
+                artistName = RemoveNumericParentheses(artistName);
 
-                var fullArtistRequestUrl = InitialArtistRequest + $"'{strippedArtistName}'";
+                var encodedArtistName = Uri.EscapeDataString(artistName);
+
+                var fullArtistRequestUrl = InitialArtistRequest + $"'{encodedArtistName}'";
                 
                 var response = await _httpClient.GetAsync(fullArtistRequestUrl);
                 response.EnsureSuccessStatusCode();
@@ -67,9 +69,11 @@ namespace DiscogsInsight.ApiIntegration.Services
             }
         }
 
-        private string RemoveParenthesesAndContents(string input)
+        private string RemoveNumericParentheses(string input)
         {
-            return Regex.Replace(input, @"\(.*?\)", "").Trim();
+            //removes parenthesis info when there are numbers within parenthesis
+            //are there bands with BandName(1) types of names? time will tell...
+            return Regex.Replace(input, @"\(\d+\)", "").Trim();
         }
         public async Task<MusicBrainzArtist> GetArtistFromMusicBrainzApiUsingArtistId(string musicBrainzArtistId)
         {
