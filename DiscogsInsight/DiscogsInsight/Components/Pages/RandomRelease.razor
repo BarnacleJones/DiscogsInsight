@@ -26,12 +26,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {          
-        if (_release == null)
-        {
-            HandleRandomResult(await ReleaseViewService.GetRandomRelease());
-        }
+        HandleRandomResult(await ReleaseViewService.GetRandomRelease());
     }
-
+    
     public async Task RefreshPage()
     {
         await OnInitializedAsync();
