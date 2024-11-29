@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:chart="clr-namespace:Syncfusion.Maui.Toolkit.Charts;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:local="clr-namespace:DiscogsInsightMAUI"
+             x:Class="DiscogsInsightMAUI.MainPage">
+
+    <ContentPage.BindingContext>
+        <local:ViewModel/>
+    </ContentPage.BindingContext>
+
+    <chart:SfCartesianChart>
+
+        <chart:SfCartesianChart.Title>
+            <Label Text="Visualizing Temperature Variations" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+        </chart:SfCartesianChart.Title>
+
+        <chart:SfCartesianChart.XAxes>
+            <chart:DateTimeAxis Interval="5"/>
+        </chart:SfCartesianChart.XAxes>
+
+        <chart:SfCartesianChart.YAxes>
+            <chart:NumericalAxis Interval="10" Minimum="0" Maximum="40">
+                <chart:NumericalAxis.LabelStyle>
+                    <chart:ChartAxisLabelStyle LabelFormat="0'C" />
+                </chart:NumericalAxis.LabelStyle>
+            </chart:NumericalAxis>
+        </chart:SfCartesianChart.YAxes>
+
+        <chart:SplineRangeAreaSeries ItemsSource="{Binding Temperature}"
+                                 XBindingPath="Date"
+                                 Low="MinValue"
+                                 High="MaxValue"
+                                 Stroke="Teal"
+                                 Fill="LightGreen"
+                                 Opacity="0.8"/>
+
+    </chart:SfCartesianChart>
+
+</ContentPage>
